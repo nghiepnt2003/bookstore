@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 // var slug = require("mongoose-slug-generator");
 const mongooseSlugUpdater = require("mongoose-slug-updater");
 var mongooseDelete = require("mongoose-delete");
+const { Payment } = require("./Payment");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
@@ -12,12 +13,12 @@ mongoose.plugin(mongooseSlugUpdater);
 const orderSchema = new Schema(
   {
     _id: { type: Number },
-    details: [{ type: ObjectId, ref: "OrderDetail", required: true }],
+    details: [{ type: Number, ref: "OrderDetail" }],
     date: { type: Date, required: true },
     status: { type: String, maxLength: 255, required: true },
-    totalPrice: { type: Number, required: true },
-    payment: { type: String, enum: Object.values(Payment), required: true },
-    user: { type: ObjectId, ref: "User", required: true },
+    totalPrice: { type: Number, required: true, default: Payment.OFFLINE },
+    payment: { type: String, enum: Object.values(Payment) },
+    user: { type: Number, ref: "User", required: true },
   },
 
   { timestamps: true }

@@ -1,13 +1,22 @@
 const express = require("express");
 const roleController = require("../app/controllers/RoleController");
+const { verifyAccessToken, isAdmin } = require("../app/middlewares/jwt");
 const router = express.Router();
 
 router.get("/:id", roleController.getById);
 router.get("/", roleController.getAll);
-router.post("/store", roleController.store);
-router.put("/:id", roleController.update);
-router.delete("/:id/force", roleController.forceDelete);
-router.delete("/:id", roleController.delete);
-router.patch("/:id/restore", roleController.restore);
+router.post("/store", [verifyAccessToken, isAdmin], roleController.store);
+router.put("/:id", [verifyAccessToken, isAdmin], roleController.update);
+router.delete(
+  "/:id/force",
+  [verifyAccessToken, isAdmin],
+  roleController.forceDelete
+);
+router.delete("/:id", [verifyAccessToken, isAdmin], roleController.delete);
+router.patch(
+  "/:id/restore",
+  [verifyAccessToken, isAdmin],
+  roleController.restore
+);
 
 module.exports = router;

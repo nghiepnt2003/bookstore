@@ -7,7 +7,7 @@ const {
 const { verifyAccessToken, isAdmin } = require("../app/middlewares/jwt");
 
 router.get("/:id", productController.getById);
-router.get("/", productController.getAll);
+router.get("/", productController.getProducts);
 router.post(
   "/store",
   [verifyAccessToken, isAdmin, validateReferencesProduct],

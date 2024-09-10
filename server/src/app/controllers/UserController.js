@@ -25,15 +25,80 @@ class UserController {
   //[GET] /user/
   async getAll(req, res) {
     try {
-      const response = await User.find({}).select(
-        "-refreshToken -password -role"
+      const queries = { ...req.query };
+      // Tách các trường đặc biệt ra khỏi query
+      const excludeFields = ["limit", "sort", "page", "fields"];
+      excludeFields.forEach((el) => delete queries[el]);
+
+      // Format lại các operators cho đúng cú pháp mongoose
+      let queryString = JSON.stringify(queries);
+      queryString = queryString.replace(
+        /\b(gte|gt|lt|lte)\b/g,
+        (matchedEl) => `$${matchedEl}`
       );
-      res
-        .status(200)
-        .json({ success: response ? true : false, users: response });
+      const formatedQueries = JSON.parse(queryString);
+
+      // Filtering
+      if (queries?.name) {
+        formatedQueries.name = { $regex: queries.name, $options: "i" };
+      }
+
+      // Execute query
+      let queryCommand = User.find(formatedQueries);
+
+      // Sorting
+      if (req.query.sort) {
+        // abc,exg => [abc,exg] => "abc exg"
+        const sortBy = req.query.sort.split(",").join(" ");
+        // sort lần lượt bởi publisher author category nếu truyền  sort("publisher author categories")
+        queryCommand = queryCommand.sort(sortBy);
+      }
+
+      // fields limiting
+      if (req.query.fields) {
+        const fields = req.query.fields.split(",").join(" ");
+        queryCommand = queryCommand.select(fields);
+      }
+
+      //Pagination
+      // limit: số docs lấy về 1 lần gọi API
+      // skip:
+      // Dấu + nằm trước số để chuyển sang số
+      // +'2' => 2
+      // +'asdasd' => NaN
+      const page = +req.query.page || 1;
+      const limit = +req.query.limit || process.env.LIMIT_USERS;
+      const skip = (page - 1) * limit;
+      queryCommand
+        .skip(skip)
+        .limit(limit)
+        .select("-refreshToken -password -role");
+
+      // Lấy danh sách sản phẩm
+      const response = await queryCommand.exec();
+
+      // Lấy số lượng sản phẩm
+      const counts = await User.find(formatedQueries).countDocuments();
+
+      res.status(200).json({
+        success: response.length > 0,
+        counts,
+        users: response.length > 0 ? response : "Cannot get user",
+      });
     } catch (error) {
-      res.status(500).json(error);
+      res.status(500).json({ success: false, message: error.message });
     }
+
+    // try {
+    //   const response = await User.find({}).select(
+    //     "-refreshToken -password -role"
+    //   );
+    //   res
+    //     .status(200)
+    //     .json({ success: response ? true : false, users: response });
+    // } catch (error) {
+    //   res.status(500).json(error);
+    // }
   }
 
   // [POST] /user/register
@@ -231,6 +296,8 @@ class UserController {
           // sameSite: "strict",
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
         });
+
+        // Lưu accessToken lên authorization
 
         return res.status(200).json({ success: true, accessToken, userData });
       } else {

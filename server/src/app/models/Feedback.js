@@ -13,7 +13,7 @@ const feedbackSchema = new Schema(
   {
     _id: { type: Number },
     comment: { type: String, maxLength: 1000 },
-    rating: { type: Number, required: true },
+    star: { type: Number, required: true },
     user: { type: Number, ref: "User", required: true },
     product: { type: Number, ref: "Product", required: true },
   },

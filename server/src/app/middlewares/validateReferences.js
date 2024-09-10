@@ -1,6 +1,8 @@
 const Author = require("../models/Author");
 const Publisher = require("../models/Publisher");
 const Category = require("../models/Category");
+const User = require("../models/User");
+const Product = require("../models/Product");
 
 const validateReferencesProduct = async (req, res, next) => {
   try {
@@ -47,5 +49,33 @@ const validateReferencesProduct = async (req, res, next) => {
       .json({ success: false, message: "An error occurred" + error });
   }
 };
+const validateReferencesFeedback = async (req, res, next) => {
+  try {
+    const { user, product } = req.body;
+    if (user) {
+      const userExists = await User.findById(user);
+      if (!userExists) {
+        return res
+          .status(400)
+          .json({ success: false, message: "User not found" });
+      }
+    }
 
-module.exports = { validateReferencesProduct };
+    if (product) {
+      const productExists = await Product.findById(product);
+      if (!productExists) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Product not found" });
+      }
+    }
+    next();
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "An error occurred" + error });
+  }
+};
+
+module.exports = { validateReferencesProduct, validateReferencesFeedback };

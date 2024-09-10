@@ -24,6 +24,8 @@ const productSchema = new Schema(
     discount: { type: mongoose.Schema.Types.Decimal128 },
     slug: { type: String, slug: "name", unique: true },
     soldCount: { type: Number, default: 0 },
+    averageRating: { type: Number, default: 0 },
+
     author: {
       type: Number,
       ref: "Author",

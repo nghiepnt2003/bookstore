@@ -18,8 +18,32 @@ const userSchema = new Schema(
     username: { type: String, maxLength: 255, required: true },
     password: { type: String, required: true },
     fullname: { type: String, maxLength: 255, required: true },
-    email: { type: String, maxLength: 255, required: true, unique: true },
-    phone: { type: String, maxLength: 20, unique: true },
+    // email: { type: String, maxLength: 255, required: true, unique: true },
+    // phone: { type: String, maxLength: 20, unique: true, require: true },
+    email: {
+      type: String,
+      maxLength: 255,
+      required: true,
+      unique: true,
+      validate: {
+        validator: function (v) {
+          // Regex kiểm tra định dạng email
+          return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+        },
+        message: (props) => `${props.value} is not a valid email address!`,
+      },
+    },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      validate: {
+        validator: function (v) {
+          return /^\d{10}$/.test(v); // kiểm tra nếu chuỗi số điện thoại có đúng 10 số
+        },
+        message: (props) => `${props.value} is not a valid phone number!`,
+      },
+    },
     address: { type: String, maxLength: 500 },
     role: { type: Number, ref: "Role", required: true, default: 2 },
     isBlocked: { type: Boolean, default: false },

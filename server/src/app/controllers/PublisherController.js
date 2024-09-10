@@ -14,13 +14,73 @@ class PublisherController {
   //[GET] /publisher/
   async getAll(req, res) {
     try {
-      let publisherList = await Publisher.find({});
-      res
-        .status(200)
-        .json({ success: publisherList ? true : false, publisherList });
+      const queries = { ...req.query };
+      // Tách các trường đặc biệt ra khỏi query
+      const excludeFields = ["limit", "sort", "page", "fields"];
+      excludeFields.forEach((el) => delete queries[el]);
+
+      // Format lại các operators cho đúng cú pháp mongoose
+      let queryString = JSON.stringify(queries);
+      queryString = queryString.replace(
+        /\b(gte|gt|lt|lte)\b/g,
+        (matchedEl) => `$${matchedEl}`
+      );
+      const formatedQueries = JSON.parse(queryString);
+
+      // Filtering
+      if (queries?.name) {
+        formatedQueries.name = { $regex: queries.name, $options: "i" };
+      }
+
+      // Execute query
+      let queryCommand = Publisher.find(formatedQueries);
+
+      // Sorting
+      if (req.query.sort) {
+        // abc,exg => [abc,exg] => "abc exg"
+        const sortBy = req.query.sort.split(",").join(" ");
+        queryCommand = queryCommand.sort(sortBy);
+      }
+
+      // fields limiting
+      if (req.query.fields) {
+        const fields = req.query.fields.split(",").join(" ");
+        queryCommand = queryCommand.select(fields);
+      }
+
+      //Pagination
+      // limit: số docs lấy về 1 lần gọi API
+      // skip:
+      // Dấu + nằm trước số để chuyển sang số
+      // +'2' => 2
+      // +'asdasd' => NaN
+      const page = +req.query.page || 1;
+      const limit = +req.query.limit || process.env.LIMIT_PUBLISHERS;
+      const skip = (page - 1) * limit;
+      queryCommand.skip(skip).limit(limit);
+
+      // Lấy danh sách sản phẩm
+      const response = await queryCommand.exec();
+
+      // Lấy số lượng sản phẩm
+      const counts = await Publisher.find(formatedQueries).countDocuments();
+
+      res.status(200).json({
+        success: response.length > 0,
+        counts,
+        publishers: response.length > 0 ? response : "Cannot get publisher",
+      });
     } catch (error) {
-      res.status(500).json({ success: false, message: error });
+      res.status(500).json({ success: false, message: error.message });
     }
+    // try {
+    //   let publisherList = await Publisher.find({});
+    //   res
+    //     .status(200)
+    //     .json({ success: publisherList ? true : false, publisherList });
+    // } catch (error) {
+    //   res.status(500).json({ success: false, message: error });
+    // }
   }
   // [POST] /publisher/store
   async store(req, res) {

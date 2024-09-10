@@ -28,6 +28,9 @@ const verifyAccessToken = (req, res, next) => {
       const token = req.headers.authorization.split(" ")[1];
       jwt.verify(token, cert, { algorithms: ["RS256"] }, (err, data) => {
         if (err) {
+          // Thay gì bắn lỗi cho client, thì
+          // check refresh token sau đó nếu refresh Token còn hạn mà accesstoken hết hạn
+          // thì tạo mới accessToken
           return res
             .status(401)
             .json({ success: false, message: "Invalid access token !!!" });

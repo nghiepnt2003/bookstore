@@ -12,8 +12,9 @@ mongoose.plugin(mongooseSlugUpdater);
 const lineItemSchema = new Schema(
   {
     _id: { type: Number },
-    product: { type: ObjectId, ref: "Product", required: true },
+    product: { type: Number, ref: "Product", required: true },
     quantity: { type: Number, required: true },
+    selectedForCheckout: { type: Boolean, default: false },
   },
 
   { timestamps: true }
