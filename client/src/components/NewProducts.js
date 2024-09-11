@@ -10,7 +10,7 @@ const NewProducts = () => {
         const response = await apiGetProducts() // thay lại bằng getAllProduct với sản phẩm mới  nhất
         if(response.success)
         {
-            setNewProduct(response.productList)
+            setNewProduct(response.products)
         }
     }
 

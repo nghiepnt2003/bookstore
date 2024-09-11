@@ -17,14 +17,14 @@ const BestSeller = () => {
         const response = await apiGetProducts() // thay lại bằng getAllProduct với số lượng đã bán max
         if(response.success)
         {
-            setBestSellers(response.productList)
+            setBestSellers(response.products)
         }
     }
 
     useEffect(() =>{
         fetchProducts()
     },[])
-    
+    console.log(bestSellers)
 
     return (
        <div className="mt-2">

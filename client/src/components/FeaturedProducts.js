@@ -10,7 +10,7 @@ const FeaturedProducts = () => {
         const response = await apiGetProducts() // thay lại bằng getAllProduct với số lượng sao lớn nhất
         if(response.success)
         {
-            setFeatured(response.productList)
+            setFeatured(response.products)
         }
     }
 
