@@ -4,10 +4,13 @@ import { apiRegister, apiLogin } from "../../apis/user"
 import Swal from "sweetalert2"
 import { useNavigate } from "react-router-dom"
 import path from "../../ultils/path"
+import { register } from "../../store/user/userSlice"
+import { useDispatch } from "react-redux"
 
 const Login = () => {
 
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const [payload, setPayload] = useState({
         email: '',
         password: '',
@@ -43,6 +46,7 @@ const Login = () => {
             const result  = await apiLogin(payload)
             console.log(result)
             if(result.success) {
+                dispatch(register({isLoggedIn: true, token: result.accessToken, userData: result.userData}))
                 navigate(`/${path.HOME}`)
             } else {
                 Swal.fire('Opps!', result.message,'error')
@@ -57,8 +61,8 @@ const Login = () => {
                 alt=""
                 className="w-full h-full object-cover"
             />
-            <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center">
-                <div className="p-8 bg-white rounded-md min-w-500px">
+            <div className="absolute top-0 bottom-0 left-0 right-0  flex items-center justify-center">
+                <div className="p-8 bg-white rounded-md w-[360px]">
                     <h1 className="text-[28px] font-semibod text-main">{isRegister? 'Register': 'Login'}</h1>
                     <InputField
                         value={payload.username}

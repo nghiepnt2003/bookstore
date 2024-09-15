@@ -14,7 +14,7 @@ const settings = {
 const BestSeller = () => {
     const [bestSellers, setBestSellers] = useState(null)
     const fetchProducts = async () => {
-        const response = await apiGetProducts() // thay lại bằng getAllProduct với số lượng đã bán max
+        const response = await apiGetProducts({sort: '-soldCount'}) // thay lại bằng getAllProduct với số lượng đã bán max
         if(response.success)
         {
             setBestSellers(response.products)
@@ -24,7 +24,6 @@ const BestSeller = () => {
     useEffect(() =>{
         fetchProducts()
     },[])
-    console.log(bestSellers)
 
     return (
        <div className="mt-2">
