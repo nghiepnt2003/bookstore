@@ -13,6 +13,9 @@ const session = require("express-session");
 require("dotenv").config();
 
 const app = express();
+// app.use(cors({
+//   origin:
+// }))
 const port = process.env.PORT || 3000;
 //connect to db
 db.connect();
