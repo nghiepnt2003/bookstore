@@ -11,3 +11,9 @@ export const apiLogin = (data) => axios({
     method: 'post',
     data
 })
+
+export const apiFogotPassword = (data) => axios({
+    url: '/user/fogotpassword',
+    method: 'get',
+    data
+})

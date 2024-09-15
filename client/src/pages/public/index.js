@@ -5,3 +5,6 @@ export { default as Blog} from './Blog'
 export { default as DetailProudct} from './DetailProduct'
 export { default as Products} from './Products'
 export { default as  FAQ} from './FAQ'  
+export { default as  ResetPassword} from './ResetPassword'  
+
+ 
