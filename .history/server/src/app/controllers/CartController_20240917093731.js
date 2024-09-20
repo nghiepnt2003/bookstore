@@ -1,7 +1,8 @@
 const Cart = require("../models/Cart");
 const LineItem = require("../models/LineItem");
 const Product = require("../models/Product");
-
+const Order = require("../models/Order");
+const OrderDetail = require("../models/OrderDetail");
 class CartController {
   //[GET] /cart
   async getCart(req, res) {

@@ -17,7 +17,9 @@ class CategoryController {
   async getAll(req, res) {
     try {
       let categories = await Category.find({});
-      res.status(200).json({ success: categories ? true : false, categories });
+      res
+        .status(200)
+        .json({ success: categoryList ? true : false, categories });
     } catch (error) {
       res.status(500).json(error);
     }

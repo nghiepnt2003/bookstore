@@ -18,7 +18,7 @@ function route(app) {
   app.use("/user", userRouter);
   app.use("/feedback", feedbackRouter);
   app.use("/cart", cartRouter);
-  app.use("/order", orderRouter);
+  // app.use("/order", orderRouter);
 
   // Nếu không vào route nào thì là err Not found
   app.use(notFound);
