@@ -1,18 +1,9 @@
-import React, { useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
-import {
-  Login,
-  Home,
-  Public,
-  FAQ,
-  Blog,
-  Products,
-  DetailProudct,
-  ResetPassword,
-} from "./pages/public";
-import path from "./ultils/path";
-import { getCategories } from "./store/app/asyncActions";
-import { useDispatch } from "react-redux";
+import React, {useEffect} from 'react';
+import { Route, Routes } from 'react-router-dom'
+import { Login, Home, Public, FAQ, Blog, Products, DetailProduct, ResetPassword,Register } from './pages/public'
+import path from './ultils/path';
+import { getCategories} from './store/app/asyncActions'
+import { useDispatch } from 'react-redux'
 
 function App() {
   const dispatch = useDispatch();
@@ -28,13 +19,11 @@ function App() {
           <Route path={path.FAQ} element={<FAQ />}></Route>
           <Route path={path.BLOG} element={<Blog />}></Route>
           <Route path={path.PRODUCTS} element={<Products />}></Route>
-          <Route
-            path={path.DETAIL_PRODUCT__PID__TITLE}
-            element={<DetailProudct />}
-          ></Route>
+          <Route path={path.DETAIL_PRODUCT__PID__TITLE} element={<DetailProduct />}></Route>
           <Route path={path.RESET_PASSWORD} element={<ResetPassword />}></Route>
         </Route>
         <Route path={path.LOGIN} element={<Login />}></Route>
+        <Route path={path.REGISTER} element={<Register />}></Route>
       </Routes>
     </div>
   );

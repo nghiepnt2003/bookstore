@@ -7,5 +7,5 @@ export const getCategories = createAsyncThunk('app/categories',async(data, {reje
     if(!response.success)
         return rejectWithValue(response)
 
-    return response.categoryList
+    return response.categories
 })

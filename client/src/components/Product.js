@@ -23,7 +23,7 @@ const Product = ({ productData }) => {
             <div class="text-[1rem] font-normal leading-[1.8rem] mt-1 mx-2 line-clamp-1">
                 {productData?.name}
             </div>
-            <span className="flex ml-2 text-[0.8rem]">{renderStarFromNumber(productData?.totalRating)}</span>
+            <span className="flex ml-2 text-[0.8rem]">{renderStarFromNumber(productData?.averageRating)}</span>
             <span className="ml-2 text-red-600 text-base fw-400">{`${formatMoney(productData?.price)} VNĐ`}</span>
         </Link>
     );
