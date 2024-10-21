@@ -7,7 +7,7 @@ const {
 } = require("../app/middlewares/validateReferences");
 const router = express.Router();
 router.get("/", commentController.getAll);
-router.get("/product/:productId", commentController.getCommentByProduct);
+router.get("/product/:productId", commentController.getAll);
 
 router.post(
   "/create",

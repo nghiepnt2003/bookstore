@@ -74,79 +74,51 @@ class CommentController {
   // [GET] /comment/product/:productId
   async getCommentByProduct(req, res) {
     try {
-      const { productId } = req.params; // Lấy productId từ URL params
+      const { productId } = req.params; // Lấy productId từ params
 
-      // Kiểm tra xem productId có tồn tại hay không
-      const productExists = await Product.findById(productId);
+      if (!productId) {
+        return res.status(400).json({
+          success: false,
+          message: "Product ID is required",
+        });
+      }
+      const productExists = await Product.exists({ _id: productId });
       if (!productExists) {
         return res.status(404).json({
           success: false,
           message: "Product not found",
         });
       }
+      // Lấy tất cả bình luận theo productId
+      const comments = await Comment.find({ product: productId })
+        .populate({
+          path: "user", // Populate thông tin người dùng bình luận
+          model: "User",
+          select: "username", // Chọn các trường cần thiết từ user
+        })
+        .populate({
+          path: "product", // Populate thông tin sản phẩm
+          model: "Product",
+          select: "name", // Chọn các trường cần thiết từ product
+        })
+        .exec();
 
-      const queries = { ...req.query };
-      const excludeFields = ["limit", "sort", "page", "fields"];
-      excludeFields.forEach((el) => delete queries[el]);
-
-      let queryString = JSON.stringify(queries);
-      queryString = queryString.replace(
-        /\b(gte|gt|lt|lte)\b/g,
-        (matchedEl) => `$${matchedEl}`
-      );
-      const formatedQueries = JSON.parse(queryString);
-
-      // Filtering theo comment
-      if (queries?.comment) {
-        formatedQueries.comment = { $regex: queries.comment, $options: "i" };
+      if (!comments.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No comments found for this product",
+        });
       }
-
-      // Filtering theo productId
-      formatedQueries.product = productId;
-
-      // Execute query
-      let queryCommand = Comment.find(formatedQueries).populate({
-        path: "product", // Populate thông tin product
-        model: "Product",
-        // Chọn các trường cần lấy từ product
-        populate: {
-          path: "categories", // Populate thông tin category của product
-          model: "Category",
-          select: "name", // Chọn trường name của category
-        },
-      });
-
-      // Sorting
-      if (req.query.sort) {
-        const sortBy = req.query.sort.split(",").join(" ");
-        queryCommand = queryCommand.sort(sortBy);
-      }
-
-      // Fields limiting
-      if (req.query.fields) {
-        const fields = req.query.fields.split(",").join(" ");
-        queryCommand = queryCommand.select(fields);
-      }
-
-      // Pagination
-      const page = +req.query.page || 1;
-      const limit = +req.query.limit || process.env.LIMIT_COMMENTS;
-      const skip = (page - 1) * limit;
-      queryCommand.skip(skip).limit(limit);
-
-      // Lấy danh sách bình luận
-      const response = await queryCommand.exec();
-
-      // Lấy số lượng bình luận
-      const counts = await Comment.find(formatedQueries).countDocuments();
 
       res.status(200).json({
-        success: response.length > 0,
-        counts,
-        comments: response.length > 0 ? response : "Cannot get comments",
+        success: true,
+        data: comments,
       });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
