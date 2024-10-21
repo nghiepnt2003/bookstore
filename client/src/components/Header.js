@@ -33,7 +33,7 @@ const Header = () => {
                         </span>                    
                     </div>
 
-                    <div className="flex px-6 border-r items-center">
+                    <div className="flex px-6 border-r items-center cursor-pointer">
                         <span className="px-2">
                             <FaUserAlt color="#f73995" fontSize="25px"/>
                         </span>
@@ -42,7 +42,7 @@ const Header = () => {
                         </span>                    
                     </div>
 
-                    <div className="flex px-6 items-center">
+                    <div className="flex px-6 items-center cursor-pointer">
                         <span className="px-2">
                             <IoMdCart color="#f73995" fontSize="30px"/>
                         </span>

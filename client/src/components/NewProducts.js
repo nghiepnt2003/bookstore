@@ -7,7 +7,7 @@ const NewProducts = () => {
 
     const [newProduct, setNewProduct] = useState(null)
     const fetchProducts = async () => {
-        const response = await apiGetProducts() // thay lại bằng getAllProduct với sản phẩm mới  nhất
+        const response = await apiGetProducts({sort: '-createdAt'}) // thay lại bằng getAllProduct với sản phẩm mới  nhất
         if(response.success)
         {
             setNewProduct(response.products)

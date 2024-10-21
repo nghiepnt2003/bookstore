@@ -7,7 +7,7 @@ const FeaturedProducts = () => {
 
     const [featured, setFeatured] = useState(null)
     const fetchProducts = async () => {
-        const response = await apiGetProducts() // thay lại bằng getAllProduct với số lượng sao lớn nhất
+        const response = await apiGetProducts({sort: '-totalRating'}) // thay lại bằng getAllProduct với số lượng sao lớn nhất
         if(response.success)
         {
             setFeatured(response.products)
