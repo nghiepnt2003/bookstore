@@ -58,3 +58,22 @@ export const productExtraInfomation = [
         icon: <FaTty />
     }
 ]
+
+
+export const sorts = [
+    {
+        id: 1,
+        value: '-soldCount',
+        text: 'Best selling'
+    },
+    {
+        id: 2,
+        value: '-createdAt',
+        text: 'New Product'
+    },
+    {
+        id: 3,
+        value: '-averageRating',
+        text: 'Featured'
+    },
+]

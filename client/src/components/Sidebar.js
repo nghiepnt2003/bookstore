@@ -11,7 +11,7 @@ const Sidebar = () => {
             {categories?.map(el => (
                 <NavLink
                     key={createSlug(el.name)}
-                    to={createSlug(el.name)}
+                    to={`product/${createSlug(el.name)}`}
                     className={({isActive}) => isActive? 'bg-main text-white px-5 pt-[15px] pb-[14px] text-base hover:text-main': 'px-5 pt-[15px] pb-[14px] text-base  hover:text-main'}
                 >
                     {el.name}

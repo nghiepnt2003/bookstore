@@ -15,5 +15,11 @@ export { default as SendOtp} from './SendOtp'
 export { default as Breadcrumb} from './Breadcrumb'
 export { default as SelectQuantity} from './SelectQuantity'
 export { default as ProductExtraInfoItem} from './ProductExtraInfoItem'
+export { default as SearchItem} from './SearchItem'
+export { default as InputSelect} from './InputSelect'
+export { default as Comment} from './Comment'
+export { default as VoteBar} from './VoteBar'
+export { default as Modal} from './Modal'
+export { default as Ratings} from './Ratings'
 
 
