@@ -114,9 +114,8 @@ class UserController {
     //   res.status(500).json(error);
     // }
   }
-  //[GET] /user/addresses
   // API lấy danh sách địa chỉ của người dùng
-  async getAddresses(req, res) {
+  async getShippingAddresses(req, res) {
     try {
       const user = req.user; // Lấy thông tin user từ accessToken
 

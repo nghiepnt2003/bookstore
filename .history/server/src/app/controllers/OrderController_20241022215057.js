@@ -134,13 +134,6 @@ class OrderController {
           message: "User address is required for checkout",
         });
       }
-      // Kiểm tra xem địa chỉ giao hàng có nằm trong danh sách địa chỉ của người dùng không
-      if (!userInfo.address.includes(shippingAddress)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid shipping address",
-        });
-      }
 
       let cart = await Cart.findOne({ user: user._id }).populate({
         path: "items",
@@ -209,7 +202,6 @@ class OrderController {
         totalPrice: totalPrice, // Tổng giá trị sau khi áp dụng giảm giá
         payment: payment, // Phương thức thanh toán
         user: user._id,
-        shippingAddress: shippingAddress,
       });
 
       // Xóa các item đã checkout khỏi giỏ hàng

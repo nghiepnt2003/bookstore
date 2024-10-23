@@ -8,7 +8,7 @@ const {
 const checkProductPurchased = require("../app/middlewares/checkProductPurchased");
 const router = express.Router();
 
-router.get("/", ratingController.getRatings);
+router.get("/", verifyAccessToken, userController.logout);
 
 router.post(
   "/create",

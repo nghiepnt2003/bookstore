@@ -4,7 +4,7 @@ const Rating = require("../models/Rating");
 
 class RatingController {
   // [GET] /rating/
-  async getRatings(req, res) {
+  async getRatingsByProduct(req, res) {
     try {
       const queries = { ...req.query };
       const excludeFields = ["limit", "sort", "page", "fields"];
@@ -43,7 +43,7 @@ class RatingController {
 
       // Pagination
       const page = +req.query.page || 1;
-      const limit = +req.query.limit || process.env.LIMIT_RATINGS || 10;
+      const limit = +req.query.limit || 10; // Bạn có thể thay đổi số lượng mặc định
       const skip = (page - 1) * limit;
       queryCommand.skip(skip).limit(limit);
 

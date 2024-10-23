@@ -9,7 +9,7 @@ router.get("/logout", verifyAccessToken, userController.logout);
 router.get("/forgotPassword", userController.forgotPassword);
 router.get("/sendOTPCreateAccount", userController.sendOTPCreateAccount);
 router.get("/wishlist", [verifyAccessToken], userController.getWishlist);
-router.get("/addresses", verifyAccessToken, userController.getAddresses);
+router.get("/shipping-addresses", verifyAccessToken, getShippingAddresses);
 router.get("/:id", userController.getById);
 router.get("/", [verifyAccessToken, isAdmin], userController.getAll);
 

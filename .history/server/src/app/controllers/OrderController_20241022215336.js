@@ -209,7 +209,6 @@ class OrderController {
         totalPrice: totalPrice, // Tổng giá trị sau khi áp dụng giảm giá
         payment: payment, // Phương thức thanh toán
         user: user._id,
-        shippingAddress: shippingAddress,
       });
 
       // Xóa các item đã checkout khỏi giỏ hàng
