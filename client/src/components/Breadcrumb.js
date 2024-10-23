@@ -7,9 +7,10 @@ const Breadcrumb = ({name}) => {
   const {IoIosArrowForward} = icons
   const routes = [
     {path: "/", breadcrumb: "Home"},
-    {path:"/san-pham/:id/:name", breadcrumb: name}
+    {path:":id/:name", breadcrumb: name}
   ];
   const breadcrumb = useBreadcurmbs(routes)
+  // console.log(breadcrumb)
   return (
     <div className='text-sm flex items-center gap-1'>
        {breadcrumb?.filter(el => !el.match.route==false).map(({match, breadcrumb}, index, self) => (

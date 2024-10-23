@@ -27,7 +27,7 @@ const Home = () => {
                 <img src={chuProductBestsellers} alt="Bestseller" className="h-11"></img>
                 <BestSeller />
             </div>
-            <img src={tipRead} alt="Tip Read" className="w-main mt-8"></img>
+            <img src={tipRead} alt="Tip Read" className="w-main"></img>
             <div className="w-main mt-4">
                 <img src={chuNewProducts} alt="New Products" className="h-11"></img>
                 <NewProducts />

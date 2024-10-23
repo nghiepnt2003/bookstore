@@ -58,3 +58,46 @@ export const productExtraInfomation = [
         icon: <FaTty />
     }
 ]
+
+
+export const sorts = [
+    {
+        id: 1,
+        value: '-soldCount',
+        text: 'Best selling'
+    },
+    {
+        id: 2,
+        value: '-createdAt',
+        text: 'New Product'
+    },
+    {
+        id: 3,
+        value: '-averageRating',
+        text: 'Featured'
+    },
+]
+
+export const voteOptions = [
+    {
+        id: 1,
+        text: 'Terrible'
+    },
+    {
+        id: 2,
+        text: 'Bad'
+    },
+    {
+        id: 3,
+        text: 'Neutral'
+    },
+    {
+        id: 4,
+        text: 'Good'
+    },
+    {
+        id: 5,
+        text: 'Perfect'
+    },
+
+]

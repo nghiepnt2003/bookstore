@@ -68,7 +68,7 @@ const Register = () => {
             <div className="absolute top-0 bottom-0 left-0 right-0  flex items-center justify-center gap-5">               
                 <div className="p-8 bg-white rounded-md w-[360px]">
                     <h1 className="text-[28px] font-semibod text-main">Register</h1>
-                    {!isSendOTP &&
+                    {isSendOTP &&
                         <div className="relative">
                         <SendOtp  sendData={handleDataChild}/>
                         <InputField 
@@ -77,15 +77,19 @@ const Register = () => {
                             nameKey='otp'
                         />
                         <Button 
-                            name='Next'
-                            handleOnClick={handleNext}
-                            style ='px-3 py-1 rounded-md text-white bg-main text-semibold absolute top-[190px] right-0'
+                            name='Register'
+                            handleOnClick={handleSubmit}
+                            style ='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 mt-3 w-full hover:bg-opacity-80 transition'
+                        />
+                        <Button 
+                            name='Pre'
+                            handleOnClick={handlePre}
+                            style ='px-4 py-1 rounded-md text-white bg-main text-semibold  absolute top-[250px] left-0 hover:bg-opacity-80 transition'
                         />
                         </div>
-
                     }
-                   {isSendOTP &&
-                        <div>
+                   {!isSendOTP &&
+                        <div className="relative">
                             <div className="w-[300px]">
                                 <InputField
                                 value={payload.username}
@@ -112,22 +116,14 @@ const Register = () => {
                                     setValue={setPayload}
                                     nameKey='password'
                                     type='password'
-                                />
-                
+                                />                
                             </div>
-                            <div className="flex justify-between">
                                 <Button 
-                                    name='Pre'
-                                    handleOnClick={handlePre}
-                                    style ='px-3 py-1 rounded-md text-white bg-main text-semibold  my-2 mt-6'
-                                />
-                                <Button 
-                                    name='Register'
-                                    handleOnClick={handleSubmit}
-                                    style ='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 mt-6 w-[150px]'
+                                name='Next'
+                                handleOnClick={handleNext}
+                                style ='px-3 py-1 rounded-md text-white bg-main text-semibold absolute top-[370px] right-0 hover:bg-opacity-80 transition'
                                 />
                             </div>
-                        </div>
                    }                  
                     <div className="flex items-center justify-between my-2 w-full text-sm">
                         <Link 
