@@ -5,7 +5,7 @@ const InputSelect = ({value, changeValue, options}) => {
     console.log(options)
   return (
     <select
-        className='form-select w-[150px]'
+        className='form-select w-[180px]'
         value={value}
         onChange={e => changeValue(e.target.value)}
     >

@@ -4,6 +4,7 @@ import { IoMdCart, IoIosArrowForward } from "react-icons/io";
 import { FaUserAlt, FaRegStar, FaStar, FaCheck, FaFacebookSquare, FaTiktok, FaMale, FaFemale, FaGift,FaReplyAll,FaTty } from "react-icons/fa";
 import { MdOutlineEmail, MdSupportAgent } from "react-icons/md";
 import { AiOutlineLogout, AiOutlineDown } from "react-icons/ai";
+import { IoSearchOutline } from "react-icons/io5";
 
 const icons = {
     FaPhone,
@@ -28,7 +29,8 @@ const icons = {
     FaGift,
     FaReplyAll,
     FaTty,
-    AiOutlineDown
+    AiOutlineDown,
+    IoSearchOutline
 }
 
 export default icons

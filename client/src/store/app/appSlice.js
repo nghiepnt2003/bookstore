@@ -35,6 +35,5 @@ export const appSlice = createSlice({
     }
 })
 
-// export const { } = appSlice.actions
-export default appSlice.reducer
 export const { showModal } = appSlice.actions
+export default appSlice.reducer
