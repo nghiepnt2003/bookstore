@@ -5,6 +5,8 @@ import path from './ultils/path';
 import { getCategories} from './store/app/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
 import { Modal } from './components';
+import { AdminLayout, ManageProduct, ManageOrder, ManageUser, CreateProduct, Dashboard } from './pages/admin';
+import { MemberLayout, Personal } from './pages/member';
 
 function App() {
   const dispatch = useDispatch();
@@ -24,9 +26,19 @@ function App() {
           <Route path={path.PRODUCTS} element={<Products />}></Route>
           <Route path={path.DETAIL_PRODUCT__PID__TITLE} element={<DetailProduct />}></Route>
           <Route path={path.RESET_PASSWORD} element={<ResetPassword />}></Route>
+          <Route path={path.ALL} element={<Home />}></Route>
+        </Route>
+        <Route path={path.ADMIN} element={<AdminLayout />}>
+          <Route path={path.DASHBOARD} element={<Dashboard />} />
+          <Route path={path.MANAGE_ORDER} element={<ManageOrder />} />
+          <Route path={path.MANAGE_PRODUCT} element={<ManageProduct />} />
+          <Route path={path.MANAGE_USER} element={<ManageUser />} />
+          <Route path={path.CREATE_PRODUCT} element={<CreateProduct />} />
+        </Route>
+        <Route path={path.MEMBER} element={<MemberLayout />}>
+          <Route path={path.PERSONAL} element={<Personal />} />
         </Route>
         <Route path={path.LOGIN} element={<Login />}></Route>
-        <Route path={path.REGISTER} element={<Register />}></Route>
       </Routes>
     </div>
   );

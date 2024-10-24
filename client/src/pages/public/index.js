@@ -6,6 +6,5 @@ export { default as DetailProduct} from './DetailProduct'
 export { default as Products} from './Products'
 export { default as  FAQ} from './FAQ'  
 export { default as  ResetPassword} from './ResetPassword'  
-export {default as Register} from './Register'
 
  

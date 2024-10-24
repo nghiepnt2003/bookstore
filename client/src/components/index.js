@@ -22,4 +22,5 @@ export { default as VoteBar} from './VoteBar'
 export { default as Modal} from './Modal'
 export { default as Ratings} from './Ratings'
 export { default as VoteOption} from './VoteOption'
+export { default as Loading} from './Loading'
 

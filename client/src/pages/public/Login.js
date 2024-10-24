@@ -1,80 +1,219 @@
-import React, {useState, useCallback, useSyncExternalStore} from "react"
-import {InputField, Button} from '../../components'
-import { apiRegister, apiLogin, apiSendOTPCreateAccount} from "../../apis/user"
-import Swal from "sweetalert2"
-import { useNavigate} from "react-router-dom"
-import path from "../../ultils/path"
-import { register } from "../../store/user/userSlice"
-import { useDispatch } from "react-redux"
-import {Link} from 'react-router-dom'
+import React, { useState, useCallback, useRef } from "react";
+import { InputField, Button } from '../../components';
+import { apiSendOTPCreateAccount, apiRegister, apiLogin } from "../../apis/user"; 
+import { ToastContainer, toast } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
+import { Link, useNavigate } from "react-router-dom";
+import { ClipLoader } from "react-spinners"; 
+import LoadingBar from 'react-top-loading-bar'; 
+import path from "../../ultils/path";
+import Swal from "sweetalert2";
+import { useDispatch } from "react-redux";
+import { register } from "../../store/user/userSlice";
 
 const Login = () => {
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
+    const loadingBarRef = useRef(null);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    
+    const [isRegister, setIsRegister] = useState(false);
     const [payload, setPayload] = useState({
+        email: '',
         password: '',
-        username: ''
-    })
+        username: '',
+        fullname: '',
+        phone: '',
+        address: '',
+        otp: '',
+    });
+    const [loading, setLoading] = useState(false);
+    const [isSendOTP, setIsSendOTP] = useState(false);
+
     const resetPayload = () => {
         setPayload({
+            email: '',
             password: '',
-            username: ''
-        })
-    }
-    const handleSubmit = useCallback(async() => {
-        const{ username, password } = payload        
-        const result  = await apiLogin(payload)
-        if(result.success) {
-            dispatch(register({isLoggedIn: true, token: result.accessToken, userData: result.userData}))
-            navigate(`/${path.HOME}`)
+            username: '',
+            fullname: '',
+            phone: '',
+            address: '',
+            otp: '',
+        });
+    };
+
+    const handleSubmit = async () => {
+        if (isRegister) {
+            const { email, password, username, fullname, phone, address } = payload;
+            if (!email || !password || !username || !fullname || !phone || !address) {
+                toast.error('Vui lòng điền tất cả các trường');
+                return;
+            }
+
+            setLoading(true);
+            loadingBarRef.current.continuousStart();
+            const response = await apiSendOTPCreateAccount({ email });
+            setLoading(false);
+            loadingBarRef.current.complete();
+
+            if (response.success) {
+                toast.success('OTP đã được gửi đến email của bạn!');
+                setIsSendOTP(true);
+            } else {
+                toast.error('Gửi OTP không thành công, email đã tồn tại. Vui lòng thử lại.');
+            }
         } else {
-            Swal.fire('Opps!', result.message,'error')
+            const { username, password } = payload;
+            const response = await apiLogin({ username, password });
+            if (response.success) {
+                console.log("CURENT " + JSON.stringify(response.userData))
+                dispatch(register({ isLoggedIn: true, token: response.accessToken, userData: response.userData }));
+                navigate(`/${path.HOME}`);
+            } else {
+                Swal.fire('Opps!', response.message, 'error');
+            }
         }
-    }, [payload])
-    console.log(payload)
-    
+    };
+
+    const handleOtpSubmit = async (e) => {
+        const { otp } = payload;
+        if (!otp) {
+            toast.error('Vui lòng nhập OTP.');
+            return;
+        }
+
+        setLoading(true);
+        loadingBarRef.current.continuousStart();
+        const response = await apiRegister({ ...payload, otp });
+        setLoading(false);
+        loadingBarRef.current.complete();
+
+        if (response.success) {
+            toast.success('Đăng ký thành công!');
+            resetPayload();
+            setIsSendOTP(false);
+            setIsRegister(false)
+        } else {
+            toast.error('OTP không hợp lệ. Vui lòng thử lại.');
+        }
+    };
+
+    const handleCloseModal = () => {
+        setIsSendOTP(false);
+        resetPayload();
+    };
+
     return (
-        <div  className="w-screen h-screen relative">           
+        <div className="w-screen h-screen relative">
+            <LoadingBar color="#36d7b7" ref={loadingBarRef} />
             <img
-                // src="https://png.pngtree.com/thumb_back/fw800/background/20240716/pngtree-a-magical-fantasy-forest-with-dense-vegetation-lighting-bugs-and-soft-image_16014529.jpg"
                 src="https://png.pngtree.com/thumb_back/fw800/background/20230721/pngtree-low-poly-gaming-city-underwater-cartoon-style-3d-rendered-night-view-image_3719053.jpg"
                 alt=""
                 className="w-full h-full object-cover"
             />
-            <div className="absolute top-0 bottom-0 left-0 right-0  flex items-center justify-center gap-5">               
+            <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center gap-5">
                 <div className="p-8 bg-white rounded-md w-[360px]">
-                    <h1 className="text-[28px] font-semibod text-main">Login</h1>
+                    <h1 className="text-[28px] font-semibold text-main">{isRegister ? 'Đăng Ký' : 'Đăng Nhập'}</h1>
                     <InputField
-                        value={payload.username}
-                        setValue={setPayload}
-                        nameKey='username'
-                    />
+                                value={payload.username}
+                                setValue={setPayload}
+                                nameKey='username'
+                            />
+                    {isRegister && (
+                        <>
+                            <InputField
+                                value={payload.fullname}
+                                setValue={setPayload}
+                                nameKey='fullname'
+                            />
+                            <InputField
+                                value={payload.phone}
+                                setValue={setPayload}
+                                nameKey='phone'
+                            />
+                            <InputField
+                                value={payload.address}
+                                setValue={setPayload}
+                                nameKey='address'
+                            />
+                            <InputField
+                                value={payload.email}
+                                setValue={setPayload}
+                                nameKey='email'
+                            />
+                        </>
+                    )}
                     <InputField
                         value={payload.password}
                         setValue={setPayload}
                         nameKey='password'
                         type='password'
                     />
-                    <Button 
-                        name='Login'
-                        handleOnClick={handleSubmit}
-                        fw
-                    />
+                    {isRegister && (
+                        <Button
+                            name="Gửi OTP"
+                            handleOnClick={handleSubmit}
+                            style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 mt-3 w-full hover:bg-opacity-80 transition'
+                            disabled={loading}
+                        />
+                    )}
+                    {!isRegister && (
+                        <Button
+                            name="Đăng Nhập"
+                            handleOnClick={handleSubmit}
+                            style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 mt-3 w-full hover:bg-opacity-80 transition'
+                            disabled={loading}
+                        />
+                    )}
+                    {loading && (
+                        <div className="flex justify-center mt-2">
+                            <ClipLoader color="#36d7b7" loading={loading} size={30} />
+                        </div>
+                    )}
                     <div className="flex items-center justify-between my-2 w-full text-sm">
-                        
-                        <span className="text-blue-500 hover:underline cursor-pointer">Forgot your account?</span>
-                        <Link 
-                            className="text-blue-500 hover:underline cursor-pointer"
-                            to={`/${path.REGISTER}`}
-                        >
-                            Create account
-                        </Link>
+                        <span onClick={() => setIsRegister(!isRegister)} className="text-blue-500 hover:underline cursor-pointer">
+                            {isRegister ? 'Đã có tài khoản? Đăng Nhập' : 'Chưa có tài khoản? Đăng Ký'}
+                        </span>
                     </div>
-                    <Link className="text-blue-500 hover:underline cursor-pointer" to={`/${path.HOME}`}>Go home?</Link>
-                </div>                
+                </div>
             </div>
+
+            {/* Modal OTP */}
+            {isSendOTP && (
+                <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="p-4 bg-white rounded-md w-[300px]">
+                        <h2 className="text-lg font-semibold">Nhập OTP</h2>
+                        <form onSubmit={handleOtpSubmit} className="flex flex-col">
+                            <InputField
+                                value={payload.otp}
+                                setValue={setPayload}
+                                nameKey='otp'
+                                placeholder="Nhập OTP"
+                            />
+                            <Button
+                                name="Xác Nhận OTP"
+                                handleOnClick={handleOtpSubmit}
+                                style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 w-full hover:bg-opacity-80 transition'
+                                disabled={loading}
+                            />
+                            {loading && (
+                                <div className="flex justify-center mt-2">
+                                    <ClipLoader color="#36d7b7" loading={loading} size={30} />
+                                </div>
+                            )}
+                        </form>
+                        <button
+                            onClick={handleCloseModal}
+                            className="mt-2 text-blue-500 underline"
+                        >
+                            Hủy
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <ToastContainer />
         </div>
-        )
-    }
-    
-    export default Login
+    );
+};
+
+export default Login;
