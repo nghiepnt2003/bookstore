@@ -650,8 +650,10 @@ class UserController {
         });
 
         // Lưu accessToken lên authorization
-        userData.role = response.role;
-        return res.status(200).json({ success: true, accessToken, userData });
+
+        return res
+          .status(200)
+          .json({ success: true, accessToken, {role,...userData} );
       } else {
         res.status(500).json("Invalid credentials !!!");
       }
