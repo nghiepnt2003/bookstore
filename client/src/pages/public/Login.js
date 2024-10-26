@@ -65,9 +65,11 @@ const Login = () => {
             const { username, password } = payload;
             const response = await apiLogin({ username, password });
             if (response.success) {
-                console.log("CURENT " + JSON.stringify(response.userData))
                 dispatch(register({ isLoggedIn: true, token: response.accessToken, userData: response.userData }));
-                navigate(`/${path.HOME}`);
+                if(+response.userData.role === 2)
+                    navigate(`/${path.HOME}`);
+                else
+                    navigate(`/${path.ADMIN}`)
             } else {
                 Swal.fire('Opps!', response.message, 'error');
             }

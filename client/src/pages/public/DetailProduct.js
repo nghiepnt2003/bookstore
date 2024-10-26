@@ -62,11 +62,12 @@ const DetailProduct = () => {
         if (response.success) {
             setProductData(response.product);
         }
-        // const rs = await apiGetRating(id)
-        // if(rs.success) {
-        //     setRating(response.data)
-        // }
+        const rs = await apiGetRating(id)
+        if(rs.success) {
+            setRating(rs.ratings)
+        }
     };
+    console.log("RATING " + JSON.stringify(rating))
 
     const fetchProducts = async () => {
         const categoryIds = productData?.categories.map(category => category._id);
@@ -230,7 +231,7 @@ const DetailProduct = () => {
                         </Button>
                 </div>
                 <div className='flex flex-col gap-4'>
-                    {productData?.ratings?.map(el => (
+                    {rating?.map(el => (
                         <Comment
                             key={el._id}
                             star={el.star}

@@ -101,3 +101,43 @@ export const voteOptions = [
     },
 
 ]
+
+const { AiOutlineDashboard, MdGroups, TbBrandProducthunt, RiBillLine, MdOutlineCategory, ImProfile} = icons
+export const adminSidebar = [
+    {
+        id: 1,
+        text: 'Dashboard',
+        path: `/${path.ADMIN}/${path.DASHBOARD}`,
+        icon: <AiOutlineDashboard />
+    },
+    {
+        id: 2,
+        text: 'Quản lý người dùng',
+        path: `/${path.ADMIN}/${path.MANAGE_USER}`,
+        icon: <MdGroups />
+    },
+    {
+        id: 3,
+        text: 'Quản lý sản phẩm',
+        path: `/${path.ADMIN}/${path.MANAGE_PRODUCT}`,
+        icon: <TbBrandProducthunt />,
+    },
+    {
+        id: 4,
+        text: 'Quản lý đơn hàng',
+        path: `/${path.ADMIN}/${path.MANAGE_ORDER}`,
+        icon: <RiBillLine />
+    },
+    {
+        id: 5,
+        text: 'Quản lý danh mục',
+        path: `/${path.ADMIN}/${path.MANAGE_CATEGORY}`,
+        icon: <MdOutlineCategory />
+    },
+    {
+        id: 6,
+        text: 'Thông tin quản lý',
+        path: `/${path.ADMIN}/${path.ADMINPERSONAL}`,
+        icon: <ImProfile />
+    }
+]

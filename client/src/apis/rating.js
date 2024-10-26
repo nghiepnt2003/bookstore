@@ -7,6 +7,6 @@ export const apiPostRating = (params) => axios({
 })
 
 export const apiGetRating = (pid) => axios({
-    url: '/product/' + pid,
+    url: `rating?product=${pid}`,
     method: 'get'
 })

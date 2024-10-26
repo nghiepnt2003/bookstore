@@ -23,4 +23,7 @@ export { default as Modal} from './Modal'
 export { default as Ratings} from './Ratings'
 export { default as VoteOption} from './VoteOption'
 export { default as Loading} from './Loading'
-
+export { default as AdminSidebar} from './AdminSidebar'
+export { default as AdminButton} from './AdminButton'
+export { default as InputForm} from './InputForm'
+export { default as Select} from './Select'
