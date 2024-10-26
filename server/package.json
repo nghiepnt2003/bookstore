@@ -50,6 +50,7 @@
     "passport-local": "^1.0.0",
     "redis": "^4.7.0",
     "socket.io": "^4.8.0",
+    "socket.io-client": "^4.8.0",
     "uniqid": "^5.4.0"
   },
   "devDependencies": {
