@@ -592,7 +592,7 @@ class UserController {
       if (!user.isDeleted) {
         return res.status(400).json({
           success: false,
-          message: "User must be soft deleted before hard delete",
+          message: "User must be soft deleted before hard deletion",
         });
       }
       // Xóa Cart liên quan đến User trước khi xóa User

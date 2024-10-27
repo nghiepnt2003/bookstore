@@ -581,20 +581,6 @@ class UserController {
   async forceDelete(req, res, next) {
     try {
       const { id } = req.params;
-      const user = await User.findById(id);
-      if (!user.isBlocked) {
-        return res.status(403).json({
-          success: false,
-          message: "User is not blocked and cannot be deleted",
-        });
-      }
-      // Kiểm tra xem user đã bị xóa mềm chưa
-      if (!user.isDeleted) {
-        return res.status(400).json({
-          success: false,
-          message: "User must be soft deleted before hard delete",
-        });
-      }
       // Xóa Cart liên quan đến User trước khi xóa User
       await Cart.deleteOne({ user: id });
 

@@ -460,19 +460,11 @@ class UserController {
   async delete(req, res, next) {
     try {
       const { id } = req.params;
-      const user = await User.findById(id);
       const check = await checkDocumentById(User, id);
       if (!check.exists) {
         return res.status(400).json({
           success: false,
           message: check.message,
-        });
-      }
-      // Kiểm tra xem User có isBlocked là true không
-      if (!user.isBlocked) {
-        return res.status(403).json({
-          success: false,
-          message: "User is not blocked and cannot be deleted",
         });
       }
       // Xóa Cart liên quan đến User trước khi xóa User
@@ -581,20 +573,6 @@ class UserController {
   async forceDelete(req, res, next) {
     try {
       const { id } = req.params;
-      const user = await User.findById(id);
-      if (!user.isBlocked) {
-        return res.status(403).json({
-          success: false,
-          message: "User is not blocked and cannot be deleted",
-        });
-      }
-      // Kiểm tra xem user đã bị xóa mềm chưa
-      if (!user.isDeleted) {
-        return res.status(400).json({
-          success: false,
-          message: "User must be soft deleted before hard delete",
-        });
-      }
       // Xóa Cart liên quan đến User trước khi xóa User
       await Cart.deleteOne({ user: id });
 
@@ -983,24 +961,19 @@ class UserController {
       const { isBlocked } = req.body; // Trạng thái block
 
       // Kiểm tra user có tồn tại hay không
-      const user = await User.findById(id).select(
-        "-password -refreshToken -role"
-      );
+      const user = await User.findById(id);
       if (!user) {
         return res.status(404).json({
           success: false,
           message: "User not found",
         });
       }
-      // Kiểm tra nếu role của user là admin
-      if (user.role === 1) {
-        return res.status(403).json({
-          success: false,
-          message: "Cannot block an admin user",
-        });
-      }
+
       // Cập nhật trạng thái block của user
       user.isBlocked = isBlocked ? isBlocked : false;
+      lineItem.selectedForCheckout = selectedForCheckout
+        ? selectedForCheckout
+        : false;
       await user.save();
 
       res.status(200).json({

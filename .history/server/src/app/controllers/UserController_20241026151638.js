@@ -13,11 +13,17 @@ const {
 } = require("../middlewares/jwt");
 const sendMail = require("../../util/sendMail");
 const { saveOTP } = require("../models/OTP");
+const Product = require("../models/Product");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.YOUR_GOOGLE_CLIENT_ID); // Client ID từ Google API
+
 class UserController {
   //[GET] /user/:id
   async getById(req, res) {
     try {
-      let user = await User.findOne({ _id: req.params.id });
+      let user = await User.findOne({ _id: req.params.id }).select(
+        "-refreshToken -password "
+      );
       res.status(200).json({ success: user ? true : false, user });
     } catch (error) {
       res.status(500).json(error);
@@ -43,9 +49,24 @@ class UserController {
       if (queries?.username) {
         formatedQueries.username = { $regex: queries.username, $options: "i" };
       }
+      if (queries?.email) {
+        formatedQueries.email = { $regex: queries.email, $options: "i" };
+      }
+      if (queries?.fullname) {
+        formatedQueries.fullname = { $regex: queries.fullname, $options: "i" };
+      }
 
       // Execute query
-      let queryCommand = User.find(formatedQueries);
+      // let queryCommand = User.find(formatedQueries);
+      let queryCommand = User.find(formatedQueries).populate({
+        path: "wishList", // Populate trường wishList
+        select: "name image price author publisher categories", // Chỉ lấy những trường cần thiết
+        populate: [
+          { path: "author", select: "name" }, // Populate thêm các trường liên quan như author
+          { path: "publisher", select: "name" }, // Populate thêm trường publisher
+          { path: "categories", select: "name" }, // Populate thêm categories
+        ],
+      });
 
       // Sorting
       if (req.query.sort) {
@@ -70,10 +91,8 @@ class UserController {
       const page = +req.query.page || 1;
       const limit = +req.query.limit || process.env.LIMIT_USERS;
       const skip = (page - 1) * limit;
-      queryCommand
-        .skip(skip)
-        .limit(limit)
-        .select("-refreshToken -password -role");
+      queryCommand.skip(skip).limit(limit).select("-refreshToken -password ");
+      // -refreshToken -password -role
 
       // Lấy danh sách sản phẩm
       const response = await queryCommand.exec();
@@ -100,6 +119,109 @@ class UserController {
     // } catch (error) {
     //   res.status(500).json(error);
     // }
+  }
+  //[GET] /user/addresses
+  // API lấy danh sách địa chỉ của người dùng
+  async getAddresses(req, res) {
+    try {
+      const user = req.user; // Lấy thông tin user từ accessToken
+
+      // Tìm thông tin người dùng và lấy danh sách địa chỉ
+      const userInfo = await User.findById(user._id).select("address");
+
+      if (!userInfo || !userInfo.address || userInfo.address.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No shipping addresses found",
+        });
+      }
+
+      // Trả về danh sách địa chỉ của người dùng
+      res.status(200).json({
+        success: true,
+        addresses: userInfo.address, // Danh sách địa chỉ
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to get shipping addresses",
+        error: error.message,
+      });
+    }
+  }
+
+  async generateRandomPhoneNumber() {
+    let phoneNumber;
+    let phoneExists = true;
+
+    // Lặp lại việc tạo số điện thoại cho đến khi số này là duy nhất
+    while (phoneExists) {
+      phoneNumber = `0${Math.floor(100000000 + Math.random() * 90000000)}`; // Tạo chuỗi 10 số bắt đầu bằng 0
+      phoneExists = await User.findOne({ phone: phoneNumber }); // Kiểm tra xem số này đã tồn tại chưa
+    }
+
+    return phoneNumber;
+  }
+  //[POST] /user/loginWithGoogle
+  async loginWithGoogle(req, res) {
+    try {
+      const userInfo = req.user;
+      const email = userInfo.email;
+      console.log("userifoo", userInfo);
+      // Kiểm tra nếu user đã tồn tại trong database
+      let user = await User.findOne({ email });
+
+      // Nếu user chưa tồn tại, tạo mới
+      if (!user) {
+        const randomPhone = await this.generateRandomPhoneNumber();
+        const newUser = new User({
+          username: email.split("@")[0], // Dùng phần đầu của email làm username
+          fullname: userInfo.name,
+          email,
+          phone: randomPhone,
+          address: "", // Có thể cho mặc định nếu không lấy từ Google
+          password: userInfo._id, // Google login không cần mật khẩu
+          role: 2, // Gán vai trò mặc định (nếu có)
+        });
+        const savedUser = await newUser.save();
+        // Tạo mới cart cho user
+        const newCart = new Cart({ user: savedUser._id, items: [] });
+        const savedCart = await newCart.save();
+        savedUser.cart = savedCart._id;
+
+        // Lưu user mới vào database
+        user = await savedUser.save();
+
+        // Gửi email chào mừng (nếu có)
+        // const html = `<!DOCTYPE html> ...`; // HTML content email
+        // await sendMail("Create account successfully", { email, html });
+      }
+
+      const accessToken = generateAccessToken(user._id, user.role);
+      const refreshToken = generateRefreshToken(user._id);
+      await User.findByIdAndUpdate(user._id, { refreshToken }, { new: true });
+      //Lưu refreshToken vào cookie
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        // secure: true, // Đảm bảo chỉ gửi cookie qua HTTPS trong môi trường production
+        // sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      });
+      const { password, role, ...userData } = user.toObject();
+      // Trả về thông tin người dùng
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        accessToken,
+        userData,
+      });
+    } catch (error) {
+      console.error("Error during Google login", error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred during login",
+      });
+    }
   }
 
   // [POST] /user/register
@@ -194,6 +316,83 @@ class UserController {
         .json({ success: false, message: "An error occurred " + err });
     }
   }
+  //[GET] /product/wishlist
+  async getWishlist(req, res) {
+    try {
+      const { _id } = req.user; // Lấy ID của user từ token
+
+      // Lấy thông tin user
+      const user = await User.findById(_id).populate({
+        path: "wishList",
+        populate: [
+          { path: "author", select: "name" }, // Populate thông tin author
+          { path: "publisher", select: "name" }, // Populate thông tin publisher
+          { path: "categories", select: "name" }, // Populate thông tin category
+        ],
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "wishList retrieved successfully",
+        wishList: user.wishList, // Trả về danh sách sản phẩm trong wishList
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred: " + error.message,
+      });
+    }
+  }
+  // [POST] /product/:id/add-to-wishlist
+  async addToWishlist(req, res) {
+    try {
+      const { _id } = req.user;
+      const productId = req.params.id;
+
+      // Kiểm tra sự tồn tại của sản phẩm
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: "Product not found",
+        });
+      }
+
+      // Lấy thông tin user
+      const user = await User.findById(_id);
+      if (!Array.isArray(user.wishList)) {
+        user.wishList = [];
+      }
+      // Kiểm tra xem sản phẩm đã có trong wishList chưa
+      if (user.wishList.includes(productId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Product already in wishList",
+        });
+      }
+
+      // Thêm sản phẩm vào wishList
+      user.wishList.push(productId);
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        message: "Product added to wishList",
+        wishList: user.wishList,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred: " + error.message,
+      });
+    }
+  }
 
   //[PUT] /user/
   async update(req, res, next) {
@@ -205,9 +404,19 @@ class UserController {
           .json({ success: false, message: "Missing inputs" });
 
       // Cập nhật user
+      // const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
+      //   new: true,
+      // }).select("-password -role -refreshToken");
       const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
         new: true,
-      }).select("-password -role -refreshToken");
+      })
+        .select("-password -role -refreshToken")
+        .populate({
+          path: "wishList",
+          populate: {
+            path: "author publisher categories", // Nếu bạn muốn lấy cả thông tin của author, publisher, categories
+          },
+        });
 
       res.status(200).json({
         success: true,
@@ -275,6 +484,91 @@ class UserController {
       });
     }
   }
+  // [DELETE] /user/wishlist/:productId
+  async removeFromWishlist(req, res) {
+    try {
+      const { _id } = req.user; // Lấy ID của user từ token
+      const productId = req.params.productId; // Lấy productId từ URL
+
+      // Lấy thông tin user
+      const user = await User.findById(_id);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // Khởi tạo wishlist nếu chưa tồn tại
+      if (!Array.isArray(user.wishList)) {
+        user.wishList = [];
+      }
+
+      // Kiểm tra xem sản phẩm có trong wishlist không
+      const index = user.wishList.indexOf(productId);
+      if (index === -1) {
+        return res.status(400).json({
+          success: false,
+          message: "Product not found in wishList",
+        });
+      }
+
+      // Xóa sản phẩm khỏi wishlist
+      user.wishList.splice(index, 1);
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Product removed from wishlist",
+        wishList: user.wishList, // Trả về wishlist sau khi xóa
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred: " + error.message,
+      });
+    }
+  }
+
+  // [DELETE] /user/wishlist/removeAll
+  async removeAllFromWishlist(req, res) {
+    try {
+      const { _id } = req.user; // Lấy ID của user từ token
+
+      // Lấy thông tin user
+      const user = await User.findById(_id);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // Khởi tạo wishList nếu chưa tồn tại
+      if (!Array.isArray(user.wishList)) {
+        user.wishList = [];
+      }
+
+      // Xóa tất cả sản phẩm khỏi wishlist
+      user.wishList = []; // Đặt wishlist thành mảng rỗng
+
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "All products removed from wishlist",
+        wishList: user.wishList, // Trả về wishlist (sẽ là mảng rỗng)
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred: " + error.message,
+      });
+    }
+  }
+
   //[DELETE] /user/:id/force
   async forceDelete(req, res, next) {
     try {
@@ -362,7 +656,7 @@ class UserController {
         });
 
         // Lưu accessToken lên authorization
-
+        userData.role = response.role;
         return res.status(200).json({ success: true, accessToken, userData });
       } else {
         res.status(500).json("Invalid credentials !!!");
@@ -612,6 +906,138 @@ class UserController {
       res
         .status(200)
         .json({ success: true, message: "OTP sent successfully.", result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  //[PUT]/address/
+  async addUserAddress(req, res, next) {
+    try {
+      const { _id } = req.user;
+      if (!req.body.address) throw new Error("Missing input address");
+      const response = await User.findByIdAndUpdate(
+        _id,
+        { $push: { address: req.body.address } },
+        { new: true }
+      ).select("-password -role -refreshToken");
+      res.status(200).json({
+        success: response ? true : false,
+        updatedUser: response ? response : "Something went wrong !!!",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  // [PUT] /address/:index
+  async updateUserAddress(req, res, next) {
+    try {
+      const { _id } = req.user;
+      const { index } = req.params; // Lấy index của địa chỉ từ params
+      const { address } = req.body; // Địa chỉ mới từ body
+
+      if (!address) throw new Error("Missing input address");
+
+      // Cập nhật địa chỉ trong mảng
+      const response = await User.findByIdAndUpdate(
+        _id,
+        { $set: { [`address.${index}`]: address } }, // Sử dụng $set để cập nhật địa chỉ tại index
+        { new: true }
+      ).select("-password -role -refreshToken");
+
+      res.status(200).json({
+        success: response ? true : false,
+        updatedUser: response ? response : "Something went wrong !!!",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // [PUT] /user/:id/block
+  async blockUser(req, res) {
+    try {
+      const { id } = req.params; // ID của user cần block
+      const { isBlocked } = req.body; // Trạng thái block
+
+      // Kiểm tra user có tồn tại hay không
+      const user = await User.findById(id).select(
+        "-password -refreshToken -passwordResetToken"
+      );
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+      // Kiểm tra nếu role của user là admin
+      if (user.role === 1) {
+        return res.status(403).json({
+          success: false,
+          message: "Cannot block an admin user",
+        });
+      }
+      // Cập nhật trạng thái block của user
+      user.isBlocked = isBlocked ? isBlocked : false;
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: isBlocked
+          ? "User blocked successfully"
+          : "User unblocked successfully",
+        data: user,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred: " + error.message,
+      });
+    }
+  }
+
+  // [DELETE] /address/:index
+  async deleteUserAddress(req, res, next) {
+    try {
+      const { _id } = req.user;
+      const index = req.params.index;
+
+      // Kiểm tra xem index có phải là một số và nằm trong phạm vi mảng địa chỉ không
+      if (isNaN(index) || index < 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid address index" });
+      }
+
+      const user = await User.findById(_id);
+
+      // Kiểm tra xem người dùng có địa chỉ nào không
+      if (!user || !user.address || user.address.length === 0) {
+        return res
+          .status(404)
+          .json({ success: false, message: "No addresses found" });
+      }
+
+      // Kiểm tra xem index có vượt quá độ dài của mảng không
+      if (index >= user.address.length) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid address index" });
+      }
+
+      // Cập nhật địa chỉ
+      const updatedAddress = user.address.filter((_, i) => i !== Number(index));
+
+      // Lưu địa chỉ đã cập nhật vào cơ sở dữ liệu
+      user.address = updatedAddress;
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Address deleted successfully",
+        updatedAddress: user.address,
+      });
     } catch (error) {
       next(error);
     }

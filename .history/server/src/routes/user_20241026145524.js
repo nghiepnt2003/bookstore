@@ -39,13 +39,9 @@ router.delete(
   [verifyAccessToken],
   userController.deleteUserAddress
 );
-router.put(
-  "/block/:id",
-  [verifyAccessToken, isAdmin],
-  userController.blockUser
-);
 router.put("/:uid", verifyAccessToken, isAdmin, userController.updateByAdmin);
 router.put("/", verifyAccessToken, userController.update);
+router.put("/", [verifyAccessToken, isAdmin], userController.blockUser);
 
 router.delete(
   "/wishlist/removeAll",
