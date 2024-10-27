@@ -58,6 +58,7 @@ const Products = () => {
         }
         // Thêm tham số tìm kiếm vào yêu cầu
         if (debouncedSearchTerm) {
+            params.page = 1
             params.name = debouncedSearchTerm;
         }
 
@@ -90,10 +91,10 @@ const Products = () => {
 
     const handlePageSizeChange = (current, newSize) => {
         setLimit(newSize); // Cập nhật số sản phẩm mỗi trang
-        setCurrentPage(1); // Reset về trang đầu khi thay đổi số sản phẩm mỗi trang
     };
 
     const handleSearch = (value) => {
+        setCurrentPage(1); // Đặt lại trang về 1 khi tìm kiếm
         setSearchTerm(value);
     };
 

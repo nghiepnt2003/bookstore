@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 
-
-const ManageProduct = () => {
-
-    return (
-        <div>ManageProduct</div>
-    )
+const Dashboard = () => {
+  return (
+    <div>
+      Dashboard
+    </div>
+  )
 }
 
-export default ManageProduct
+export default Dashboard
