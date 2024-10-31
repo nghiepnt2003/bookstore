@@ -10,6 +10,7 @@ const ratingRouter = require("./rating");
 const commentRouter = require("./comment");
 const discountRouter = require("./discount");
 const messageRouter = require("./message");
+const statictisRouter = require("./statictis");
 
 const { notFound, errHandler } = require("../app/middlewares/ErrorHandler");
 function route(app) {
@@ -25,6 +26,7 @@ function route(app) {
   app.use("/comment", commentRouter);
   app.use("/discount", discountRouter);
   app.use("/message", messageRouter);
+  app.use("/statictis", statictisRouter);
 
   // Nếu không vào route nào thì là err Not found
   app.use(notFound);

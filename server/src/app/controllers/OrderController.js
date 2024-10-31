@@ -6,6 +6,7 @@ const LineItem = require("../models/LineItem");
 const User = require("../models/User");
 const { Payment } = require("../models/Payment");
 const QRCode = require("qrcode");
+const Member = require("../models/Member");
 async function generateMoMoQR(phone, price) {
   const text = `2|99|${phone}|||||${price}`;
 
@@ -197,7 +198,7 @@ class OrderController {
           .json({ success: false, message: "Payment method not provided" });
       }
       // Kiểm tra xem người dùng có địa chỉ hay không
-      const userInfo = await User.findById(user._id).select("address");
+      const userInfo = await User.findById(user._id).select("address member");
 
       if (!userInfo.address || userInfo.address.length === 0) {
         return res.status(400).json({
@@ -271,6 +272,18 @@ class OrderController {
           { new: true } // Trả về tài liệu đã được cập nhật
         );
       }
+      // Kiểm tra rank của user để áp dụng giảm giá
+      const member = await Member.findById(userInfo.member);
+      if (member) {
+        if (member.rank === "Silver") {
+          totalPrice *= 0.98; // Giảm 2%
+        } else if (member.rank === "Gold") {
+          totalPrice *= 0.95; // Giảm 5%
+        } else if (member.rank === "Diamond") {
+          totalPrice *= 0.9; // Giảm 10%
+        }
+      }
+      totalPrice = Math.round(totalPrice * 100) / 100;
 
       const orderStatus = payment === Payment.MOMO ? "Not Yet Paid" : "Pending";
 
@@ -403,6 +416,24 @@ class OrderController {
       // Cập nhật trạng thái đơn hàng
       order.status = status;
       await order.save();
+
+      if (status === "Successed") {
+        // Tìm tất cả các orderDetails liên quan đến order này
+        const orderDetails = await OrderDetail.find({
+          _id: { $in: order.details },
+        });
+
+        // Tính tổng số lượng sản phẩm
+        const totalQuantity = orderDetails.reduce(
+          (acc, detail) => acc + detail.quantity,
+          0
+        );
+        const user = await User.findById(order.user).populate("member");
+        if (user && user.member) {
+          user.member.score += 2 * totalQuantity; // Cộng thêm 2 điểm
+          await user.member.save(); // Lưu thay đổi vào Member
+        }
+      }
 
       res.status(200).json({
         success: true,
