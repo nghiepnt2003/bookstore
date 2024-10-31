@@ -2,6 +2,8 @@ const User = require("../models/User");
 const { multipleMongooseToObject } = require("../../util/mongoose");
 const asyncHandler = require("express-async-handler");
 const Cart = require("../models/Cart");
+const Member = require("../models/Member");
+
 var jwt = require("jsonwebtoken");
 var fs = require("fs");
 const crypto = require("crypto");
@@ -189,6 +191,10 @@ class UserController {
         const savedCart = await newCart.save();
         savedUser.cart = savedCart._id;
 
+        const newMember = new Member({ score: 0, rank: "Bronze" });
+        const savedMember = await newMember.save();
+        savedUser.member = savedMember._id; // Liên kết member với user
+
         // Lưu user mới vào database
         user = await savedUser.save();
 
@@ -248,6 +254,12 @@ class UserController {
       const newCart = new Cart({ user: savedUser._id, items: [] });
       const savedCart = await newCart.save();
       savedUser.cart = savedCart._id;
+
+      // Tạo member mới cho user
+      const newMember = new Member({ score: 0, rank: "Bronze" });
+      const savedMember = await newMember.save();
+      savedUser.member = savedMember._id; // Liên kết member với user
+
       await savedUser.save();
       // Trả về tài liệu đã lưu thành công
       const html = `<!DOCTYPE html>
