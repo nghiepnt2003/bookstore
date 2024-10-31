@@ -3,9 +3,17 @@ import logo from '../assets/logo.png'
 import icons from "../ultils/icons"
 import {Link} from 'react-router-dom'
 import path from "../ultils/path"
+import { useNavigate } from "react-router-dom"; 
 
 const Header = () => {
     const {FaPhone, FaTruckFast,IoMdCart,FaUserAlt} = icons
+
+    const navigate = useNavigate(); // Khởi tạo useNavigate
+    // Hàm điều hướng đến trang Profile
+    const handleNavigateProfile = () => {
+        navigate(`/${path.PROFILE}`); // Chuyển đến đường dẫn profile
+    };
+
     return (
         <div className="w-full bg-white flex justify-center">
             <div className="w-main flex justify-between h-[140px] py-[16px] bg-white">
@@ -33,7 +41,7 @@ const Header = () => {
                         </span>                    
                     </div>
 
-                    <div className="flex px-6 border-r items-center cursor-pointer">
+                    <div onClick={handleNavigateProfile} className="flex px-6 border-r items-center cursor-pointer">
                         <span className="px-2">
                             <FaUserAlt color="#f73995" fontSize="25px"/>
                         </span>
