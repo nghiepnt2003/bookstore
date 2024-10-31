@@ -5,8 +5,9 @@ import path from './ultils/path';
 import { getCategories} from './store/app/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
 import { Modal } from './components';
-import { AdminLayout, ManageProduct, ManageOrder, ManageUser, CreateProduct, Dashboard } from './pages/admin';
+import { AdminLayout, ManageProduct, ManageOrder, ManageUser, Dashboard, ManageCategory, ManageAuthor } from './pages/admin';
 import { MemberLayout, Personal } from './pages/member';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   const dispatch = useDispatch();
@@ -18,6 +19,7 @@ function App() {
   return (
     <div className="font-main bg-[#f8f8f8] relative">
     {isShowModal && <Modal>{modalChildren}</Modal>}
+    <ToastContainer />
       <Routes>
         <Route path={path.PUBLIC} element={<Public />}>
           <Route path={path.HOME} element={<Home />}></Route>
@@ -31,9 +33,11 @@ function App() {
         <Route path={path.ADMIN} element={<AdminLayout />}>
           <Route path={path.DASHBOARD} element={<Dashboard />} />
           <Route path={path.MANAGE_ORDER} element={<ManageOrder />} />
+          <Route path={path.MANAGE_CATEGORY} element={<ManageCategory />} />
           <Route path={path.MANAGE_PRODUCT} element={<ManageProduct />} />
           <Route path={path.MANAGE_USER} element={<ManageUser />} />
-          <Route path={path.CREATE_PRODUCT} element={<CreateProduct />} />
+          <Route path={path.MANAGE_INFO_AUTHOR} element={<ManageAuthor />} />
+          <Route path={path.ALL} element={<Dashboard />}></Route>
         </Route>
         <Route path={path.MEMBER} element={<MemberLayout />}>
           <Route path={path.PERSONAL} element={<Personal />} />

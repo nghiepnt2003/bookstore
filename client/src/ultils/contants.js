@@ -118,24 +118,30 @@ export const adminSidebar = [
     },
     {
         id: 3,
+        text: 'Quản lý danh mục',
+        path: `/${path.ADMIN}/${path.MANAGE_CATEGORY}`,
+        icon: <MdGroups />
+    },
+    {
+        id: 4,
+        text: 'Quản lý thông tin tác giả',
+        path: `/${path.ADMIN}/${path.MANAGE_INFO_AUTHOR}`,
+        icon: <ImProfile />
+    },
+    {
+        id: 5,
         text: 'Quản lý sản phẩm',
         path: `/${path.ADMIN}/${path.MANAGE_PRODUCT}`,
         icon: <TbBrandProducthunt />,
     },
     {
-        id: 4,
+        id: 6,
         text: 'Quản lý đơn hàng',
         path: `/${path.ADMIN}/${path.MANAGE_ORDER}`,
         icon: <RiBillLine />
     },
     {
-        id: 5,
-        text: 'Quản lý danh mục',
-        path: `/${path.ADMIN}/${path.MANAGE_CATEGORY}`,
-        icon: <MdOutlineCategory />
-    },
-    {
-        id: 6,
+        id: 7,
         text: 'Thông tin quản lý',
         path: `/${path.ADMIN}/${path.ADMINPERSONAL}`,
         icon: <ImProfile />

@@ -40,14 +40,37 @@ const Login = () => {
             otp: '',
         });
     };
-
     const handleSubmit = async () => {
         if (isRegister) {
             const { email, password, username, fullname, phone, address } = payload;
-            if (!email || !password || !username || !fullname || !phone || !address) {
-                toast.error('Vui lòng điền tất cả các trường');
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+            const phonePattern = /^[0-9]{10,15}$/; 
+        
+            if (!email || !emailPattern.test(email)) {
+                toast.error('Vui lòng nhập địa chỉ email hợp lệ.');
                 return;
             }
+            if (!password || password.length < 6) {
+                toast.error('Mật khẩu phải có ít nhất 6 ký tự.');
+                return;
+            }
+            if (!username) {
+                toast.error('Vui lòng nhập tên đăng nhập.');
+                return;
+            }
+            if (!fullname) {
+                toast.error('Vui lòng nhập họ tên.');
+                return;
+            }
+            if (!phone || !phonePattern.test(phone)) {
+                toast.error('Số điện thoại không hợp lệ.');
+                return;
+            }
+            if (!address) {
+                toast.error('Vui lòng nhập địa chỉ.');
+                return;
+            }
+            
 
             setLoading(true);
             loadingBarRef.current.continuousStart();
@@ -69,7 +92,7 @@ const Login = () => {
                 if(+response.userData.role === 2)
                     navigate(`/${path.HOME}`);
                 else
-                    navigate(`/${path.ADMIN}`)
+                    navigate(`/${path.ADMIN}/${path.DASHBOARD}`)
             } else {
                 Swal.fire('Opps!', response.message, 'error');
             }
