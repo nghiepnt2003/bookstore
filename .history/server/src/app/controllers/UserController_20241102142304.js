@@ -576,6 +576,14 @@ class UserController {
           message: "User is not blocked and cannot be deleted",
         });
       }
+      const cart = await Cart.findOne({ user: id });
+      if (cart) {
+        // Xóa mềm các `LineItem` trong `Cart`
+        await LineItem.deleteMany({ _id: { $in: cart.items } }); // Sử dụng deleteMany để xóa `LineItem`
+
+        // Xóa mềm `Cart`
+        await Cart.deleteOne({ user: id }); // Sử dụng deleteOne để xóa `Cart`
+      }
       // Xóa Cart liên quan đến User trước khi xóa User
       await Cart.delete({ user: id });
 

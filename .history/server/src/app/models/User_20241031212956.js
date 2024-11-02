@@ -47,7 +47,6 @@ const userSchema = new Schema(
     address: { type: Array, default: [] },
     role: { type: Number, ref: "Role", required: true, default: 2 },
     isBlocked: { type: Boolean, default: false },
-    image: { type: String },
     wishList: [{ type: Number, ref: "Product" }],
     cart: { type: Number, ref: "Cart" },
     refreshToken: { type: String },

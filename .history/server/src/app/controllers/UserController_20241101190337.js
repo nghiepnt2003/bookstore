@@ -177,29 +177,16 @@ class UserController {
 
       // Nếu user chưa tồn tại, tạo mới
       if (!user) {
-        // Upload ảnh đại diện của Google lên Cloudinary
-        let imageUrl = null;
-        if (userInfo.picture) {
-          const uploadedImage = await cloudinary.uploader.upload(
-            userInfo.picture,
-            {
-              folder: "bookstore",
-            }
-          );
-          imageUrl = uploadedImage.secure_url; // URL ảnh sau khi upload lên Cloudinary
-        }
-        // const pictureUrl = userInfo.picture;
-        // const uploadedImage = await cloudinary.uploader.upload(pictureUrl, {
-        //   folder: "bookstore", // Thư mục lưu trữ ảnh
-        // });
-
+        // Tải ảnh đại diện từ URL Google
+        const pictureUrl = userInfo.picture;
+        const response = await axios.get(pictureUrl, {
+          responseType: "arraybuffer",
+        });
         const randomPhone = await this.generateRandomPhoneNumber();
         const newUser = new User({
           username: email.split("@")[0], // Dùng phần đầu của email làm username
           fullname: userInfo.name,
           email,
-          image: imageUrl,
-          // image: uploadedImage.secure_url,
           phone: randomPhone,
           // address: "", // Có thể cho mặc định nếu không lấy từ Google
           password: userInfo._id, // Google login không cần mật khẩu
@@ -253,8 +240,7 @@ class UserController {
   // [POST] /user/register
   async register(req, res) {
     try {
-      const { username, password, fullname, email, phone, address, image } =
-        req.body;
+      const { username, password, fullname, email, phone, address } = req.body;
 
       // thiếu role với cart
       if (!username || !password || !fullname || !email || !phone) {
@@ -268,17 +254,8 @@ class UserController {
           .status(400)
           .json({ success: false, message: "Username already exists." });
       }
-      let imageUrl = null;
-      // Kiểm tra nếu người dùng gửi URL ảnh đại diện
-      if (image) {
-        const uploadedImage = await cloudinary.uploader.upload(image, {
-          folder: "bookstore",
-        });
-        imageUrl = uploadedImage.secure_url; // Lưu URL ảnh từ Cloudinary
-      }
-      // const user = new User(req.body);
-      const user = new User({ ...req.body, image: imageUrl || req.body.image });
 
+      const user = new User(req.body);
       const savedUser = await user.save();
 
       const newCart = new Cart({ user: savedUser._id, items: [] });
@@ -439,61 +416,31 @@ class UserController {
   //[PUT] /user/
   async update(req, res, next) {
     try {
-      Cloud.single("image")(req, res, async (err) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({
-            success: false,
-            message: "Error uploading image",
-            error: err.message,
-          });
-        }
-        const { _id } = req.user;
-        const existingUser = await User.findById(_id);
-        if (!existingUser) {
-          return res
-            .status(404)
-            .json({ success: false, message: "User not found" });
-        }
-        // Xử lý xóa ảnh cũ nếu có ảnh mới được upload
-        if (req.file) {
-          if (existingUser.image) {
-            // Lấy public_id từ URL của ảnh hiện tại
-            const publicId = existingUser.image.split("/").pop().split(".")[0];
+      const { _id } = req.user;
+      if (!_id || Object.keys(req.body).length === 0)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing inputs" });
 
-            // Xóa ảnh cũ trên Cloudinary
-            await cloudinary.uploader.destroy(`bookstore/${publicId}`); // Thay `your_folder` bằng tên thư mục của bạn
-          }
-
-          // Lấy URL của ảnh mới từ Cloudinary
-          req.body.image = req.file.path; // Lưu URL của ảnh mới
-        }
-
-        if (!_id || Object.keys(req.body).length === 0)
-          return res
-            .status(400)
-            .json({ success: false, message: "Missing inputs" });
-
-        // Cập nhật user
-        // const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
-        //   new: true,
-        // }).select("-password -role -refreshToken");
-        const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
-          new: true,
-        })
-          .select("-password -role -refreshToken")
-          .populate({
-            path: "wishList",
-            populate: {
-              path: "author publisher categories", // Nếu bạn muốn lấy cả thông tin của author, publisher, categories
-            },
-          });
-
-        res.status(200).json({
-          success: true,
-          message: "User update successful",
-          updatedUser,
+      // Cập nhật user
+      // const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
+      //   new: true,
+      // }).select("-password -role -refreshToken");
+      const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
+        new: true,
+      })
+        .select("-password -role -refreshToken")
+        .populate({
+          path: "wishList",
+          populate: {
+            path: "author publisher categories", // Nếu bạn muốn lấy cả thông tin của author, publisher, categories
+          },
         });
+
+      res.status(200).json({
+        success: true,
+        message: "User update successful",
+        updatedUser,
       });
     } catch (error) {
       res.status(500).json({
@@ -505,49 +452,20 @@ class UserController {
   //[PUT] /user/:uid
   async updateByAdmin(req, res, next) {
     try {
-      Cloud.single("image")(req, res, async (err) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({
-            success: false,
-            message: "Error uploading image",
-            error: err.message,
-          });
-        }
-        const { uid } = req.params;
-        const existingUser = await User.findById(uid);
-        if (!existingUser) {
-          return res
-            .status(404)
-            .json({ success: false, message: "User not found" });
-        }
-        // Xử lý xóa ảnh cũ nếu có ảnh mới được upload
-        if (req.file) {
-          if (existingUser.image) {
-            // Lấy public_id từ URL của ảnh hiện tại
-            const publicId = existingUser.image.split("/").pop().split(".")[0];
+      const { uid } = req.params;
+      if (Object.keys(req.body).length === 0)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing inputs" });
+      // Cập nhật user
+      const updatedUser = await User.findByIdAndUpdate(uid, req.body, {
+        new: true,
+      }).select("-password -role -refreshToken");
 
-            // Xóa ảnh cũ trên Cloudinary
-            await cloudinary.uploader.destroy(`bookstore/${publicId}`);
-          }
-
-          // Lấy URL của ảnh mới từ Cloudinary
-          req.body.image = req.file.path; // Lưu URL của ảnh mới
-        }
-        if (Object.keys(req.body).length === 0)
-          return res
-            .status(400)
-            .json({ success: false, message: "Missing inputs" });
-        // Cập nhật user
-        const updatedUser = await User.findByIdAndUpdate(uid, req.body, {
-          new: true,
-        }).select("-password -role -refreshToken");
-
-        res.status(200).json({
-          success: true,
-          message: "User update successful",
-          updatedUser,
-        });
+      res.status(200).json({
+        success: true,
+        message: "User update successful",
+        updatedUser,
       });
     } catch (error) {
       res.status(500).json({

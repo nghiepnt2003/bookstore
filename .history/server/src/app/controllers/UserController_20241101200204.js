@@ -449,12 +449,17 @@ class UserController {
           });
         }
         const { _id } = req.user;
+        if (!_id || Object.keys(req.body).length === 0)
+          return res
+            .status(400)
+            .json({ success: false, message: "Missing inputs" });
         const existingUser = await User.findById(_id);
         if (!existingUser) {
           return res
             .status(404)
             .json({ success: false, message: "User not found" });
         }
+
         // Xử lý xóa ảnh cũ nếu có ảnh mới được upload
         if (req.file) {
           if (existingUser.image) {
@@ -468,12 +473,6 @@ class UserController {
           // Lấy URL của ảnh mới từ Cloudinary
           req.body.image = req.file.path; // Lưu URL của ảnh mới
         }
-
-        if (!_id || Object.keys(req.body).length === 0)
-          return res
-            .status(400)
-            .json({ success: false, message: "Missing inputs" });
-
         // Cập nhật user
         // const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
         //   new: true,
@@ -505,49 +504,20 @@ class UserController {
   //[PUT] /user/:uid
   async updateByAdmin(req, res, next) {
     try {
-      Cloud.single("image")(req, res, async (err) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({
-            success: false,
-            message: "Error uploading image",
-            error: err.message,
-          });
-        }
-        const { uid } = req.params;
-        const existingUser = await User.findById(uid);
-        if (!existingUser) {
-          return res
-            .status(404)
-            .json({ success: false, message: "User not found" });
-        }
-        // Xử lý xóa ảnh cũ nếu có ảnh mới được upload
-        if (req.file) {
-          if (existingUser.image) {
-            // Lấy public_id từ URL của ảnh hiện tại
-            const publicId = existingUser.image.split("/").pop().split(".")[0];
+      const { uid } = req.params;
+      if (Object.keys(req.body).length === 0)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing inputs" });
+      // Cập nhật user
+      const updatedUser = await User.findByIdAndUpdate(uid, req.body, {
+        new: true,
+      }).select("-password -role -refreshToken");
 
-            // Xóa ảnh cũ trên Cloudinary
-            await cloudinary.uploader.destroy(`bookstore/${publicId}`);
-          }
-
-          // Lấy URL của ảnh mới từ Cloudinary
-          req.body.image = req.file.path; // Lưu URL của ảnh mới
-        }
-        if (Object.keys(req.body).length === 0)
-          return res
-            .status(400)
-            .json({ success: false, message: "Missing inputs" });
-        // Cập nhật user
-        const updatedUser = await User.findByIdAndUpdate(uid, req.body, {
-          new: true,
-        }).select("-password -role -refreshToken");
-
-        res.status(200).json({
-          success: true,
-          message: "User update successful",
-          updatedUser,
-        });
+      res.status(200).json({
+        success: true,
+        message: "User update successful",
+        updatedUser,
       });
     } catch (error) {
       res.status(500).json({
