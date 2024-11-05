@@ -5,7 +5,9 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.5",
+    "@paypal/react-paypal-js": "^8.7.0",
     "@reduxjs/toolkit": "^1.9.7",
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -30,6 +32,7 @@
     "redux-persist": "^6.0.0",
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.14.0",
+    "use-debounce": "^10.0.4",
     "use-react-router-breadcrumbs": "^4.0.1",
     "web-vitals": "^2.1.4"
   },

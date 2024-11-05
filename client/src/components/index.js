@@ -36,5 +36,5 @@ export { default as AuthorSelect} from './AuthorSelect'
 export { default as EditAuthorForm} from './EditAuthorForm'
 export { default as CreateProduct} from './CreateProduct'
 export { default as compressImage} from './compressImage'
-
-
+export { default as MemberSidebar} from './MemberSidebar'
+export { default as HistoryOrderItem} from './HistoryOrderItem'

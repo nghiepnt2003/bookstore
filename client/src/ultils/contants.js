@@ -147,3 +147,30 @@ export const adminSidebar = [
         icon: <ImProfile />
     }
 ]
+
+export const memberSidebar = [
+    {
+        id: 1,
+        type: 'single',
+        text: 'Thông tin cá nhân',
+        path: `/${path.MEMBER}/${path.PERSONAL}`,
+        icon: <AiOutlineDashboard />
+    },
+    {
+        id: 2,
+        type: 'single',
+        text: 'Giỏ hàng của tôi',
+        path: `/${path.MEMBER}/${path.MY_CART}`,
+        icon: <MdGroups />
+    },
+    {
+        id: 3,
+        type: 'single',
+        text: 'Lịch sử mua hàng',
+        path: `/${path.MEMBER}/${path.HISTORY}`,
+        icon: <RiBillLine />
+    }
+]
+
+export const cash = "Cash"
+export const paypal = "Paypal"

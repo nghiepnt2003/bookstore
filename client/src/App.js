@@ -6,7 +6,7 @@ import { getCategories} from './store/app/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
 import { Modal } from './components';
 import { AdminLayout, ManageProduct, ManageOrder, ManageUser, Dashboard, ManageCategory, ManageAuthor } from './pages/admin';
-import { MemberLayout, Personal } from './pages/member';
+import { MemberLayout, Personal, History, MyCart, Checkout } from './pages/member';
 import { ToastContainer } from 'react-toastify';
 
 function App() {
@@ -21,6 +21,7 @@ function App() {
     {isShowModal && <Modal>{modalChildren}</Modal>}
     <ToastContainer />
       <Routes>
+        <Route path={path.CHECKOUT} element={<Checkout />} />
         <Route path={path.PUBLIC} element={<Public />}>
           <Route path={path.HOME} element={<Home />}></Route>
           <Route path={path.FAQ} element={<FAQ />}></Route>
@@ -41,6 +42,8 @@ function App() {
         </Route>
         <Route path={path.MEMBER} element={<MemberLayout />}>
           <Route path={path.PERSONAL} element={<Personal />} />
+          <Route path={path.MY_CART} element={<MyCart />} />
+          <Route path={path.HISTORY} element={<History />} />
         </Route>
         <Route path={path.LOGIN} element={<Login />}></Route>
       </Routes>

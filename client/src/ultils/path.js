@@ -11,6 +11,7 @@ const path = {
     FAQ: 'faqs',
     RESET_PASSWORD: 'reset-password/:token',
     SENDOTP: 'send-otp',
+    CHECKOUT: 'checkout',
 
     //Admin
     ADMIN: 'admin',
@@ -25,6 +26,9 @@ const path = {
     // member
     MEMBER: 'member',
     PERSONAL: 'personal',
+    MY_CART: 'my-cart',
+    HISTORY: 'buy-history',
+
 }
 
 export default path

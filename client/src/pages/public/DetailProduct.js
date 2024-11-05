@@ -1,17 +1,18 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Breadcrumb, Button, ProductExtraInfoItem, SelectQuantity, Product, Comment, VoteBar, VoteOption, Modal } from "../../components";
-import { apiGetProduct, apiGetProducts, apiGetRating, apiPostComments, apiPostRating } from "../../apis";
+import { Breadcrumb, Button, ProductExtraInfoItem, SelectQuantity, Product, Comment, VoteBar, VoteOption } from "../../components";
+import { apiGetProduct, apiGetProducts, apiGetRating, apiPostComments, apiPostRating, apiUpdateCart, apiGetUserCart } from "../../apis";
 import { formatMoney, formatPrice, renderStarFromNumber } from "../../ultils/helpers";
 import { productExtraInfomation } from '../../ultils/contants';
 import Slider from "react-slick";
-import { useSelector } from 'react-redux'
-import Swal from 'sweetalert2'
-import { showModal } from '../../store/app/appSlice'
-import path from '../../ultils/path'
-import { apiGetComments } from "../../apis";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+import { showModal } from '../../store/app/appSlice';
+import path from '../../ultils/path';
+import { toast } from 'react-toastify';
+import { updateCart } from '../../store/cart/cartSlice'; // Import action từ cartSlice
 import { useNavigate } from "react-router-dom";
+import { fetchCart } from '../../store/cart/asyncActions'; 
 
 const settings = {
     dots: false,
@@ -24,130 +25,129 @@ const settings = {
 const DetailProduct = () => {
     const { id, name } = useParams();
     const [productData, setProductData] = useState(null);
-    const [rating, setRating] = useState(null)
+    const [rating, setRating] = useState([]);
     const [quantity, setQuantity] = useState(1);
-    const [relatedProducts, setRelatedProducts] = useState(null);
-    const dispatch = useDispatch()
-    const [payload, setPayload] = useState({
-        comment: '',
-        star: ''
-    })
-    const {isLoggedIn} = useSelector(state => state.user)
-    const navigate = useNavigate()
-    const [update, setUpdate] = useState(false)
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const { isLoggedIn } = useSelector(state => state.user);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleSubmitVoteOption = async (value) => {
-        console.log(value)
         if (!value.comment || !value.star) {
-            alert('Vui lòng thêm nhận xét của bạn')
-            return
+            alert('Vui lòng thêm nhận xét của bạn');
+            return;
         }
-        const rs = await apiPostRating({
-            star: value?.star,
-            product: productData?._id})
-        console.log("RATING "+ JSON.stringify(rs))
-        const respone = await apiPostComments({
+        await apiPostRating({
+            star: value.star,
+            product: productData?._id
+        });
+        await apiPostComments({
             product: productData?._id,
-            comment: value?.comment})
-        console.log("CÔMMNET "+ respone)
-        // const response = await apiRatings({ star: value.star, comment: value.comment, pid: product?._id, updatedAt: Date.now() })
-        // console.log(response)
-        dispatch(showModal({ isShowModal: false, modalChildren: null }))
-        rerender()
-
-    }
+            comment: value.comment
+        });
+        fetchRatingData(); // Cập nhật lại đánh giá
+    };
 
     const fetchProductData = async () => {
         const response = await apiGetProduct(id);
         if (response.success) {
             setProductData(response.product);
-        }
-        const rs = await apiGetRating(id)
-        if(rs.success) {
-            setRating(rs.ratings)
+            fetchRatingData(); // Gọi lấy đánh giá sản phẩm
         }
     };
-    console.log("RATING " + JSON.stringify(rating))
 
-    const fetchProducts = async () => {
-        const categoryIds = productData?.categories.map(category => category._id);
+    const fetchRatingData = async () => {
+        const rs = await apiGetRating(id);
+        if (rs.success) {
+            setRating(rs.ratings);
+        }
+    };
+
+    const fetchRelatedProducts = async () => {
+        if (!productData) return;
+        const categoryIds = productData.categories.map(category => category._id);
         const productPromises = categoryIds.map(cateId => apiGetProducts({ categories: cateId }));
         const responses = await Promise.all(productPromises);
-        const allProducts = [];
-
-        responses.forEach(response => {
+        const allProducts = responses.reduce((acc, response) => {
             if (response.success) {
-                response.products.forEach(product => {
-                    const exists = allProducts.some(existingProduct => existingProduct._id === product._id);
-                    if (!exists) {
-                        allProducts.push(product);
-                    }
-                });
+                return acc.concat(response.products.filter(product => !acc.some(existingProduct => existingProduct._id === product._id)));
             }
-        });
-
+            return acc;
+        }, []);
         setRelatedProducts(allProducts);
     };
 
-    const rerender = useCallback(() => {
-        setUpdate(!update)
-    },[update])
-
     useEffect(() => {
-        if (id) {
-            fetchProductData();
-        }
-        window.scrollTo(0,0)
+        fetchProductData();
+        window.scrollTo(0, 0);
     }, [id]);
 
     useEffect(() => {
-        if (id) {
-            fetchProductData();
-        }
-    }, [update])
-
-    useEffect(() => {
-        if (productData) {
-            fetchProducts();
-        }
+        fetchRelatedProducts();
     }, [productData]);
 
-    const handleQuantity = useCallback((number) => {
+    const handleQuantityChange = useCallback((number) => {
         if (!Number(number) || Number(number) < 1) {
             return;
         }
         setQuantity(number);
-    }, [quantity]);
+    }, []);
 
     const handleChangeQuantity = useCallback((flag) => {
-        if (flag === 'minus' && quantity === 1) return;
-        if (flag === 'minus') setQuantity(prev => +prev - 1);
-        if (flag === 'plus') setQuantity(prev => +prev + 1);
-    }, [quantity]);
+        setQuantity(prev => {
+            if (flag === 'minus' && prev === 1) return prev;
+            return flag === 'minus' ? prev - 1 : prev + 1;
+        });
+    }, []);
 
     const handleVoteNow = () => {
-        if(!isLoggedIn) {
+        if (!isLoggedIn) {
             Swal.fire({
-            text: 'Login to vote',
-            cancelButtonText: "Cancel",
-            confirmButtonText: 'Go Login',
-            title: 'Oops!',
-            showCancelButton: true
+                text: 'Vui lòng đăng nhập để đánh giá',
+                cancelButtonText: "Hủy",
+                confirmButtonText: 'Đi tới trang đăng nhập',
+                title: 'Oops!',
+                showCancelButton: true
             }).then((rs) => {
-            if(rs.isConfirmed) {
-                navigate(`/${path.LOGIN}`)
-            }}) 
+                if (rs.isConfirmed) {
+                    navigate(`/${path.LOGIN}`);
+                }
+            });
         } else {
             dispatch(
-                showModal({ 
-                    isShowModal: true, 
+                showModal({
+                    isShowModal: true,
                     modalChildren: <VoteOption 
-                    productName={productData?.name} 
-                    handleSubmitVoteOption = {handleSubmitVoteOption}
-                    />})
-            )
+                                    productName={productData?.name} 
+                                    handleSubmitVoteOption={handleSubmitVoteOption} />
+                })
+            );
         }
-    }
+    };
+
+    const handleAddToCart =  async () => {
+        if (!isLoggedIn) {
+            return Swal.fire({
+                title: 'Gần đúng...',
+                text: 'Vui lòng đăng nhập trước',
+                icon: 'info',
+                cancelButtonText: 'Không bây giờ!',
+                showCancelButton: true,
+                confirmButtonText: 'Đi tới trang đăng nhập!'
+            }).then(async (rs) => {
+                if (rs.isConfirmed) navigate(`/${path.LOGIN}`);
+            });
+        }
+        const response = await apiUpdateCart({ productId: productData._id, quantity });
+        if (response.success) {
+            // const getCarts = await apiGetUserCart()
+            dispatch(updateCart({ product: productData, quantity }));
+            dispatch(fetchCart()); // Gọi action để fetch lại giỏ hàng
+            toast.success("Đã thêm vào giỏ");
+        } else {
+            toast.error("Đã xảy ra lỗi");
+        }
+    };
 
     return (
         <div className="mt-4 mb-10">
@@ -184,11 +184,11 @@ const DetailProduct = () => {
                             <span className="font-semibold">Số lượng</span>
                             <SelectQuantity 
                                 quantity={quantity}
-                                handleQuantity={handleQuantity}
+                                handleQuantity={handleQuantityChange}
                                 handleChangeQuantity={handleChangeQuantity}
                             />
                         </div>
-                        <Button name='Thêm vào giỏ hàng' fw />
+                        <Button handleOnClick={handleAddToCart} name='Thêm vào giỏ hàng' fw />
                     </div>
                 </div>
                 <div className="flex-2">
@@ -205,11 +205,11 @@ const DetailProduct = () => {
             <div className='flex p-4 flex-col'>
                 <div className='flex'>
                     <div className='flex-4 border flex-col flex items-center justify-center border-red-500'>
-                        <span className='font-semibold text-3xl'>{`${productData?.averageRating}/5`}</span>
+                        <span className='font-semibold text-3xl'>{`${productData?.averageRating || 0}/5`}</span>
                         <span className='flex items-center gap-1'>{renderStarFromNumber(productData?.averageRating)?.map((el, index) => (
                             <span key={index}>{el}</span>
                         ))}</span>
-                        <span className='text-sm'>{`${rating?.length} Người đánh giá`}</span>
+                        <span className='text-sm'>{`${rating.length} Người đánh giá`}</span>
                     </div>
                     <div className='flex-6 border gap-5 flex flex-col p-4 items-center'>
                         {Array.from(Array(5).keys()).reverse().map(el => (
@@ -217,7 +217,7 @@ const DetailProduct = () => {
                                 key={el}
                                 number={el + 1}
                                 ratingTotal={productData?.averageRating}
-                                ratingCount={rating?.filter(i => i.star === el + 1)?.length}
+                                ratingCount={rating.filter(i => i.star === el + 1).length}
                             />
                         ))}
                     </div>
@@ -227,11 +227,12 @@ const DetailProduct = () => {
                     <Button 
                         name='Đánh giá ngay!' 
                         handleOnClick={handleVoteNow}
-                    >Đánh giá ngay!
-                        </Button>
+                    >
+                        Đánh giá ngay!
+                    </Button>
                 </div>
                 <div className='flex flex-col gap-4'>
-                    {rating?.map(el => (
+                    {rating.map(el => (
                         <Comment
                             key={el._id}
                             star={el.star}
@@ -247,7 +248,7 @@ const DetailProduct = () => {
                 <h3 className="text-[20px] font-semibold py-[15px] border-b-2 border-main">Người dùng khác cũng mua:</h3>
                 <div>
                     <Slider {...settings}>
-                        {relatedProducts?.map(el => (
+                        {relatedProducts.map(el => (
                             <Product 
                                 key={el._id}
                                 productData={el}

@@ -423,10 +423,18 @@ class CartController {
           .json({ success: false, message: "Cart not found" });
       }
 
+      // // Kiểm tra xem LineItem có tồn tại trong giỏ hàng không
+      // const existingLineItem = cart.items.find(
+      //   (lineItem) => lineItem._id.toString() === item
+      // );
+
       // Kiểm tra xem LineItem có tồn tại trong giỏ hàng không
-      const existingLineItem = cart.items.find(
-        (lineItem) => lineItem._id.toString() === item
-      );
+const existingLineItem = cart.items.find((lineItem) => {
+  const isMatch = lineItem._id.toString() === item;
+  console.log(`Checking LineItem: ${lineItem._id.toString()} against item: ${item}, Match: ${isMatch}`);
+  return isMatch;
+});
+
       if (!existingLineItem) {
         return res
           .status(404)
