@@ -285,8 +285,7 @@ class OrderController {
       }
       totalPrice = Math.round(totalPrice * 100) / 100;
 
-      const orderStatus =
-        payment === Payment.OFFLINE ? "Pending" : "Not Yet Paid";
+      const orderStatus = payment === Payment.MOMO ? "Not Yet Paid" : "Pending";
 
       // Tạo đơn hàng mới với thông tin chi tiết đã tạo
       const newOrder = await Order.create({
