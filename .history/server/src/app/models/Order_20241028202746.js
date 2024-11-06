@@ -13,7 +13,6 @@ mongoose.plugin(mongooseSlugUpdater);
 const orderSchema = new Schema(
   {
     _id: { type: Number },
-    recipientName: { type: String, required: true },
     details: [{ type: Number, ref: "OrderDetail" }],
     date: { type: Date, required: true },
     status: {
