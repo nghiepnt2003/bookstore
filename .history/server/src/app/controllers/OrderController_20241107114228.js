@@ -51,7 +51,7 @@ async function createZaloPayOrder(user, totalPrice, orderId) {
     // embed_data: JSON.stringify({
     //   redirecturl: "https://your-redirect-url.com",
     // }),
-    callback_url: `https://be93-2405-4800-5b06-cbb0-f417-4e8d-9c96-ab19.ngrok-free.app/order/callback/${orderId}`,
+    callback_url: `https://f955-27-77-75-170.ngrok-free.app/order/callback/${orderId}`,
     description: `Payment for order #${orderId}`,
   };
 
@@ -629,6 +629,7 @@ class OrderController {
       const validStatuses = [
         "Not Yet Paid",
         "Pending",
+        "Processing",
         "Cancelled",
         "Delivering",
         "Successed",
