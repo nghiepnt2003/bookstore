@@ -452,7 +452,6 @@ class OrderController {
       const newOrder = await Order.create({
         details: orderDetailsIds,
         recipientName: recipientName,
-        recipientPhone,
         date: new Date(),
         status: orderStatus,
         totalPrice: totalPrice, // Tổng giá trị sau khi áp dụng giảm giá

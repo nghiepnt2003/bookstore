@@ -2,7 +2,6 @@ const Cart = require("../models/Cart");
 const LineItem = require("../models/LineItem");
 const Member = require("../models/Member");
 const Product = require("../models/Product");
-const User = require("../models/User");
 
 class CartController {
   //[GET] /cart
@@ -78,17 +77,17 @@ class CartController {
         (acc, item) => acc + item.finalPrice * item.quantity,
         0
       );
-      const member = await Member.findById(userInfo.member);
-      if (member) {
-        if (member.rank === "Silver") {
-          totalPrice *= 0.98; // Giảm 2%
-        } else if (member.rank === "Gold") {
-          totalPrice *= 0.95; // Giảm 5%
-        } else if (member.rank === "Diamond") {
-          totalPrice *= 0.9; // Giảm 10%
-        }
-      }
-      totalPrice = Math.round(totalPrice * 100) / 100;
+      // const member = await Member.findById(userInfo.member);
+      // if (member) {
+      //   if (member.rank === "Silver") {
+      //     totalPrice *= 0.98; // Giảm 2%
+      //   } else if (member.rank === "Gold") {
+      //     totalPrice *= 0.95; // Giảm 5%
+      //   } else if (member.rank === "Diamond") {
+      //     totalPrice *= 0.9; // Giảm 10%
+      //   }
+      // }
+      // totalPrice = Math.round(totalPrice * 100) / 100;
 
       // Trả về thông tin tổng quan về giỏ hàng
       return res.status(200).json({

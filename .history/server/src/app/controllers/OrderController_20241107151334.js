@@ -351,10 +351,10 @@ class OrderController {
           .status(400)
           .json({ success: false, message: "Payment method not provided" });
       }
-      if (!recipientName || !recipientPhone) {
+      if (!recipientName) {
         return res
           .status(400)
-          .json({ success: false, message: "Missing Inputs" });
+          .json({ success: false, message: "Recipient name is required" });
       }
       // Kiểm tra xem người dùng có địa chỉ hay không
       const userInfo = await User.findById(user._id).select("address member");
@@ -452,7 +452,6 @@ class OrderController {
       const newOrder = await Order.create({
         details: orderDetailsIds,
         recipientName: recipientName,
-        recipientPhone,
         date: new Date(),
         status: orderStatus,
         totalPrice: totalPrice, // Tổng giá trị sau khi áp dụng giảm giá

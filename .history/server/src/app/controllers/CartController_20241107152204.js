@@ -2,7 +2,6 @@ const Cart = require("../models/Cart");
 const LineItem = require("../models/LineItem");
 const Member = require("../models/Member");
 const Product = require("../models/Product");
-const User = require("../models/User");
 
 class CartController {
   //[GET] /cart
