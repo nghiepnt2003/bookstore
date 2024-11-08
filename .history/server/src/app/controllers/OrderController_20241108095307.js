@@ -752,7 +752,6 @@ class OrderController {
 
       // Xóa đơn hàng
       // await order.delete();
-
       // Cập nhật trạng thái đơn hàng thành "Cancelled"
       order.status = "Cancelled";
       await order.save();
