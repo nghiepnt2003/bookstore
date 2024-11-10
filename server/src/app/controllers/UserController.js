@@ -1223,14 +1223,14 @@ class UserController {
       if (!oldPassword || !newPassword) {
         return res
           .status(400)
-          .json({ success: false, message: "Missing inputs" });
+          .json({ success: false, message: "Nhập thiếu thông tin" });
       }
 
       const user = await User.findById(userId);
       if (!user) {
         return res
           .status(404)
-          .json({ success: false, message: "User not found" });
+          .json({ success: false, message: "Người dùng không tồn tại" });
       }
 
       // Kiểm tra mật khẩu cũ
@@ -1238,14 +1238,14 @@ class UserController {
       if (!isCorrectOldPassword) {
         return res
           .status(400)
-          .json({ success: false, message: "Incorrect old password" });
+          .json({ success: false, message: "Mật khẩu cũ không chính xác" });
       }
       // Kiểm tra mật khẩu mới có trùng với mật khẩu cũ không
       const isSameAsOldPassword = await user.isCorrectPassword(newPassword);
       if (isSameAsOldPassword) {
         return res.status(400).json({
           success: false,
-          message: "New password cannot be the same as old password",
+          message: "Mật khẩu mới không được trùng với mật khẩu cũ",
         });
       }
       // Cập nhật mật khẩu mới
@@ -1255,7 +1255,7 @@ class UserController {
 
       res.status(200).json({
         success: true,
-        message: "Password updated successfully",
+        message: "Cập nhật mật khẩu mới thành công",
       });
     } catch (error) {
       next(error);

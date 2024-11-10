@@ -14,6 +14,11 @@ router.get(
   orderController.getAllByAdmin
 );
 router.get(
+  "/byTime",
+  [verifyAccessToken, isAdmin],
+  orderController.getOrdersByTimes
+);
+router.get(
   "/checkOrderStatus/:orderId",
   [verifyAccessToken],
   orderController.checkOrderStatus
