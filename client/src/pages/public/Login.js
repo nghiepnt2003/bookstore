@@ -195,9 +195,12 @@ const Login = () => {
                         </div>
                     )}
                     <div className="flex items-center justify-between my-2 w-full text-sm">
-                        <span onClick={() => setIsRegister(!isRegister)} className="text-blue-500 hover:underline cursor-pointer">
-                            {isRegister ? 'Đã có tài khoản? Đăng Nhập' : 'Chưa có tài khoản? Đăng Ký'}
+                        <span onClick={() => setIsRegister(!isRegister)} className="hover:underline cursor-pointer">
+                            {isRegister ? 'Đăng Nhập' : 'Đăng Ký'}
                         </span>
+                        {/* <span className="hover:underline cursor-pointer" onClick={}>
+                            Quên mật khẩu?
+                        </span> */}
                     </div>
                 </div>
             </div>

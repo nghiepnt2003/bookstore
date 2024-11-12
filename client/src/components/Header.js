@@ -108,6 +108,7 @@ const Header = () => {
     const { FaPhone, FaTruckFast, IoMdCart, FaUserAlt } = icons;
     const navigate = useNavigate(); // Khởi tạo useNavigate
     const dispatch = useDispatch();
+    const { current } = useSelector(state => state.user)
 
     // Lấy thông tin giỏ hàng từ Redux store
     const { items: cartItems, totalPrice, loading, error } = useSelector(state => state.cart);
@@ -154,16 +155,18 @@ const Header = () => {
                         </span>                    
                     </div>
 
-                    <div onClick={handleNavigateProfile} className="flex px-6 border-r items-center cursor-pointer">
-                        <span className="px-2">
-                            <FaUserAlt color="#f73995" fontSize="25px" />
-                        </span>
-                        <span className="flex flex-col items-center">                        
-                            Profile
-                        </span>                    
-                    </div>
+                   {current && 
+                    <div className="flex justify-center items-center">
+                        <div onClick={handleNavigateProfile} className="flex px-6 border-r h-[108px] items-center cursor-pointer">
+                            <span className="px-2">
+                                <FaUserAlt color="#f73995" fontSize="25px" />
+                            </span>
+                            <span className="flex flex-col items-center">                        
+                                Profile
+                            </span>                    
+                        </div>
 
-                    <div onClick={handleNavigateCart} className="flex px-6 items-center cursor-pointer">
+                    <div onClick={handleNavigateCart} className="flex px-6 items-center cursor-pointer h-[108px]">
                         <span className="px-2">
                             <IoMdCart color="#f73995" fontSize="30px" />
                         </span>
@@ -172,6 +175,8 @@ const Header = () => {
                             <span className="font-semibold text-[15px]">{`${totalPrice} VNĐ`}</span>
                         </span>                    
                     </div>
+                    </div>
+                   }
                 </div>
             </div>
         </div>

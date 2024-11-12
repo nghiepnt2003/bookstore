@@ -1,9 +1,10 @@
 import { Button } from 'antd'
 import React from 'react'
 import { toast } from 'react-toastify';
-import { apiUpdateOrder } from '../apis';
+import { apiCancelOrder } from '../apis';
 
 function HistoryOrderItem({ setFetch, listOrder }) {
+    console.log("listOrder " + JSON.stringify(listOrder) )
 
     const formatDate = (dataDate) => {
 
@@ -17,14 +18,13 @@ function HistoryOrderItem({ setFetch, listOrder }) {
 
     const handleCancel = async (oid) => {
 
-        const response = await apiUpdateOrder({ status: 'Cancelled' }, oid)
+        const response = await apiCancelOrder(oid)
 
         if (response.success) {
 
             setFetch(prev => !prev)
             toast.success("Hủy thành công")
         } else {
-
             toast.success(response.mess)
         }
     }
@@ -60,7 +60,7 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                         Tổng tiền
                                     </p>
                                     <p className="text-[14px] uppercase text-[#999] font-[500]">
-                                        {order.total ? order?.total?.toLocaleString('vi-VN', {
+                                        {order.totalPrice ? order?.totalPrice?.toLocaleString('vi-VN', {
                                             style: 'currency',
                                             currency: 'VND',
                                         }) : "0"}
@@ -68,18 +68,18 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                 </div>
                             </div>
                             {
-                                order.products.map(product => (
-                                    <div key={product.product._id} className="flex pt-[10px]">
-                                        <img className="m-2 h-24 w-28 rounded-md border object-contain" src={product.product?.imageUrl[0]} alt="" />
+                                order?.details?.map(product => (
+                                    <div key={product._id} className="flex pt-[10px]">
+                                        <img className="m-2 h-24 w-28 rounded-md border object-contain" src={product?.productImage} alt="" />
                                         <div className="flex w-[350px] flex-col px-4 py-4">
-                                            <span className="font-semibold text-[18px] text-[#333]">{product.product?.productName}</span>
+                                            <span className="font-semibold text-[18px] text-[#333]">{product?.productName}</span>
                                             <p className="text-[16px] font-bold">
-                                                {(product.product?.price).toLocaleString('vi-VN', {
+                                                {(product?.productPrice).toLocaleString('vi-VN', {
                                                     style: 'currency',
                                                     currency: 'VND',
                                                 })}
                                             </p>
-                                            <span className="float-right text-gray-400">x {product.count}</span>
+                                            <span className="float-right text-gray-400">x {product.quantity}</span>
                                         </div>
                                     </div>
                                 ))
@@ -87,9 +87,9 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                             <div className='mt-[20px] flex items-center gap-[40px]'>
                                 <Button className='cursor-default '>
                                     {
-                                        order.status === "Pending" ? "Đang chờ xác nhận"
-                                            : order.status === "Confirmed" ? "Đang giao"
-                                                : order.status === "Shipped" ? "Hoàn thành"
+                                        order.status === "Pending" ? "Chờ xác nhận"
+                                            : order.status === "Successed" ? "Hoàn thành"
+                                                : order.status === "Delivering" ? "Đang giao"
                                                     : order.status === "Cancelled" ? "Đã hủy"
                                                         : ""
                                     }

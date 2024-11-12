@@ -12,20 +12,19 @@ const History = () => {
     const [fetch, setFetch] = React.useState(false)
 
     useEffect(() => {
-
         fetchOrder()
     }, [fetch])
 
     useEffect(() => {
 
-        const newList = allListOrder.filter(order => order.status == key)
+        const newList = allListOrder?.filter(order => order?.status == key)
         setFilterListOrder(newList)
     }, [allListOrder, key])
 
     const fetchOrder = async () => {
         const response = await apiGetOrderUser()
-        if (response.success) {
-            setAllListOrder(response.result)
+        if (response?.success) {
+            setAllListOrder(response?.orders)
         }
     }
 
@@ -39,7 +38,7 @@ const History = () => {
             <div class="sm:px-[10px] lg:px-[20px] xl:px-[20px]">
                 <div class="px-4 pt-8">
                     <p class="text-xl pb-[10px] font-bold border-b border-solid border-[#555]">
-                        Lịch sử đặt hàng
+                        Lịch sử mua hàng
                     </p>
                     <div class="mt-8 space-y-3 rounded-lg border bg-white px-2 py-4 sm:px-6">
 
@@ -50,10 +49,10 @@ const History = () => {
                             <TabPane tab="Chờ xác nhận" key="Pending">
                                 <HistoryOrderItem setFetch={setFetch} listOrder={filterListOrder} />
                             </TabPane>
-                            <TabPane tab="Đang giao" key="Confirmed">
+                            <TabPane tab="Đang giao" key="Delivering">
                                 <HistoryOrderItem setFetch={setFetch} listOrder={filterListOrder} />
                             </TabPane>
-                            <TabPane tab="Hoàn thành" key="Shipped">
+                            <TabPane tab="Hoàn thành" key="Successed">
                                 <HistoryOrderItem setFetch={setFetch} listOrder={filterListOrder} />
                             </TabPane>
                             <TabPane tab="Đã hủy" key="Cancelled">

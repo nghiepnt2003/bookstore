@@ -1,24 +1,22 @@
 import React, { memo, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Checkbox, Popconfirm, message } from 'antd';
-import { apiUpdateCart, apiRemoveCart } from '../../apis';
+import { apiUpdateCart, apiRemoveCart, apiCheckout } from '../../apis'; // Nhập apiCheckout
 import { toast } from 'react-toastify';
 import { CloseOutlined } from '@ant-design/icons';
 import path from '../../ultils/path';
 import withBaseComponent from '../../hocs/withBaseComponent';
 import { Link, useNavigate } from 'react-router-dom';
-import { updateCart, removeFromCart } from '../../store/cart/cartSlice'; // Import action từ cartSlice
+import { updateCart, removeFromCart } from '../../store/cart/cartSlice';
 
 const MyCart = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [total, setTotal] = useState(0);
     const [listCheckout, setListCheckout] = useState([]);
-    const { items: cartItems } = useSelector(state => state.cart); // Lấy giỏ hàng từ Redux store
-    console.log("CART ID" + cartItems._id)
-
+    const { items: cartItems } = useSelector(state => state.cart);
+    
     useEffect(() => {
-        // Tính tổng giá trị của các sản phẩm trong giỏ hàng đã chọn
         const result = listCheckout.reduce((acc, current) => {
             return acc + current.quantity * current.product.price;
         }, 0);
@@ -26,7 +24,6 @@ const MyCart = () => {
     }, [listCheckout]);
 
     useEffect(() => {
-        // Cập nhật danh sách sản phẩm đã chọn từ giỏ hàng
         const newListCheckout = cartItems.filter(cartItem =>
             listCheckout.some(item => item.product._id === cartItem.product._id)
         );
@@ -81,7 +78,6 @@ const MyCart = () => {
     };
 
     const handleRemoveToCart = async (id, product) => {
-        console.log("ID AAAA " + id)
         const response = await apiRemoveCart(id);
         if (response.success) {
             dispatch(removeFromCart({ product }));
@@ -89,8 +85,64 @@ const MyCart = () => {
         } else {
             toast.error(response.mess);
         }
-        console.log("CART AFTER "+ JSON.stringify(cartItems))
+    };
 
+    // const handleCheckout = async () => {
+    //     if (listCheckout.length === 0) {
+    //         toast.warn("Vui lòng chọn sản phẩm để thanh toán");
+    //         return;
+    //     }
+
+    //     try {
+    //         const response = await apiCheckout({
+    //             items: listCheckout.map(item => ({
+    //                 productId: item.product._id,
+    //                 quantity: item.quantity,
+    //             })),
+    //             totalPrice: total,
+    //         });
+
+    //         if (response.success) {
+    //             // Chuyển hướng đến trang xác nhận thanh toán hoặc trang khác
+    //             navigate(`/${path.CHECKOUT}`, { state: { listCheckout } });
+    //             toast.success("Thanh toán thành công!");
+    //         } else {
+    //             toast.error("Thanh toán không thành công: " + response.message);
+    //         }
+    //     } catch (error) {
+    //         toast.error("Lỗi khi thanh toán: " + error.message);
+    //     }
+    // };
+
+    const handleCheckout = async () => {
+        if (listCheckout.length === 0) {
+            toast.warn("Vui lòng chọn sản phẩm để thanh toán");
+            return;
+        }
+
+        console.log("listCheckout " + JSON.stringify(listCheckout))
+    
+        try {
+            // Duyệt qua từng sản phẩm trong listCheckout và gọi apiCheckout
+            for (const item of listCheckout) {
+                const response = await apiCheckout(item._id, {
+                    selectedForCheckout: true, // Giả sử muốn đặt selectedForCheckout là true
+                    // quantity: item.quantity,
+                    // productId: item.product?._id,
+                    // productName: item.product?.name,
+                    // productImage: item.product?.image,
+                    // productPrice: item.product?.price, // Lưu giá đã được giảm (nếu có)
+                });
+    
+                if (!response.success) {
+                    toast.error("Thanh toán không thành công cho sản phẩm: " + item.product.name);
+                    return; // Dừng quá trình thanh toán nếu có lỗi
+                }
+            }
+            navigate(`/${path.CHECKOUT}`, { state: { listCheckout } });
+        } catch (error) {
+            toast.error("Lỗi khi thanh toán: " + error.message);
+        }
     };
 
     return (
@@ -187,14 +239,13 @@ const MyCart = () => {
                             </p>
                         </div>
                     </div>
-                    <Link
-                        to={`/${path.CHECKOUT}`}
-                        state={{ listCheckout }}
+                    <button
+                        onClick={handleCheckout}
+                        disabled={total === 0}
+                        className="mt-6 disabled:bg-slate-200 disabled:text-[#333] w-full rounded-md bg-blue-500 py-1.5 font-medium text-blue-50 hover:bg-blue-600"
                     >
-                        <button disabled={total === 0} className="mt-6 disabled:bg-slate-200 disabled:text-[#333] w-full rounded-md bg-blue-500 py-1.5 font-medium text-blue-50 hover:bg-blue-600">
-                            Thanh toán
-                        </button>
-                    </Link>
+                        Thanh toán
+                    </button>
                 </div>
             </div>
         </div>

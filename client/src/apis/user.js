@@ -47,13 +47,13 @@ export const apiDeleteUser = (uid) => axios({
 })
 
 export const apiChangePassword = (data) => axios({
-    url: '/user/customer/resetpassword',
+    url: '/user/changePassword',
     method: 'put',
     data
 })
 
 export const apiUpdateUser1 = (data) => axios({
-    url: '/user/customer',
+    url: '/user',
     method: 'put',
     data
 })
@@ -64,23 +64,29 @@ export const apiOrder = (data) => axios({
     data
 })
 
+export const apiCheckout = (id, data) => axios({
+    url: `/cart/item/${id}/checkout`,
+    method: "put",
+    data
+})
+
 export const apiGetOrderUser = () => axios({
-    url: "/bill",
+    url: "/order/getAllsByUser",
     method: "get"
 })
 
 export const apiGetAllOrder = () => axios({
-    url: "/bill/admin",
+    url: "/order/getAll",
     method: "get"
 })
 
 export const apiGetAllOrderByTime = (query) => axios({
-    url: `/bill/list${query}`,
+    url: `/order/byTime${query}`,
     method: "get"
 })
 
 export const apiUpdateOrder = (data, oid) => axios({
-    url: `/bill/status/${oid}`,
+    url: `/order/updateStatus/${oid}`,
     method: "put",
     data
 })
@@ -97,5 +103,20 @@ export const apiRemoveCart = (pid) => axios({
 })
 export const apiGetUserCart = () => axios({
     url: '/cart',
+    method: 'get',
+})
+
+export const apiGetAddress = () => axios({
+    url: '/user/addresses',
+    method: 'get',
+})
+
+export const apiCancelOrder = (id) => axios({
+    url: `/order/${id}`,
+    method: 'put',
+})
+
+export const apiForgotPassword = (email) => ({
+    url: `/forgotPassword/${email}`,
     method: 'get',
 })

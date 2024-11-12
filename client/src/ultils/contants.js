@@ -172,5 +172,5 @@ export const memberSidebar = [
     }
 ]
 
-export const cash = "Cash"
+export const cash = "OFFLINE"
 export const paypal = "Paypal"

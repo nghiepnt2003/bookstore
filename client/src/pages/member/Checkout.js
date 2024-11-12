@@ -3,14 +3,16 @@ import { Link } from 'react-router-dom'
 import logo from "../../assets/logo.png"
 import { cash } from '../../ultils/contants'
 import { useLocation, useNavigate } from "react-router-dom"
-import { Button, Form, Input, message, Modal } from 'antd';
-import { apiGetUserCart, apiOrder } from '../../apis'
+import { Button, Form, Input, message, Modal, Select } from 'antd';
+import { apiGetAddress, apiGetUserCart, apiOrder } from '../../apis'
 import { toast } from 'react-toastify'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Spin } from 'antd'
 import { updateCart } from '../../store/cart/cartSlice'
 import PayPal from '../../components/PayPal'
 import { useDebounce } from 'use-debounce';
+
+const { Option } = Select;
 
 const Checkout = () => {
 
@@ -24,6 +26,9 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false)
     const [list, setList] = useState([])
     const [isSuccess, setIsSuccess] = useState(false)
+    const { current } = useSelector(state => state.user)
+    const [suggestedAddresses, setSuggestedAddresses] = useState([]); // Danh sách địa chỉ gợi ý
+    const [selectedAddress, setSelectedAddress] = useState(''); // Địa chỉ được chọn
     const [payPalPayload, setPayPalPayload] = useState({
         products: [],
         paymentMethod: "PayPal",
@@ -44,9 +49,30 @@ const Checkout = () => {
 
 
     React.useEffect(() => {
-
+        fetchSuggestedAddresses();
         setList(listCheckout)
     }, [])
+
+    // Fetch danh sách địa chỉ gợi ý từ API
+    const fetchSuggestedAddresses = async () => {
+        try {
+            // Giả sử bạn có API để lấy địa chỉ gợi ý
+            const response = await apiGetAddress();
+            console.log(response);
+
+            // Kiểm tra xem response.addresses có phải là mảng không
+            if (Array.isArray(response.addresses)) {
+                console.log('Địa chỉ gợi ý:', response.addresses + " " + typeof(response.addresses));
+                setSuggestedAddresses(response.addresses);
+            } else {
+                console.warn('response.addresses không phải là mảng:', response.addresses);
+            }
+        } catch (error) {
+            console.error('Error fetching suggested addresses:', error);
+        }
+    };
+
+    console.log("fetchSuggestedAddresses " + suggestedAddresses + " " + typeof(suggestedAddresses))
 
     React.useEffect(() => {
 
@@ -54,9 +80,6 @@ const Checkout = () => {
         setTotal(result)
     }, [list])
 
-    // React.useEffect(() => {
-    //     if(isSuccess) dispatch
-    // }, [isSuccess])
     const onFinish = async (values) => {
 
         const products = list.map(item => ({
@@ -71,20 +94,15 @@ const Checkout = () => {
             ...values
         }
         console.log("DATA ORDER " + JSON.stringify(dataOrder))
-        const pM = dataOrder?.paymentMethod;
-        console.log("PM " + pM)
-        const adr = dataOrder?.address;
-        console.log("ADR " + adr)
         try {
             setLoading(true)
             const response = await apiOrder({
-                payment: pM,
-                shippingAddress: adr,
+                recipientName: dataOrder.recipient,
+                recipientPhone: dataOrder.phone,
+                payment: dataOrder.paymentMethod,
+                shippingAddress: dataOrder.address,
             })
             if (response.success) {
-
-                const getCarts = await apiGetUserCart()
-                dispatch(updateCart({ products: getCarts.userCart.cart.products }))
                 Modal.success({
                     title: 'Thành công!',
                     content: (
@@ -95,6 +113,8 @@ const Checkout = () => {
                     ),
                     onOk() { navigate("/products") },
                 });
+                const getCarts = await apiGetUserCart();
+                dispatch(updateCart({ products: getCarts.cart.items }));
             } else {
                 if (response.status === "soldout") {
 
@@ -188,6 +208,12 @@ const Checkout = () => {
         return () => clearTimeout(timeoutId);
     }, [formData, list]);
 
+    const handleAddressSelect = (value) => {
+        setSelectedAddress(value); // Cập nhật địa chỉ đã chọn
+        form.setFieldsValue({ address: value }); // Cập nhật giá trị ô Input
+        // form.se
+    };
+
     return (
         <Spin spinning={loading} size={"large"}>
 
@@ -212,7 +238,7 @@ const Checkout = () => {
                                     <div key={item.product._id} class="flex flex-col rounded-lg bg-white sm:flex-row">
                                         <img class="m-2 h-24 w-28 rounded-md border object-contain" src={item.product.image} alt="" />
                                         <div class="flex w-[350px] flex-col px-4 py-4">
-                                            <span class="font-semibold">{item.product.name}</span>
+                                            <span class="font-semibold">{item.product.productName}</span>
                                             <p class="text-lg font-bold">
                                                 {item.product.price.toLocaleString('vi-VN', {
                                                     style: 'currency',
@@ -271,6 +297,7 @@ const Checkout = () => {
                                 <Form.Item
                                     label="Người nhận"
                                     name="recipient"
+                                    initialValue={current?.fullname || ''}
                                     rules={[
                                         {
                                             required: true,
@@ -284,6 +311,7 @@ const Checkout = () => {
                                 <Form.Item
                                     label="Số điện thoại"
                                     name="phone"
+                                    initialValue={current?.phone || ''}
                                     rules={[
                                         {
                                             required: true,
@@ -297,6 +325,7 @@ const Checkout = () => {
                                 <Form.Item
                                     label="Địa chỉ giao hàng"
                                     name="address"
+                                    // initialValue={selectedAddress || (current?.address[0] || '')} // Thiết lập giá trị mặc định
                                     rules={[
                                         {
                                             required: true,
@@ -305,6 +334,17 @@ const Checkout = () => {
                                     ]}
                                 >
                                     <Input placeholder="Nhập địa chỉ giao hàng" />
+                                    {/* <Select
+                                        placeholder="Gợi ý địa chỉ"
+                                        style={{ width: '100%', marginTop: '10px' }}
+                                        onChange={handleAddressSelect}
+                                    >
+                                        {suggestedAddresses.map((address, index) => (
+                                            <Option key={index} value={address}>
+                                                {address} {/* Hiển thị địa chỉ 
+                                            </Option>
+                                        ))}
+                                    </Select>*/}
                                 </Form.Item>
 
                                 <Form.Item

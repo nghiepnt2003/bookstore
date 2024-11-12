@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { apiGetAuthors, apiDeleteAuthor, apiUpdateAuthor } from '../../apis/author'; // Cập nhật API
+import { apiGetAuthors, apiDeleteAuthor, apiUpdateAuthor } from '../../apis';
 import moment from 'moment';
-import { InputField, EditAuthorForm } from '../../components'; // Đảm bảo EditAuthorForm tồn tại
+import { InputField, EditAuthorForm, CreateAuthor } from '../../components'; // Đảm bảo EditAuthorForm tồn tại
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import clsx from 'clsx';
 import { useDispatch } from "react-redux";
 import { showModal } from '../../store/app/appSlice';
+import icons from '../../ultils/icons';
+
+const { FaRegEdit, FaTrashAlt, FaPlus } = icons;
 
 const ManageAuthor = () => {
     const [authors, setAuthors] = useState(null);
@@ -14,6 +17,7 @@ const ManageAuthor = () => {
     const dispatch = useDispatch();
 
     const fetchAuthors = async (params) => {
+        console.log("PR " + JSON.stringify(params))
         const response = await apiGetAuthors(params);
         if (response.success) 
             setAuthors(response.authors);
@@ -21,7 +25,11 @@ const ManageAuthor = () => {
     };
 
     useEffect(() => {
-        fetchAuthors(queries.name !== '' ? queries : {});
+        console.log("PR TEN" + queries.name)
+        if(queries.name !=="")
+            fetchAuthors({ name: queries.name }); // Truyền đúng tham số tìm kiếm
+        else
+            fetchAuthors(); // Truyền đúng tham số tìm kiếm
     }, [queries]);
 
     const handleUpdateAuthor = async (updatedAuthorData, authorId) => {
@@ -38,7 +46,7 @@ const ManageAuthor = () => {
             if (result.isConfirmed) {
                 const response = await apiDeleteAuthor(authorId);
                 if (response.success) {
-                    fetchAuthors();
+                    fetchAuthors(queries); // Sử dụng queries để lấy dữ liệu
                     toast.success(response.message);
                 } else toast.error(response.message);
             }
@@ -61,6 +69,18 @@ const ManageAuthor = () => {
         dispatch(showModal({ isShowModal: false, modalChildren: null }));
     };
 
+    const openAddModal = () => {
+        dispatch(showModal({
+            isShowModal: true,
+            modalChildren: (
+                <CreateAuthor
+                    onClose={() => dispatch(showModal({ isShowModal: false, modalChildren: null }))}
+                    onRefresh={fetchAuthors} // Gọi lại fetch sau khi cập nhật
+                />
+            ),
+        }));
+    };
+
     return (
         <div className={clsx('w-full')} style={{ backgroundColor: '#f8f8f8' }}>
             <h1 className='h-[75px] justify-between flex items-center text-3xl font-bold px-4 border-b border-b-main'>
@@ -76,6 +96,9 @@ const ManageAuthor = () => {
                         placeholder='Tìm kiếm tên tác giả' // Cập nhật placeholder
                         isHideLabel
                     />
+                </div>
+                <div className='w-[40px] h-[30px] bg-main text-white rounded text-center justify-center float-end items-center flex cursor-pointer mb-1' onClick={() => openAddModal()}>
+                    <FaPlus />
                 </div>
                 <table className='table-auto mb-6 text-left w-full shadow bg-white'>
                     <thead className='font-bold bg-main text-[13px] text-white'>
