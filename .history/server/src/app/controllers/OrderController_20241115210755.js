@@ -737,7 +737,7 @@ class OrderController {
         // Thanh toán thành công
         const { orderId } = req.params;
         const originalOrderId = orderId.split("-")[0];
-        const order = await Order.findById(originalOrderId); // Tìm đơn hàng từ database
+        const order = await Order.findById(orderId); // Tìm đơn hàng từ database
 
         if (!order) {
           result.success = false;

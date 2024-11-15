@@ -53,7 +53,7 @@ async function createZaloPayOrder(user, totalPrice, orderId) {
     // embed_data: JSON.stringify({
     //   redirecturl: "https://your-redirect-url.com",
     // }),
-    callback_url: `https://af0b-27-77-75-170.ngrok-free.app/order/callbackZaloPay/${orderId}`,
+    callback_url: `https://fedc-42-116-53-167.ngrok-free.app/order/callbackZaloPay/${orderId}`,
     description: `Payment for order #${orderId}`,
   };
 
@@ -78,10 +78,6 @@ async function createZaloPayOrder(user, totalPrice, orderId) {
 }
 
 async function createMoMoOrder(user, totalPrice, orderId) {
-  // const secretKey =
-  //   process.env.MOMO_SECRET_KEY || "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-  // const accessKey = process.env.MOMO_ACCESS_KEY || "F8BBA842ECF85";
-
   const accessKey = "F8BBA842ECF85";
   const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
   const partnerCode = "MOMO";
@@ -644,6 +640,14 @@ class OrderController {
 
       const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
       if (payment === Payment.MOMO) {
+        // const qrCodeUrl = await generateMoMoQR("0357130507", totalPrice);
+        // const qrCodeUrl = await generateMoMoQR("0357130507", 1000);
+        // res.status(200).json({
+        //   success: true,
+        //   message: "Checkout successful",
+        //   order: newOrder,
+        //   qrCode: qrCodeUrl, // Trả về mã QR để quét thanh toán
+        // });
         try {
           const momoResponse = await createMoMoOrder(
             user,
@@ -679,10 +683,9 @@ class OrderController {
           // newOrder._id
           uniqueOrderId
         );
-
         if (
           zaloPayResponse.success &&
-          zaloPayResponse.zalopayData.return_code === 1
+          zaloPayResponse.zalopayData.resultCode === 0
         ) {
           res.status(200).json({
             success: true,
@@ -776,30 +779,24 @@ class OrderController {
       resultCode,
       signature,
     } = req.body;
-    // const secretKey =
-    //   process.env.MOMO_SECRET_KEY || "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-    // const accessKey = process.env.MOMO_ACCESS_KEY || "F8BBA842ECF85";
-    // const redirectUrl =
-    //   process.env.MOMO_REDIRECT_URL || "https://webhook.site/your-redirect-url";
-    // const requestType = "payWithMethod";
 
-    // const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
+    const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"; // Secret key from MoMo
+    const rawSignature = `amount=${amount}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&requestId=${requestId}&resultCode=${resultCode}`;
 
-    // // Validate signature
-    // const expectedSignature = crypto
-    //   .createHmac("sha256", secretKey)
-    //   .update(rawSignature)
-    //   .digest("hex");
+    // Validate signature
+    const expectedSignature = crypto
+      .createHmac("sha256", secretKey)
+      .update(rawSignature)
+      .digest("hex");
 
-    // if (signature !== expectedSignature) {
-    //   console.log("Invalid signature");
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, message: "Invalid signature" });
-    // }
+    if (signature !== expectedSignature) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid signature" });
+    }
 
     // Check if the payment was successful
-    if (resultCode === 0) {
+    if (resultCode === "0") {
       // Payment successful, proceed with updating the order status in your database
       try {
         // Assume you have a function `updateOrderStatus` to handle the order update

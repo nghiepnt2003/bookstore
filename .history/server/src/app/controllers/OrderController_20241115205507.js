@@ -53,7 +53,7 @@ async function createZaloPayOrder(user, totalPrice, orderId) {
     // embed_data: JSON.stringify({
     //   redirecturl: "https://your-redirect-url.com",
     // }),
-    callback_url: `https://af0b-27-77-75-170.ngrok-free.app/order/callbackZaloPay/${orderId}`,
+    callback_url: `https://fedc-42-116-53-167.ngrok-free.app/order/callbackZaloPay/${orderId}`,
     description: `Payment for order #${orderId}`,
   };
 
@@ -78,15 +78,16 @@ async function createZaloPayOrder(user, totalPrice, orderId) {
 }
 
 async function createMoMoOrder(user, totalPrice, orderId) {
-  // const secretKey =
-  //   process.env.MOMO_SECRET_KEY || "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-  // const accessKey = process.env.MOMO_ACCESS_KEY || "F8BBA842ECF85";
-
-  const accessKey = "F8BBA842ECF85";
-  const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-  const partnerCode = "MOMO";
+  const secretKey =
+    process.env.MOMO_SECRET_KEY || "K951B6PE1waDMi640xX08PD3vg6EkVlz";
+  const accessKey = process.env.MOMO_ACCESS_KEY || "F8BBA842ECF85";
   const redirectUrl =
-    "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
+    process.env.MOMO_REDIRECT_URL || "https://webhook.site/your-redirect-url";
+
+  // const accessKey = "F8BBA842ECF85";
+  // const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
+  const partnerCode = "MOMO";
+  // const redirectUrl ="https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
   const ipnUrl = `https://af0b-27-77-75-170.ngrok-free.app/order/callbackMomo/${orderId}`;
   const requestType = "payWithMethod";
   const amount = totalPrice.toString();
@@ -644,6 +645,14 @@ class OrderController {
 
       const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
       if (payment === Payment.MOMO) {
+        // const qrCodeUrl = await generateMoMoQR("0357130507", totalPrice);
+        // const qrCodeUrl = await generateMoMoQR("0357130507", 1000);
+        // res.status(200).json({
+        //   success: true,
+        //   message: "Checkout successful",
+        //   order: newOrder,
+        //   qrCode: qrCodeUrl, // Trả về mã QR để quét thanh toán
+        // });
         try {
           const momoResponse = await createMoMoOrder(
             user,
@@ -679,10 +688,9 @@ class OrderController {
           // newOrder._id
           uniqueOrderId
         );
-
         if (
           zaloPayResponse.success &&
-          zaloPayResponse.zalopayData.return_code === 1
+          zaloPayResponse.zalopayData.resultCode === 0
         ) {
           res.status(200).json({
             success: true,

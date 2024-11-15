@@ -648,8 +648,8 @@ class OrderController {
           const momoResponse = await createMoMoOrder(
             user,
             totalPrice,
-            // newOrder._id
-            uniqueOrderId
+            newOrder._id
+            // uniqueOrderId
           );
           if (momoResponse.success && momoResponse.data.resultCode === 0) {
             res.status(200).json({
@@ -676,8 +676,8 @@ class OrderController {
         const zaloPayResponse = await createZaloPayOrder(
           user,
           totalPrice,
-          // newOrder._id
-          uniqueOrderId
+          newOrder._id
+          // uniqueOrderId
         );
 
         if (
@@ -737,7 +737,7 @@ class OrderController {
         // Thanh toán thành công
         const { orderId } = req.params;
         const originalOrderId = orderId.split("-")[0];
-        const order = await Order.findById(originalOrderId); // Tìm đơn hàng từ database
+        const order = await Order.findById(orderId); // Tìm đơn hàng từ database
 
         if (!order) {
           result.success = false;

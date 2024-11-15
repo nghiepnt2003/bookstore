@@ -644,6 +644,14 @@ class OrderController {
 
       const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
       if (payment === Payment.MOMO) {
+        // const qrCodeUrl = await generateMoMoQR("0357130507", totalPrice);
+        // const qrCodeUrl = await generateMoMoQR("0357130507", 1000);
+        // res.status(200).json({
+        //   success: true,
+        //   message: "Checkout successful",
+        //   order: newOrder,
+        //   qrCode: qrCodeUrl, // Trả về mã QR để quét thanh toán
+        // });
         try {
           const momoResponse = await createMoMoOrder(
             user,
@@ -679,10 +687,9 @@ class OrderController {
           // newOrder._id
           uniqueOrderId
         );
-
         if (
           zaloPayResponse.success &&
-          zaloPayResponse.zalopayData.return_code === 1
+          zaloPayResponse.zalopayData.resultCode === 0
         ) {
           res.status(200).json({
             success: true,
