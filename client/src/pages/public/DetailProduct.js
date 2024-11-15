@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Breadcrumb, Button, ProductExtraInfoItem, SelectQuantity, Product, Comment, VoteBar, VoteOption } from "../../components";
-import { apiGetProduct, apiGetProducts, apiGetRating, apiPostComments, apiPostRating, apiUpdateCart, apiGetUserCart } from "../../apis";
+import { apiGetProduct, apiGetProducts, apiGetRating, apiPostComments, apiPostRating, apiUpdateCart, apiGetUserCart , apiGetComment} from "../../apis";
 import { formatMoney, formatPrice, renderStarFromNumber } from "../../ultils/helpers";
 import { productExtraInfomation } from '../../ultils/contants';
 import Slider from "react-slick";
@@ -26,6 +26,7 @@ const DetailProduct = () => {
     const { id, name } = useParams();
     const [productData, setProductData] = useState(null);
     const [rating, setRating] = useState([]);
+    const [comment, setComment] = useState([]);
     const [quantity, setQuantity] = useState(1);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const { isLoggedIn } = useSelector(state => state.user);
@@ -45,24 +46,67 @@ const DetailProduct = () => {
             product: productData?._id,
             comment: value.comment
         });
-        fetchRatingData(); // Cập nhật lại đánh giá
+        // fetchRatingCommentData()
+        fetchProductData();
+        // Đóng modal sau khi đánh giá thành công
+        dispatch(showModal({ isShowModal: false, modalChildren: null }));
     };
 
     const fetchProductData = async () => {
         const response = await apiGetProduct(id);
+        console.log("PRODUCT DATA " + JSON.stringify(response.product.author))
         if (response.success) {
             setProductData(response.product);
-            fetchRatingData(); // Gọi lấy đánh giá sản phẩm
+            fetchRatingCommentData()
         }
     };
 
-    const fetchRatingData = async () => {
+    const fetchRatingCommentData = async () => {
         const rs = await apiGetRating(id);
-        if (rs.success) {
-            setRating(rs.ratings);
+        const rsp = await apiGetComment(id);
+    
+        if (rs.success && rsp.success) {
+            const ratings = rs.ratings;
+            const comments = rsp.comments;
+    
+            // Tạo một đối tượng để lưu trữ dữ liệu theo userId
+            const combinedData = {};
+    
+            // Thêm dữ liệu từ ratings vào combinedData
+            ratings.forEach(rating => {
+                const userId = rating.user._id; // Giả sử có trường postedBy với _id
+                combinedData[userId] = {
+                    userId,
+                    username: rating.user.username,
+                    updatedAt: rating.updatedAt,
+                    image: rating.user.image,
+                    rating: rating.star, // Lấy trường star từ rating
+                    comment: null // Khởi tạo comment là null
+                };
+            });
+    
+            // Thêm dữ liệu từ comments vào combinedData
+            comments.forEach(comment => {
+                const userId = comment.user; // Giả sử có trường postedBy với _id
+                if (combinedData[userId]) {
+                    combinedData[userId].comment = comment.comment; // Lấy trường comment từ comment
+                } else {
+                    // //Nếu userId không có trong ratings, bạn có thể quyết định cách xử lý
+                    // combinedData[userId] = {
+                    //     userId,
+                    //     rating: null, // Không có rating cho user này
+                    //     comment: comment.comment // Lấy trường comment từ comment
+                    // };
+                }
+            });
+    
+            // Chuyển đổi combinedData thành mảng
+            const resultArray = Object.values(combinedData);
+            console.log("NE RATING ANHD COMMNET " + JSON.stringify(resultArray)); // Kết quả là mảng các đối tượng đã kết hợp
+            setRating(resultArray)
         }
     };
-
+    
     const fetchRelatedProducts = async () => {
         if (!productData) return;
         const categoryIds = productData.categories.map(category => category._id);
@@ -119,7 +163,8 @@ const DetailProduct = () => {
                     isShowModal: true,
                     modalChildren: <VoteOption 
                                     productName={productData?.name} 
-                                    handleSubmitVoteOption={handleSubmitVoteOption} />
+                                    handleSubmitVoteOption={handleSubmitVoteOption}
+                                    />
                 })
             );
         }
@@ -176,7 +221,12 @@ const DetailProduct = () => {
                             <span key={el.id}>{` ${el.name}, `}</span>
                         ))}
                     </div>
-                    <div>{`Tác giả: ${productData?.author.name}`}</div>
+                    <div>
+                        <span>Tác giả:</span>
+                        {productData?.author.map(el => (
+                            <span key={el.id}>{` ${el.name}, `}</span>
+                        ))}
+                    </div>
                     <div>{`NXB: ${productData?.publisher.name}`}</div>
                     <div>{`Mô tả: ${productData?.description}`}</div>
                     <div className="flex flex-col gap-8">
@@ -235,11 +285,11 @@ const DetailProduct = () => {
                     {rating.map(el => (
                         <Comment
                             key={el._id}
-                            star={el.star}
+                            star={el.rating}
                             updatedAt={el.updatedAt}
                             comment={el.comment}
-                            name={el.postedBy?.name}
-                            image={el.postedBy?.avatar}
+                            name={el.username}
+                            image={el.image}
                         />
                     ))}
                 </div>

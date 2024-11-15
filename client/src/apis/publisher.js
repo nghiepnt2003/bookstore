@@ -10,3 +10,19 @@ export const apiGetPublishers = () => axios({
     method: 'get'
 })
 
+export const apiDeletePublisher = () => axios({
+    url: '/publisher',
+    method: 'get'
+})
+
+export const apiUpdatePublisher = (data,id) => axios({
+    url: `/publisher/${id}`,
+    method: 'put',
+    data
+})
+export const apiCreatePublisher = (data) => axios({
+    url: '/publisher/store',
+    method: 'post',
+    data
+})
+

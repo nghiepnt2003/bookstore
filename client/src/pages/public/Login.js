@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { InputField, Button } from '../../components';
-import { apiSendOTPCreateAccount, apiRegister, apiLogin } from "../../apis/user"; 
+import { apiSendOTPCreateAccount, apiRegister, apiLogin, apiForgotPassword } from "../../apis/user"; 
 import { ToastContainer, toast } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ const Login = () => {
     const dispatch = useDispatch();
     
     const [isRegister, setIsRegister] = useState(false);
+    const [isForgotPassword, setIsForgotPassword] = useState(false); // Thêm trạng thái quên mật khẩu
     const [payload, setPayload] = useState({
         email: '',
         password: '',
@@ -40,6 +41,36 @@ const Login = () => {
             otp: '',
         });
     };
+
+    const handleForgotPasswordSubmit = async () => {
+        const { email } = payload;
+        if (!email) {
+            toast.error('Vui lòng nhập địa chỉ email.');
+            return;
+        }
+    
+        setLoading(true);
+        loadingBarRef.current.continuousStart();
+    
+        try {
+            const response = await apiForgotPassword(email); // Gọi API quên mật khẩu
+            setLoading(false);
+            loadingBarRef.current.complete();
+    
+            if (response?.success) {
+                toast.success('Đường link đặt lại mật khẩu đã được gửi đến email của bạn!');
+                setIsForgotPassword(false); // Đóng modal quên mật khẩu
+            } else {
+                toast.error(response?.message);
+            }
+        } catch (error) {
+            console.error("LOI " + error)
+            setLoading(false);
+            loadingBarRef.current.complete();
+            toast.error('Đã xảy ra lỗi, vui lòng thử lại sau.');
+        }
+    };
+
     const handleSubmit = async () => {
         if (isRegister) {
             const { email, password, username, fullname, phone, address } = payload;
@@ -198,9 +229,12 @@ const Login = () => {
                         <span onClick={() => setIsRegister(!isRegister)} className="hover:underline cursor-pointer">
                             {isRegister ? 'Đăng Nhập' : 'Đăng Ký'}
                         </span>
-                        {/* <span className="hover:underline cursor-pointer" onClick={}>
+                        <span 
+                            onClick={() => setIsForgotPassword(true)} 
+                            className="hover:underline cursor-pointer"
+                        >
                             Quên mật khẩu?
-                        </span> */}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -231,6 +265,40 @@ const Login = () => {
                         </form>
                         <button
                             onClick={handleCloseModal}
+                            className="mt-2 text-blue-500 underline"
+                        >
+                            Hủy
+                        </button>
+                    </div>
+                </div>
+            )}
+
+             {/* Modal quên mật khẩu */}
+             {isForgotPassword && (
+                <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="p-4 bg-white rounded-md w-[300px]">
+                        <h2 className="text-lg font-semibold">Quên mật khẩu</h2>
+                        <form onSubmit={handleForgotPasswordSubmit} className="flex flex-col">
+                            <InputField
+                                value={payload.email}
+                                setValue={setPayload}
+                                nameKey='email'
+                                placeholder="Nhập email của bạn"
+                            />
+                            <Button
+                                name="Gửi Email"
+                                handleOnClick={handleForgotPasswordSubmit}
+                                style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 w-full hover:bg-opacity-80 transition'
+                                disabled={loading}
+                            />
+                            {loading && (
+                                <div className="flex justify-center mt-2">
+                                    <ClipLoader color="#36d7b7" loading={loading} size={30} />
+                                </div>
+                            )}
+                        </form>
+                        <button
+                            onClick={() => setIsForgotPassword(false)}
                             className="mt-2 text-blue-500 underline"
                         >
                             Hủy

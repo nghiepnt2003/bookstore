@@ -1,9 +1,9 @@
 import axios from '../axios'
 
-export const apiPostRating = (params) => axios({
+export const apiPostRating = (data) => axios({
     url: `/rating/create`,
     method: 'post',
-    params
+    data
 })
 
 export const apiGetRating = (pid) => axios({

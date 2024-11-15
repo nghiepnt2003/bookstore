@@ -5,7 +5,7 @@ import path from './ultils/path';
 import { getCategories} from './store/app/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
 import { Modal } from './components';
-import { AdminLayout, ManageProduct, ManageOrder, ManageUser, Dashboard, ManageCategory, ManageAuthor, AdminPersonnal } from './pages/admin';
+import { AdminLayout, ManageProduct, ManageOrder, ManageUser, Dashboard, ManageCategory, ManageAuthor, AdminPersonnal, ManagePublisher } from './pages/admin';
 import { MemberLayout, Personal, History, MyCart, Checkout } from './pages/member';
 import { ToastContainer } from 'react-toastify';
 
@@ -38,6 +38,7 @@ function App() {
           <Route path={path.MANAGE_PRODUCT} element={<ManageProduct />} />
           <Route path={path.MANAGE_USER} element={<ManageUser />} />
           <Route path={path.MANAGE_INFO_AUTHOR} element={<ManageAuthor />} />
+          <Route path={path.MANAGE_INFO_PUBLISHER} element={<ManagePublisher />} />
           <Route path={path.ADMINPERSONAL} element={<AdminPersonnal />} />
           <Route path={path.ALL} element={<Dashboard />}></Route>
         </Route>

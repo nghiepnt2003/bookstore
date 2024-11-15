@@ -124,18 +124,24 @@ export const adminSidebar = [
     },
     {
         id: 4,
-        text: 'Quản lý thông tin tác giả',
+        text: 'Thông tin tác giả',
         path: `/${path.ADMIN}/${path.MANAGE_INFO_AUTHOR}`,
         icon: <ImProfile />
     },
     {
         id: 5,
+        text: 'Thông tin nhà xuất bản',
+        path: `/${path.ADMIN}/${path.MANAGE_INFO_PUBLISHER}`,
+        icon: <ImProfile />
+    },
+    {
+        id: 6,
         text: 'Quản lý sản phẩm',
         path: `/${path.ADMIN}/${path.MANAGE_PRODUCT}`,
         icon: <TbBrandProducthunt />,
     },
     {
-        id: 6,
+        id: 7,
         text: 'Quản lý đơn hàng',
         path: `/${path.ADMIN}/${path.MANAGE_ORDER}`,
         icon: <RiBillLine />
