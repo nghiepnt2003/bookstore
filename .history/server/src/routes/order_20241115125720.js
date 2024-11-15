@@ -32,7 +32,6 @@ router.get("/:id", [verifyAccessToken], orderController.getById);
 
 router.post("/checkout", [verifyAccessToken], orderController.checkout);
 router.post("/callbackZaloPay/:orderId", orderController.callbackZaloPay);
-router.post("/callbackMomo/:orderId", orderController.callbackMomo);
 
 router.put(
   "/confirmQRcode/:orderId",

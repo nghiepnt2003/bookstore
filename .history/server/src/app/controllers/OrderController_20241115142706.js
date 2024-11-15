@@ -83,7 +83,7 @@ async function createMoMoOrder(user, totalPrice, orderId) {
   const partnerCode = "MOMO";
   const redirectUrl =
     "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
-  const ipnUrl = `https://0c7a-42-116-53-167.ngrok-free.app/order/callbackMomo/${orderId}`;
+  const ipnUrl = `https://6fc7-42-116-53-167.ngrok-free.app/order/callbackMomo/${orderId}`;
   const requestType = "payWithMethod";
   const amount = totalPrice.toString();
   const orderInfo = "Payment for Order #" + orderId;
@@ -769,17 +769,16 @@ class OrderController {
   async callbackMomo(req, res) {
     const { orderId } = req.params;
     const originalOrderId = orderId.split("-")[0];
-    console.log("callback momo : ", originalOrderId);
+
     const {
       partnerCode,
       orderInfo,
       amount,
       // orderId: orderId,
       requestId,
-      resultCode,
+      responseCode,
       signature,
     } = req.body;
-    console.log(responseCode);
 
     const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"; // Secret key from MoMo
     const rawSignature = `accessKey=${req.body.accessKey}&amount=${amount}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&requestId=${requestId}&responseCode=${responseCode}`;
@@ -797,14 +796,12 @@ class OrderController {
     }
 
     // Check if the payment was successful
-    if (responseCode === 0) {
+    if (responseCode === "0") {
       // Payment successful, proceed with updating the order status in your database
       try {
         // Assume you have a function `updateOrderStatus` to handle the order update
-        const order = await Order.findById(originalOrderId);
-        order.status = "Pending"; // Cập nhật trạng thái đơn hàng thành Pending
-        await order.save();
-        console.log("orderUpdated : ", order);
+        const order = await updateOrderStatus(orderId, "paid"); // You might want to update the order status to 'paid'
+
         return res.status(200).json({
           success: true,
           message: "Payment successful",

@@ -776,10 +776,9 @@ class OrderController {
       amount,
       // orderId: orderId,
       requestId,
-      resultCode,
+      responseCode,
       signature,
     } = req.body;
-    console.log(responseCode);
 
     const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"; // Secret key from MoMo
     const rawSignature = `accessKey=${req.body.accessKey}&amount=${amount}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&requestId=${requestId}&responseCode=${responseCode}`;
@@ -797,14 +796,11 @@ class OrderController {
     }
 
     // Check if the payment was successful
-    if (responseCode === 0) {
+    if (responseCode === "0") {
       // Payment successful, proceed with updating the order status in your database
       try {
         // Assume you have a function `updateOrderStatus` to handle the order update
         const order = await Order.findById(originalOrderId);
-        order.status = "Pending"; // Cập nhật trạng thái đơn hàng thành Pending
-        await order.save();
-        console.log("orderUpdated : ", order);
         return res.status(200).json({
           success: true,
           message: "Payment successful",
