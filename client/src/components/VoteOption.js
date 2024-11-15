@@ -4,7 +4,7 @@ import { voteOptions } from '../ultils/contants'
 import { AiFillStar } from 'react-icons/ai'
 import Button from './Button'
 
-const VoteOption = ({ productName, handleSubmitVoteOption }) => {
+const VoteOption = ({ productName, handleSubmitVoteOption}) => {
     const modalRef = useRef()
     const [chooseStar, setChooseStar] = useState(null)
     const [comment, setComment] = useState('')

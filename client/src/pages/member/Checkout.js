@@ -267,10 +267,10 @@ const Checkout = () => {
                                 </label>
                             </div>
                             <div className='w-full mx-auto'>
-                                <PayPal
+                                {/* <PayPal
                                     payload={payPalPayload}
                                     setIsSuccess={setIsSuccess}
-                                    amount={(total / 24250).toFixed(2)} />
+                                    amount={(total / 24250).toFixed(2)} /> */}
                             </div>
                         </form>
                         <p class="mt-8 text-lg">Voucher</p>

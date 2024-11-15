@@ -164,12 +164,15 @@ export default function PayPal({ amount, payload, setIsSuccess }) {
     useEffect(() => {
         // Kiểm tra localStorage để xem PayPal đã được tải chưa
         const hasLoadedPayPal = localStorage.getItem('hasLoadedPayPal');
+        console.log("hasLoadedPayPal " + hasLoadedPayPal)
         if (!hasLoadedPayPal) {
             setLoadPayPal(true);
             // Đánh dấu rằng PayPal đã được tải
             localStorage.setItem('hasLoadedPayPal', 'true');
         }
     }, []);
+
+    console.log("LOAD PAL PA " + loadPayPal)
 
     return (
         <div style={{ maxWidth: "750px", minHeight: "200px", margin: 'auto' }}>

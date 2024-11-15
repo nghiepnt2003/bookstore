@@ -19,12 +19,6 @@ export const apiLogin = (data) => axios({
     data
 })
 
-// export const apiFogotPassword = (data) => axios({
-//     url: '/fogotpassword',
-//     method: 'get',
-//     data
-// })
-
 export const apiGetCurrent = () => axios({
     url: '/user/current',
     method: 'post'
@@ -116,7 +110,7 @@ export const apiCancelOrder = (id) => axios({
     method: 'put',
 })
 
-export const apiForgotPassword = (email) => ({
-    url: `/forgotPassword/${email}`,
+export const apiForgotPassword = (email) => axios({
+    url: `/user/forgotPassword?email=${email}`,
     method: 'get',
 })

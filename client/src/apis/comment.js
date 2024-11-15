@@ -5,3 +5,8 @@ export const apiPostComments = (data) => axios({
     method: 'post',
     data
 })
+
+export const apiGetComment = (pid) => axios({
+    url: `/comment/product/${pid}`,
+    method: 'get'
+})
