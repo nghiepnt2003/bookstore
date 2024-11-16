@@ -376,6 +376,7 @@ class OrderController {
 
       // Lấy số lượng đơn hàng
       const counts = await Order.find({
+        user: _id,
         ...formatedQueries,
       }).countDocuments();
 
