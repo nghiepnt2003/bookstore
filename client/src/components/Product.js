@@ -7,7 +7,7 @@ import path from '../ultils/path'
 
 const Product = ({ productData }) => {
     return (
-        <Link className="border no-underline block bg-[#fff] mt-2 ml-4 mr-4 mb-5 rounded-sm shadow transition-transform duration-100 ease-in will-change-transform
+        <Link className="h-[378px] border no-underline block bg-[#fff] mt-2 ml-4 mr-4 mb-5 rounded-sm shadow transition-transform duration-100 ease-in will-change-transform
                         hover:translate-y-[-1px] hover:shadow-[0_1px_20px_0_rgba(0,0,0,0.05)]"
             to={`/${path.DETAIL_PRODUCT}/${productData?._id}/${productData.name}`}
         >
@@ -23,7 +23,11 @@ const Product = ({ productData }) => {
             <div class="text-[1rem] font-normal leading-[1.8rem] mt-1 mx-2 line-clamp-1">
                 {productData?.name}
             </div>
-            <span className="flex ml-2 text-[0.8rem]">{renderStarFromNumber(productData?.averageRating)}</span>
+            <span className="flex ml-2 text-[0.8rem]">
+                {productData?.averageRating > 0 
+                    ? renderStarFromNumber(productData.averageRating) 
+                    : ''}
+            </span>
             <span className="ml-2 text-red-600 text-base fw-400">{`${formatMoney(productData?.price)} VNĐ`}</span>
         </Link>
     );

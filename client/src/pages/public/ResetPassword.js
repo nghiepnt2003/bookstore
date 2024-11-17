@@ -117,7 +117,7 @@ const ResetPassword = () => {
         }
     }, [password])
     return (
-        <div className='absolute animate-slide-right top-0 left-0 bottom-0 right-0 bg-[#e2acca] rounded flex flex-col items-center py-8 z-50 h-screen justify-center'>
+        <div className='absolute animate-slide-right top-0 left-0 bottom-0 right-0 bg-[#f893cb] rounded flex flex-col items-center py-8 z-50 h-screen justify-center'>
             <div className='p-[20px] bg-white rounded-[12px] w-[34vw]'>
                 <div className='flex flex-col gap-4 '>
                     <label htmlFor="password">Enter your new password:</label>

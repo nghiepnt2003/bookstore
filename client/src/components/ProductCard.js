@@ -24,7 +24,11 @@ const ProductCard = ({productData}) => {
                 <div class="text-[1rem] font-normal mt-1 mb-1 mx-2 line-clamp-1">
                     {productData?.name}
                 </div>
-                <span className="flex ml-2  mb-1 text-[0.8rem]">{renderStarFromNumber(productData?.averageRating)}</span>
+                <span className="flex ml-2  mb-1 text-[0.8rem]">
+                    {productData?.averageRating > 0 
+                        ? renderStarFromNumber(productData.averageRating) 
+                        : ''}
+                </span>
                 <span className="ml-2 text-red-600 text-base fw-400">{`${formatMoney(productData?.price)} VNĐ`}</span>
             </div>
         </Link>

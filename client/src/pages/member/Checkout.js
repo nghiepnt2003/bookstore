@@ -273,11 +273,11 @@ const Checkout = () => {
                                     amount={(total / 24250).toFixed(2)} /> */}
                             </div>
                         </form>
-                        <p class="mt-8 text-lg">Voucher</p>
+                        {/* <p class="mt-8 text-lg">Voucher</p>
                         <div className="flex items-center mt-[20px]">
                             <Input className="mr-[10px]" placeholder="Nhập mã voucher" />
                             <Button>Áp dụng</Button>
-                        </div>
+                        </div> */}
                     </div>
                     <div class="mt-10 bg-gray-50 px-4 pt-8 lg:mt-0">
                         <p class="text-xl mb-[40px]">Thông tin đơn hàng</p>
@@ -325,7 +325,7 @@ const Checkout = () => {
                                 <Form.Item
                                     label="Địa chỉ giao hàng"
                                     name="address"
-                                    // initialValue={selectedAddress || (current?.address[0] || '')} // Thiết lập giá trị mặc định
+                                    initialValue={(current?.address[current?.address.length-1])} // Thiết lập giá trị mặc định
                                     rules={[
                                         {
                                             required: true,

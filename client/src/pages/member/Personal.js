@@ -135,7 +135,7 @@ const Personal = () => {
     };
 
     return (
-        <div className='w-full relative p-4 bg-gray-100 rounded-lg shadow-md'>
+        <div className='w-full relative p-4'>
              {loading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50">
                     <ClipLoader color="#3498db" loading={loading} size={50} /> {/* Sử dụng ClipLoader */}

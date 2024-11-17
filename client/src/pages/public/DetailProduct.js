@@ -206,9 +206,9 @@ const DetailProduct = () => {
         }
         const response = await apiUpdateCart({ productId: productData._id, quantity });
         if (response.success) {
-            toast.success("Đã thêm vào giỏ");
             // const getCarts = await apiGetUserCart()
             dispatch(updateCart({ product: productData, quantity }));
+            toast.success("Đã thêm vào giỏ");
             dispatch(fetchCart()); // Gọi action để fetch lại giỏ hàng
         } else {
             toast.error("Đã xảy ra lỗi");
@@ -223,7 +223,7 @@ const DetailProduct = () => {
             <div className="mt-4 flex">
                 <div className="flex-4">
                     <div className="bg-white h-[530px] w-[450px] flex items-center justify-center">
-                        <img src={productData?.image} alt="Product" className="object-cover" />
+                        <img src={productData?.image} alt="Product" className="object-cover h-[530px] w-[450px]" />
                     </div>
                 </div>
                 <div className="flex-4">
