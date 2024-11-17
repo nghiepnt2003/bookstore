@@ -29,8 +29,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import appSlice from './app/appSlice';
 import userSlice from './user/userSlice';
 import storage from 'redux-persist/lib/storage';
-import { persistReducer, persistStore } from 'redux-persist';
+// import { persistReducer, persistStore } from 'redux-persist';
 import cartSlice from './cart/cartSlice'; // Đảm bảo đường dẫn đúng
+import {persistStore, persistReducer, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE} from 'redux-persist'
 
 const commonConfig = {
   key: 'shop/user',
@@ -49,6 +50,12 @@ export const store = configureStore({
     user: persistReducer(userConfig, userSlice),
     cart: cartSlice
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoreActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
 // Tạo persistor

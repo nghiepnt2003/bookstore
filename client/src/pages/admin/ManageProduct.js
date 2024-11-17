@@ -99,7 +99,7 @@ const ManageProduct = () => {
                 <div className='w-[40px] h-[30px] bg-main text-white rounded text-center justify-center float-end items-center flex cursor-pointer mb-1' onClick={() => openAddModal()}>
                     <FaPlus />
                 </div>
-                <table className='mb-6 text-left w-full'>
+                <table className='mb-6 text-left w-full shadow bg-white'>
                     <thead className='font-bold bg-main text-[13px] text-white'>
                         <tr className='border border-main'>
                             <th className='px-4 py-2'>STT</th>

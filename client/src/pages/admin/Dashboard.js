@@ -3,7 +3,8 @@ import React from 'react'
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts'
 import { DatePicker, Select } from 'antd'
 import dayjs from 'dayjs'
-import { apiGetAllOrderByTime } from '../../apis/user'
+import { apiGetAllOrderByTime, apiGetAllOrder } from '../../apis/user'
+import { useSelector } from 'react-redux';
 
 const { RangePicker } = DatePicker
 
@@ -28,6 +29,9 @@ const formatDate = (date) => {
 }
 
 const getRevenueLast7Days = (orders) => {
+
+    console.log("7 DAYS")
+    console.log("ORDER iC " + JSON.stringify(orders))
     const formattedOrders = [];
 
     const currentDate = new Date()
@@ -42,7 +46,7 @@ const getRevenueLast7Days = (orders) => {
             const updatedAt = new Date(order?.updatedAt)
 
             if (updatedAt.toDateString() === date.toDateString()) {
-                totalRevenue += order?.total
+                totalRevenue += order?.totalPrice
             }
         }
 
@@ -72,7 +76,7 @@ const getRevenueLast6Months = (orders) => {
             const updatedAt = new Date(order?.updatedAt);
 
             if (updatedAt.getMonth() === date.getMonth() && updatedAt.getFullYear() === date.getFullYear()) {
-                totalRevenue += order?.total;
+                totalRevenue += order?.totalPrice;
             }
         }
 
@@ -102,7 +106,7 @@ const getRevenueLast4Years = (orders) => {
             const updatedAt = new Date(order.updatedAt);
 
             if (updatedAt.getFullYear() === date.getFullYear()) {
-                totalRevenue += order.total;
+                totalRevenue += order.totalPrice;
             }
         }
 
@@ -122,7 +126,6 @@ const formatPrice = (price) => {
 }
 
 const Dashboard = () => {
-
     const [dateFilter, setDateFilter] = React.useState({
         label: "Hôm nay",
         today: dayjs(new Date(), "DD/MM/YYYY")
@@ -156,16 +159,17 @@ const Dashboard = () => {
 
     const fetchListOrders = async (query) => {
 
-        const response = await apiGetAllOrderByTime(query)
+        const response = await apiGetAllOrderByTime(query)       
 
         if (response.success) {
+            console.log("RPS ORDERS" + response.orders)
             setListOrders(response.orders)
         }
     }
 
     const fetchAllListOrders = async () => {
 
-        const response = await apiGetAllOrderByTime("")
+        const response = await apiGetAllOrder();
 
         console.log(response)
         if (response.success) {
@@ -188,24 +192,30 @@ const Dashboard = () => {
     };
 
     React.useEffect(() => {
+            if (dateFilter.startDate && dateFilter.endDate) {
 
-        if (dateFilter.startDate && dateFilter.endDate) {
-
-            fetchListOrders(`?startTime=${convertDateFormat(dateFilter.startDate)}&endTime=${convertDateFormat(dateFilter.endDate)}`)
-        } else {
-            fetchListOrders(`?toDay=${true}`)
-        }
+                fetchListOrders(`?startTime=${convertDateFormat(dateFilter.startDate)}&endTime=${convertDateFormat(dateFilter.endDate)}`)
+            } else {
+                // fetchListOrders(`?toDay=${true}`)
+                const today = new Date();
+                const day = String(today.getDate()).padStart(2, '0'); // Ngày
+                const month = String(today.getMonth() + 1).padStart(2, '0'); // Tháng
+                const year = today.getFullYear(); // Năm
+    
+                const formattedDate = `${year}-${month}-${day}`; // Định dạng DD/MM/YYYY
+                console.log("TODAY " + formattedDate)
+                fetchListOrders(`?startTime=${formattedDate}&endTime=${formattedDate}`)
+            }
 
     }, [dateFilter])
 
     React.useEffect(() => {
 
-        const newIncomes = listOrders.reduce((acc, curr) => acc + curr.total, 0)
+        const newIncomes = listOrders.reduce((acc, curr) => acc + curr.totalPrice, 0)
         setIncomes(newIncomes)
     }, [listOrders])
 
     React.useEffect(() => {
-
         fetchAllListOrders()
     }, [])
 

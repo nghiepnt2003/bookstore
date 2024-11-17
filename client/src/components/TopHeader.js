@@ -4,14 +4,15 @@ import path from '../ultils/path'
 import { getCurrent } from '../store/user/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
 import icons from '../ultils/icons'
-import { logout } from '../store/user/userSlice'
+import { logout,  clearMessage } from '../store/user/userSlice'
+import Swal from 'sweetalert2'
 
 const { AiOutlineLogout} = icons
 
 const TopHeader = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const {isLoggedIn, current, isLoading} = useSelector(state => state.user)
+  const {isLoggedIn, current, isLoading, mes} = useSelector(state => state.user)
   useEffect(() => {
     if(isLoggedIn && isLoading==true)
     {
@@ -20,11 +21,19 @@ const TopHeader = () => {
     
   }, [dispatch, isLoggedIn])
 
+  useEffect(() => {
+    if(mes)
+      Swal.fire('Oops!', mes, 'info').then(() => {
+        dispatch(clearMessage())
+        navigate(`/${path.LOGIN}`)        
+    })
+  },[mes])
+
   return (
     <div className='h-[38px] w-full bg-[#f73995] flex items-center justify-center'>
         <div className='w-main flex items-center justify-between text-white text-[0.9rem]'>
             <span>ODER ONLINE OR CALL US (+1450) 056 7077</span>
-            {isLoggedIn
+            {isLoggedIn && current
               ? <div className='flex items-center'>
                   <span className='mr-2'>{`Wellcome, ${current?.fullname}`}</span>
                   <span 

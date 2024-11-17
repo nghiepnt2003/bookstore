@@ -5,7 +5,16 @@ const VoteBar = ({ number, ratingCount, ratingTotal }) => {
   const percentRef = useRef()
   useEffect(() => {
     const percent = Math.round(ratingCount * 100 / ratingTotal) || 0
+    console.log("NUMBER " + number)
+    console.log("RATING COUNT " + ratingCount)
+    console.log("RATING TOTAL " + ratingTotal)
+    console.log("PERCENT " + percent)
     percentRef.current.style.cssText = `right: ${100 - percent}%`
+   // Log chi tiết hơn về percentRef.current
+  //  console.log("percentRef.current:", percentRef.current);
+  //  console.log("percentRef.current.style:", percentRef.current.style);
+  //  console.log("percentRef.current.offsetWidth:", percentRef.current.offsetWidth);
+  //  console.log("percent:", percent);
   }, [ratingCount, ratingTotal])
   return (
     <div className='flex container items-center gap-3 text-gray-600 p-2'>

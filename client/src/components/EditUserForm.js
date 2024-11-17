@@ -6,12 +6,17 @@ const options = [
     { value: 'Đã khóa', code: true }
 ];
 
+const roleOptions = [
+    { value: 'admin', code: 1 },
+    { value: 'user', code: 2 }
+];
+
 const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
     const [formData, setFormData] = useState({
         username: '',
         role: '',
         phone: '',
-        status: ''
+        isBlocked: ''
     });
     const [errors, setErrors] = useState({});
 
@@ -19,9 +24,9 @@ const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
         if (user) {
             setFormData({
                 username: user.username,
-                role: user.role,
+                role: user.role === 1 ? 1 : 2, // Thiết lập vai trò dựa trên user.role
                 phone: user.phone,
-                status: user.isBlocked
+                isBlocked: user.isBlocked
             });
         }
     }, [user]);
@@ -34,7 +39,7 @@ const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
     const validateForm = () => {
         const newErrors = {};
         if (!formData.username) newErrors.username = 'Yêu cầu nhập tên';
-        if (!formData.role) newErrors.role = 'Yêu cầu nhập vai trò';
+        if (formData.role === '') newErrors.role = 'Yêu cầu chọn vai trò';
         if (!formData.phone) newErrors.phone = 'Yêu cầu nhập số điện thoại';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -45,12 +50,10 @@ const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
         if (!validateForm()) return;
 
         const response = await onUpdate(formData, user._id);
-        console.log(response)
         if (response.success) {
-            console.log("AAAAAAA")
-            toast.success(response.message);
             onCancel();
             fetchUsers(); // Đảm bảo rằng bạn gọi fetchUsers ở đây
+            toast.success("Cập nhật người dùng thành công");
         } else {
             toast.error(response.message);
         }
@@ -75,22 +78,10 @@ const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
                     value={formData.username}
                     onChange={handleChange}
                     placeholder="Tên người dùng"
-                    className="p-2 border border-gray-300 rounded-md text-lg"
+                    className="p-2 border border-gray-300 rounded-md text-lg bg-gray-100"
+                    disabled
                 />
                 {errors.username && <span className="text-red-500 text-sm mt-1">{errors.username}</span>}
-            </div>
-            <div className="flex flex-col">
-                <label htmlFor="role" className="font-semibold mb-1">Vai trò</label>
-                <input
-                    type="text"
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    placeholder="Vai trò"
-                    className="p-2 border border-gray-300 rounded-md text-lg"
-                />
-                {errors.role && <span className="text-red-500 text-sm mt-1">{errors.role}</span>}
             </div>
             <div className="flex flex-col">
                 <label htmlFor="phone" className="font-semibold mb-1">Số điện thoại</label>
@@ -101,16 +92,35 @@ const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Số điện thoại"
-                    className="p-2 border border-gray-300 rounded-md text-lg"
+                    className="p-2 border border-gray-300 rounded-md text-lg bg-gray-100"
+                    disabled
                 />
                 {errors.phone && <span className="text-red-500 text-sm mt-1">{errors.phone}</span>}
             </div>
             <div className="flex flex-col">
-                <label htmlFor="status" className="font-semibold mb-1">Trạng thái</label>
+                <label htmlFor="role" className="font-semibold mb-1">Vai trò</label>
                 <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    className="p-2 border border-gray-300 rounded-md text-lg"
+                >
+                    <option value="" disabled>Chọn vai trò</option>
+                    {roleOptions.map(option => (
+                        <option key={option.value} value={option.code}>
+                            {option.value}
+                        </option>
+                    ))}
+                </select>
+                {errors.role && <span className="text-red-500 text-sm mt-1">{errors.role}</span>}
+            </div>
+            <div className="flex flex-col">
+                <label htmlFor="isBlocked" className="font-semibold mb-1">Trạng thái</label>
+                <select
+                    id="isBlocked"
+                    name="isBlocked"
+                    value={formData.isBlocked}
                     onChange={handleChange}
                     className="p-2 border border-gray-300 rounded-md text-lg"
                 >

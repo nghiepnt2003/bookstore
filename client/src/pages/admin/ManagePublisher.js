@@ -24,7 +24,8 @@ const ManagePublisher = () => {
     };
 
     useEffect(() => {
-        if (queries.name !== "")
+        console.log("QUERI NAME " + JSON.stringify(queries))
+        if (queries.name && queries.name !== "")
             fetchPublishers({ name: queries.name });
         else
             fetchPublishers();
@@ -89,7 +90,7 @@ const ManagePublisher = () => {
                             <th className='px-4 py-2 '>STT</th>
                             <th className='px-4 py-2 '>Tên nhà xuất bản</th>
                             <th className='px-4 py-2 '>Mô tả</th>
-                            <th className='px-8 py-2 '>Lựa chọn</th>
+                            <th className='px-4 py-2 '>Lựa chọn</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,7 +100,9 @@ const ManagePublisher = () => {
                                 <td className='py-2 px-4'>{el.name}</td>
                                 <td className='py-2 px-4'>{el.description}</td>
                                 <td className='py-2 px-4'>
-                                    <span onClick={() => openEditModal(el)} className='px-2 text-main hover:underline cursor-pointer'>Sửa</span>
+                                    <span onClick={() => openEditModal(el)} className='px-2 text-main hover:underline cursor-pointer'>
+                                        <FaRegEdit />
+                                    </span>
                                     {/*<span onClick={() => handlerDeletePublisher(el._id)} className='px-2 text-main hover:underline cursor-pointer'>Xóa</span> */}
                                 </td>
                             </tr>

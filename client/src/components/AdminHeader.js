@@ -17,12 +17,12 @@ const AdminHeader = () => {
     if (isLoggedIn && isLoading === true) {
       dispatch(getCurrent());
     }
-  }, [dispatch, isLoggedIn, isLoading]);
+  }, [dispatch, isLoggedIn]);
 
   return (
     <div className='h-[50px] w-full bg-main flex items-center justify-between text-white text-[0.95rem] shadow-sm sticky top-0 z-10'>
       {/* <div className='flex items-center justify-between text-main text-[1rem]'> */}
-        <span className='ml-4'>Admin Dashboard - Manage Your Products Effectively!</span>
+        <span className='ml-4'>SunShine - Một cuốn sách là một giấc mơ bạn cầm trong tay!</span>
         {isLoggedIn ? (
           <div className='flex items-center'>
             <span className='mr-2'>{`Welcome, ${current?.fullname}`}</span>

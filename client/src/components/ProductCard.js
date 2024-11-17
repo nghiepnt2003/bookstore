@@ -17,8 +17,8 @@ const ProductCard = ({productData}) => {
                     alt={'Product Image'} 
                     className="w-[100px] h-[130px] mt-1 object-contain" 
                 />
-                <img src={label} alt="" className="absolute top-0 left-[-28px] w-[100px] h-[36px] object-cover"/>
-                <span className="font-bold top-0 left-[3px] absolute text-white">HOT</span>
+                {/* <img src={label} alt="" className="absolute top-0 left-[-28px] w-[100px] h-[36px] object-cover"/>
+                <span className="font-bold top-0 left-[3px] absolute text-white">HOT</span> */}
             </div>            
             <div>
                 <div class="text-[1rem] font-normal mt-1 mb-1 mx-2 line-clamp-1">

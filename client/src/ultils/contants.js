@@ -102,7 +102,7 @@ export const voteOptions = [
 
 ]
 
-const { AiOutlineDashboard, MdGroups, TbBrandProducthunt, RiBillLine, MdOutlineCategory, ImProfile} = icons
+const { AiOutlineDashboard, MdGroups, TbBrandProducthunt, RiBillLine, MdOutlineCategory, ImProfile, BiCategoryAlt, GrContactInfo } = icons
 export const adminSidebar = [
     {
         id: 1,
@@ -120,13 +120,13 @@ export const adminSidebar = [
         id: 3,
         text: 'Quản lý danh mục',
         path: `/${path.ADMIN}/${path.MANAGE_CATEGORY}`,
-        icon: <MdGroups />
+        icon: <BiCategoryAlt />
     },
     {
         id: 4,
         text: 'Thông tin tác giả',
         path: `/${path.ADMIN}/${path.MANAGE_INFO_AUTHOR}`,
-        icon: <ImProfile />
+        icon: <GrContactInfo  />
     },
     {
         id: 5,
@@ -146,12 +146,12 @@ export const adminSidebar = [
         path: `/${path.ADMIN}/${path.MANAGE_ORDER}`,
         icon: <RiBillLine />
     },
-    {
-        id: 7,
-        text: 'Thông tin quản lý',
-        path: `/${path.ADMIN}/${path.ADMINPERSONAL}`,
-        icon: <ImProfile />
-    }
+    // {
+    //     id: 7,
+    //     text: 'Thông tin quản lý',
+    //     path: `/${path.ADMIN}/${path.ADMINPERSONAL}`,
+    //     icon: <ImProfile />
+    // }
 ]
 
 export const memberSidebar = [

@@ -58,7 +58,7 @@ const Login = () => {
             loadingBarRef.current.complete();
     
             if (response?.success) {
-                toast.success('Đường link đặt lại mật khẩu đã được gửi đến email của bạn!');
+                toast.success('Hãy kiểm tra email của bạn!');
                 setIsForgotPassword(false); // Đóng modal quên mật khẩu
             } else {
                 toast.error(response?.message);
@@ -120,10 +120,18 @@ const Login = () => {
             const response = await apiLogin({ username, password });
             if (response.success) {
                 dispatch(register({ isLoggedIn: true, token: response.accessToken, userData: response.userData }));
-                if(+response.userData.role === 2)
-                    navigate(`/${path.HOME}`);
-                else
-                    navigate(`/${path.ADMIN}/${path.DASHBOARD}`)
+                // if(+response.userData.role === 2)
+                //     navigate(`/${path.HOME}`);
+                // else
+                //     navigate(`/${path.ADMIN}/${path.DASHBOARD}`)
+                // Đặt timeout ngắn để đảm bảo Redux đã cập nhật
+                setTimeout(() => {
+                    if (+response.userData.role === 2) {
+                        navigate(`/${path.HOME}`);
+                    } else {
+                        navigate(`/${path.ADMIN}/${path.DASHBOARD}`);
+                    }
+                }, 100); // Thay đổi thời gian nếu cần
             } else {
                 Swal.fire('Opps!', response.message, 'error');
             }
@@ -220,12 +228,12 @@ const Login = () => {
                             disabled={loading}
                         />
                     )}
-                    {loading && (
+                    {/* {loading && (
                         <div className="flex justify-center mt-2">
                             <ClipLoader color="#36d7b7" loading={loading} size={30} />
                         </div>
-                    )}
-                    <div className="flex items-center justify-between my-2 w-full text-sm">
+                    )} */}
+                    {/* <div className="flex items-center justify-between my-2 w-full text-sm">
                         <span onClick={() => setIsRegister(!isRegister)} className="hover:underline cursor-pointer">
                             {isRegister ? 'Đăng Nhập' : 'Đăng Ký'}
                         </span>
@@ -236,13 +244,30 @@ const Login = () => {
                             Quên mật khẩu?
                         </span>
                     </div>
+                    <Link className='flex justify-center text-sm hover:underline cursor-pointer' to={`/${path.HOME}`}>Về trang chủ?</Link> */}
+                    {!isRegister && (
+                        <span 
+                         onClick={() => setIsForgotPassword(true)} 
+                         className="flex justify-center text-sm hover:underline cursor-pointer"
+                        >
+                            Quên mật khẩu?
+                        </span>
+                        )
+                    }
+                    
+                    <div className="flex items-center justify-between my-2 w-full text-sm">
+                        <span onClick={() => setIsRegister(!isRegister)} className="hover:underline cursor-pointer">
+                            {isRegister ? 'Đăng Nhập' : 'Đăng Ký'}
+                        </span>
+                        <Link className='text-sm hover:underline cursor-pointer' to={`/${path.HOME}`}>Về trang chủ?</Link>
+                    </div>                    
                 </div>
             </div>
 
             {/* Modal OTP */}
             {isSendOTP && (
                 <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="p-4 bg-white rounded-md w-[300px]">
+                    <div className="p-4 bg-white rounded-md w-[350px]">
                         <h2 className="text-lg font-semibold">Nhập OTP</h2>
                         <form onSubmit={handleOtpSubmit} className="flex flex-col">
                             <InputField
@@ -251,24 +276,27 @@ const Login = () => {
                                 nameKey='otp'
                                 placeholder="Nhập OTP"
                             />
-                            <Button
-                                name="Xác Nhận OTP"
-                                handleOnClick={handleOtpSubmit}
-                                style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 w-full hover:bg-opacity-80 transition'
-                                disabled={loading}
-                            />
-                            {loading && (
+                            <div className="flex justify-between">
+                                <Button
+                                    name="Xác Nhận OTP"
+                                    handleOnClick={handleOtpSubmit}
+                                    style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 hover:bg-opacity-80 transition'
+                                    disabled={loading}
+                                />
+                                 <button
+                                    onClick={handleCloseModal}
+                                    className="px-4 py-2 rounded-md bg-gray-200 text-semibold my-2 hover:bg-opacity-80 transition"
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+                            
+                            {/* {loading && (
                                 <div className="flex justify-center mt-2">
                                     <ClipLoader color="#36d7b7" loading={loading} size={30} />
                                 </div>
-                            )}
+                            )} */}
                         </form>
-                        <button
-                            onClick={handleCloseModal}
-                            className="mt-2 text-blue-500 underline"
-                        >
-                            Hủy
-                        </button>
                     </div>
                 </div>
             )}
@@ -276,7 +304,7 @@ const Login = () => {
              {/* Modal quên mật khẩu */}
              {isForgotPassword && (
                 <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="p-4 bg-white rounded-md w-[300px]">
+                    <div className="p-4 bg-white rounded-md w-[350px]">
                         <h2 className="text-lg font-semibold">Quên mật khẩu</h2>
                         <form onSubmit={handleForgotPasswordSubmit} className="flex flex-col">
                             <InputField
@@ -285,24 +313,27 @@ const Login = () => {
                                 nameKey='email'
                                 placeholder="Nhập email của bạn"
                             />
-                            <Button
-                                name="Gửi Email"
-                                handleOnClick={handleForgotPasswordSubmit}
-                                style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 w-full hover:bg-opacity-80 transition'
-                                disabled={loading}
-                            />
-                            {loading && (
+                            <div className="flex justify-between">
+                                <Button
+                                    name="Gửi Email"
+                                    handleOnClick={handleForgotPasswordSubmit}
+                                    style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 hover:bg-opacity-80 transition'
+                                    disabled={loading}
+                                />
+                                <button
+                                    onClick={() => setIsForgotPassword(false)}
+                                    className="px-4 py-2 rounded-md bg-gray-200 text-semibold my-2 hover:bg-opacity-80 transition"
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+                           
+                            {/* {loading && (
                                 <div className="flex justify-center mt-2">
                                     <ClipLoader color="#36d7b7" loading={loading} size={30} />
                                 </div>
-                            )}
+                            )} */}
                         </form>
-                        <button
-                            onClick={() => setIsForgotPassword(false)}
-                            className="mt-2 text-blue-500 underline"
-                        >
-                            Hủy
-                        </button>
                     </div>
                 </div>
             )}

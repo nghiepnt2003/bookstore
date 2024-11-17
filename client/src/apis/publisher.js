@@ -5,9 +5,10 @@ export const apiGetPublisher = (id) => axios({
     method: 'get'
 })
 
-export const apiGetPublishers = () => axios({
+export const apiGetPublishers = (params) => axios({
     url: '/publisher',
-    method: 'get'
+    method: 'get',
+    params
 })
 
 export const apiDeletePublisher = () => axios({

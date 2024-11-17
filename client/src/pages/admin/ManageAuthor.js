@@ -26,7 +26,7 @@ const ManageAuthor = () => {
 
     useEffect(() => {
         console.log("PR TEN" + queries.name)
-        if(queries.name !=="")
+        if(queries.name && queries.name !=="")
             fetchAuthors({ name: queries.name }); // Truyền đúng tham số tìm kiếm
         else
             fetchAuthors(); // Truyền đúng tham số tìm kiếm
@@ -108,7 +108,7 @@ const ManageAuthor = () => {
                             <th className='px-4 py-2 '>Mô tả</th>
                             <th className='px-4 py-2 '>Hình ảnh</th>
                             <th className='px-4 py-2 '>Ngày tạo</th>
-                            <th className='px-8 py-2 '>Lựa chọn</th>
+                            <th className='px-4 py-2 '>Lựa chọn</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,9 +121,13 @@ const ManageAuthor = () => {
                                     <img src={el.image} alt={el.name} className="w-20 h-20 object-cover" />
                                 </td>
                                 <td className='py-2 px-4'>{moment(el.createdAt).format('DD/MM/YYYY')}</td>
-                                <td className='py-2 px-4'>
-                                    <span onClick={() => openEditModal(el)} className='px-2 text-main hover:underline cursor-pointer'>Sửa</span>
-                                    <span onClick={() => handlerDeleteAuthor(el._id)} className='px-2 text-main hover:underline cursor-pointer'>Xóa</span>
+                                <td className='py-2 px-4 flex'>
+                                    <span onClick={() => openEditModal(el)} className='px-2 text-main hover:underline cursor-pointer'>
+                                        <FaRegEdit />
+                                    </span>
+                                    <span onClick={() => handlerDeleteAuthor(el._id)} className='px-2 text-main hover:underline cursor-pointer'>
+                                        <FaTrashAlt />
+                                    </span>
                                 </td>
                             </tr>
                         ))}

@@ -7,6 +7,9 @@ import Swal from 'sweetalert2';
 import clsx from 'clsx';
 import { useDispatch } from "react-redux";
 import { showModal } from '../../store/app/appSlice';
+import icons from '../../ultils/icons';
+
+const { FaRegEdit, FaTrashAlt, FaPlus } = icons;
 
 const ManageUser = () => {
     const [users, setUsers] = useState(null);
@@ -43,7 +46,7 @@ const ManageUser = () => {
                     const response = await apiDeleteUser(uid);
                     if (response.success) {
                         fetchUsers();
-                        toast.success(response.message);
+                        toast.success("Xóa người dùng thành công");
                     } else toast.error(response.message);
                 }
             });
@@ -116,9 +119,13 @@ const ManageUser = () => {
                                 <td className='py-2 px-4'>{el.phone}</td>
                                 <td className='py-2 px-4'>{el.isBlocked ===false ? 'Hoạt động' : 'Đã khóa'}</td>
                                 <td className='py-2 px-4'>{moment(el.createdAt).format('DD/MM/YYYY')}</td>
-                                <td className='py-2 px-4'>
-                                    <span onClick={() => openEditModal(el)} className='px-2 text-main hover:underline cursor-pointer'>Sửa</span>
-                                    <span onClick={() => handlerDeleteUser(el._id, el.isBlocked)} className='px-2 text-main hover:underline cursor-pointer'>Xóa</span>
+                                <td className='py-2 px-4 flex'>
+                                    <span onClick={() => openEditModal(el)} className='px-2 text-main hover:underline cursor-pointer'>
+                                        <FaRegEdit />
+                                    </span>
+                                    <span onClick={() => handlerDeleteUser(el._id, el.isBlocked)} className='px-2 text-main hover:underline cursor-pointer'>
+                                        <FaTrashAlt />
+                                    </span>
                                 </td>
                             </tr>
                         ))}

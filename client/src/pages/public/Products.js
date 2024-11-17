@@ -108,7 +108,7 @@ const Products = () => {
                             className='p-3 text-xs text-gray-500 gap-6 relative border border-gray-800 flex justify-between items-center bg-white w-[100px]'
                             onClick={() => changeActiveFilter('Price')}
                         >
-                            <span className='capitalize'>Giá</span>
+                            <span className='capitalize text-center'>Giá</span>
                             <AiOutlineDown />
                             {activeClick === 'Price' && (
                                 <div className='absolute top-full left-0 w-fit p-4 z-10 bg-white border border-main'>

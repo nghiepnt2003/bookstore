@@ -9,6 +9,8 @@ import { TbBrandProducthunt } from "react-icons/tb";
 import { RiBillLine } from "react-icons/ri";
 import { ImProfile } from "react-icons/im";
 import { TiCameraOutline } from "react-icons/ti";
+import { BiCategoryAlt } from "react-icons/bi";
+import { GrContactInfo } from "react-icons/gr";
 
 const icons = {
     FaPhone,
@@ -44,7 +46,9 @@ const icons = {
     FaRegEdit,
     FaPlus,
     FaTrashAlt,
-    TiCameraOutline
+    TiCameraOutline,
+    BiCategoryAlt,
+    GrContactInfo 
 }
 
 export default icons

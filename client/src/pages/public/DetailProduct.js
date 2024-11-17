@@ -109,16 +109,37 @@ const DetailProduct = () => {
     
     const fetchRelatedProducts = async () => {
         if (!productData) return;
-        const categoryIds = productData.categories.map(category => category._id);
-        const productPromises = categoryIds.map(cateId => apiGetProducts({ categories: cateId }));
-        const responses = await Promise.all(productPromises);
-        const allProducts = responses.reduce((acc, response) => {
-            if (response.success) {
-                return acc.concat(response.products.filter(product => !acc.some(existingProduct => existingProduct._id === product._id)));
-            }
-            return acc;
-        }, []);
-        setRelatedProducts(allProducts);
+        if(productData.categories && productData.categories.length >0){
+            const categoryIds = productData.categories.map(category => category._id);
+            const productPromises = categoryIds.map(cateId => apiGetProducts({ categories: cateId }));
+            const responses = await Promise.all(productPromises);
+            const allProducts = responses.reduce((acc, response) => {
+                if (response.success) {
+                    return acc.concat(response.products.filter(product => !acc.some(existingProduct => existingProduct._id === product._id)));
+                }
+                return acc;
+            }, []);
+            setRelatedProducts(allProducts);
+            return;
+
+        }else if(productData.author && productData.author.length >0){
+            const authorIds = productData.author.map(au => au._id);
+            const productPromises = authorIds.map(auId => apiGetProducts({ author: auId }));
+            const responses = await Promise.all(productPromises);
+            const allProducts = responses.reduce((acc, response) => {
+                if (response.success) {
+                    return acc.concat(response.products.filter(product => !acc.some(existingProduct => existingProduct._id === product._id)));
+                }
+                return acc;
+            }, []);
+            setRelatedProducts(allProducts);
+            return;
+        }else {
+            const rs = await apiGetProducts({publisher: productData.publisher._id})
+            setRelatedProducts(rs.products);
+            return;
+        }
+       
     };
 
     useEffect(() => {
@@ -185,10 +206,10 @@ const DetailProduct = () => {
         }
         const response = await apiUpdateCart({ productId: productData._id, quantity });
         if (response.success) {
+            toast.success("Đã thêm vào giỏ");
             // const getCarts = await apiGetUserCart()
             dispatch(updateCart({ product: productData, quantity }));
             dispatch(fetchCart()); // Gọi action để fetch lại giỏ hàng
-            toast.success("Đã thêm vào giỏ");
         } else {
             toast.error("Đã xảy ra lỗi");
         }
@@ -217,15 +238,23 @@ const DetailProduct = () => {
                     <div>{`Số trang: ${productData?.pageNumber}`}</div>
                     <div>
                         <span>Thể loại:</span>
-                        {productData?.categories.map(el => (
-                            <span key={el.id}>{` ${el.name}, `}</span>
-                        ))}
+                        {productData?.categories && productData.categories.length > 0 ? (
+                            productData.categories.map(el => (
+                                <span key={el.id}>{` ${el.name}, `}</span>
+                            ))
+                        ) : (
+                            <span> Đang cập nhật</span>
+                        )}
                     </div>
                     <div>
                         <span>Tác giả:</span>
-                        {productData?.author.map(el => (
-                            <span key={el.id}>{` ${el.name}, `}</span>
-                        ))}
+                        {productData?.author && productData.author.length > 0 ? (
+                            productData.author.map(el => (
+                                <span key={el.id}>{` ${el.name}, `}</span>
+                            ))
+                        ) : (
+                            <span> Đang cập nhật</span>
+                        )}
                     </div>
                     <div>{`NXB: ${productData?.publisher.name}`}</div>
                     <div>{`Mô tả: ${productData?.description}`}</div>
@@ -266,8 +295,9 @@ const DetailProduct = () => {
                             <VoteBar
                                 key={el}
                                 number={el + 1}
-                                ratingTotal={productData?.averageRating}
-                                ratingCount={rating.filter(i => i.star === el + 1).length}
+                                // ratingTotal={productData?.averageRating}
+                                ratingTotal={rating.length}
+                                ratingCount={rating.filter(i => i.rating === el + 1).length}
                             />
                         ))}
                     </div>

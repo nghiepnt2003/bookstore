@@ -69,7 +69,7 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                         Số điện thoại
                                     </p>
                                     <p className="text-[14px] text-[#999] font-[500]">
-                                        {order.phone}
+                                        {order.recipientPhone}
                                     </p>
                                 </div>
 
