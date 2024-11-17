@@ -786,9 +786,10 @@ class UserController {
       const response = await User.findOne({ username });
       // Kiểm tra nếu user bị chặn
       if (response && response.isBlocked) {
-        return res
-          .status(403)
-          .json({ success: false, message: "User is blocked. Access denied." });
+        return res.status(403).json({
+          success: false,
+          message: "Người dùng đã bị chặn. Truy cập bị từ chối.",
+        });
       }
       // Phải có else ở dưới vì khi không đúng mật khẩu thì hàm isCorrectPassword vẫn không sinh ra lỗi
       if (response && (await response.isCorrectPassword(password))) {
@@ -818,7 +819,10 @@ class UserController {
         userData.role = response.role;
         return res.status(200).json({ success: true, accessToken, userData });
       } else {
-        res.status(500).json("Invalid credentials !!!");
+        res.status(500).json({
+          success: false,
+          message: "Thông tin đăng nhập không hợp lệ !!!",
+        });
       }
     } catch (error) {
       return res

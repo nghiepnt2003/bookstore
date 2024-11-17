@@ -87,7 +87,7 @@ async function createMoMoOrder(user, totalPrice, orderId) {
   const partnerCode = "MOMO";
   const redirectUrl =
     "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
-  const ipnUrl = `https://af0b-27-77-75-170.ngrok-free.app/order/callbackMomo/${orderId}`;
+  const ipnUrl = `https://8037-27-77-75-170.ngrok-free.app/order/callbackMomo/${orderId}`;
   const requestType = "payWithMethod";
   const amount = totalPrice.toString();
   const orderInfo = "Payment for Order #" + orderId;
@@ -436,7 +436,7 @@ class OrderController {
     }
   }
 
-  //[GET] /order/check-status
+  //[GET] /order/check-status-zalopay
   async checkPaymentStatusZaloPay(req, res) {
     const { app_trans_id } = req.body;
 
@@ -503,6 +503,35 @@ class OrderController {
       });
     }
   }
+
+  //[GET] /order/check-status-momo
+  async checkPaymentStatusMomo(req, res) {
+    const { orderId } = req.body;
+    const rawSignature = `accessKey=${process.env.MOMO_ACCESS_KEY}&orderId=${orderId}&partnerCode=MOMO&requestId=${orderId}`;
+    const signature = crypto
+      .createHmac("sha256", process.env.MOMO_SECRET_KEY)
+      .update(rawSignature)
+      .digest("hex");
+    const requestBody = JSON.stringify({
+      partnerCode: "MOMO",
+      requestId: orderId,
+      orderId,
+      signature,
+      lang: "vi",
+    });
+    const options = {
+      method: "POST",
+      url: "https://test-payment.momo.vn/v2/gateway/api/query",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: requestBody,
+    };
+    let result = await axios(options);
+
+    return res.status(200).json(result.data);
+  }
+
   //[POST] /order/checkout
   async checkout(req, res) {
     try {

@@ -24,9 +24,14 @@ router.get(
   orderController.checkOrderStatus
 );
 router.get(
-  "/check-status",
+  "/check-status-zalopay",
   [verifyAccessToken],
   orderController.checkPaymentStatusZaloPay
+);
+router.get(
+  "/check-status-momo",
+  [verifyAccessToken],
+  orderController.checkPaymentStatusMomo
 );
 router.get("/:id", [verifyAccessToken], orderController.getById);
 
