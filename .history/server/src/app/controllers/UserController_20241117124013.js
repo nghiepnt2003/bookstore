@@ -968,7 +968,7 @@ class UserController {
                         <p>Xin chào, <span style="font-weight: bold;">${user?.username}</span>!</p>
                         <p>Xin vui lòng click vào đường link dưới đây để thay đổi mật khẩu của bạn.</p>
                         <p>Link này sẽ hết hạn sau 15 phút kể từ bây giờ. </p>
-                        <strong style="color: #da4f25;"><a href=${process.env.URL_CLIENT}/reset-password/${resetToken}>Click here</a></strong>
+                        <strong style="color: #da4f25;"><a href=${process.env.URL_CLIENT}/user/resetPassword/${resetToken}>Click here</a></strong>
                         <p>Cảm ơn bạn đã tin tưởng sử dụng web của chúng tôi!</p>
                         <p>Trân trọng,</p>
                         <p>Book Store</p>
