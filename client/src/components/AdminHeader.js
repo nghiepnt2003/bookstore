@@ -5,6 +5,8 @@ import { getCurrent } from '../store/user/asyncActions';
 import { useDispatch, useSelector } from 'react-redux';
 import icons from '../ultils/icons';
 import { logout } from '../store/user/userSlice';
+import { toast } from 'react-toastify'
+import Swal from 'sweetalert2'
 
 const { AiOutlineLogout } = icons;
 
@@ -18,6 +20,17 @@ const AdminHeader = () => {
       dispatch(getCurrent());
     }
   }, [dispatch, isLoggedIn]);
+  const handleLogout = () => {
+      Swal.fire({
+      title: 'Bạn có chắc chắn muốn đăng xuất???',
+      text: 'Bạn đã sẵn sàng đăng xuất chưa???',
+      showCancelButton: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(logout());
+      }
+    });
+  };
 
   return (
     <div className='h-[50px] w-full bg-main flex items-center justify-between text-white text-[0.95rem] shadow-sm sticky top-0 z-10'>
@@ -27,7 +40,7 @@ const AdminHeader = () => {
           <div className='flex items-center'>
             <span className='mr-2'>{`Welcome, ${current?.fullname}`}</span>
             <span 
-              onClick={() => dispatch(logout())}
+              onClick={handleLogout}
               className='hover:rounded-full hover:bg-gray-200 cursor-pointer hover:text-main mr-4'
             >
               <AiOutlineLogout size={20} />

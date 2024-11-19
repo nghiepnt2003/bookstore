@@ -21,6 +21,18 @@ const TopHeader = () => {
     
   }, [dispatch, isLoggedIn])
 
+  const handleLogout = () => {
+      Swal.fire({
+      title: 'Bạn có chắc chắn muốn đăng xuất???',
+      text: 'Bạn đã sẵn sàng đăng xuất chưa???',
+      showCancelButton: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(logout());
+      }
+    });
+  }
+
   useEffect(() => {
     if(mes)
       Swal.fire('Oops!', mes, 'info').then(() => {
@@ -28,6 +40,7 @@ const TopHeader = () => {
         navigate(`/${path.LOGIN}`)        
     })
   },[mes])
+
 
   return (
     <div className='h-[38px] w-full bg-[#f73995] flex items-center justify-center'>
@@ -37,7 +50,7 @@ const TopHeader = () => {
               ? <div className='flex items-center'>
                   <span className='mr-2'>{`Wellcome, ${current?.fullname}`}</span>
                   <span 
-                    onClick={() => dispatch(logout())}
+                    onClick={handleLogout}
                     className='hover:rounded-full hover:bg-gray-200 cursor-pointer hover:text-main p-2'
                   >
                     <AiOutlineLogout  size={18}/>

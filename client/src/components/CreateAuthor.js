@@ -43,7 +43,7 @@ const CreateAuthor = ({ onClose, onRefresh }) => {
             console.log( "FROM DATAT " + JSON.stringify(formData))
             const response = await apiCreateAuthor(formData);
             if (response.success) {
-                toast.success('Thêm tác giả thành công');
+                toast.success('Thêm thành công');
                 onRefresh();
                 onClose();
             } else {

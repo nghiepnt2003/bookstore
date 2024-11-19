@@ -169,7 +169,7 @@ const EditAuthorForm = ({ author, onUpdate, onCancel, fetchAuthors }) => {
         if (response.success) {
             onCancel();
             fetchAuthors(); // Gọi lại danh sách tác giả
-            toast.success('Cập nhật tác giả thành công')
+            toast.success('Cập nhật thành công')
             // showToast('Cập nhật tác giả thành công', 'success'); // Gọi showToast từ cha
         } else {
             toast.error(response.message);

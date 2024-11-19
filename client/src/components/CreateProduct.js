@@ -83,7 +83,7 @@ const CreateProduct = ({ onClose, onRefresh }) => {
             const response = await apiCreateProduct({ ...formData, categories: selectedCategories, author: selectedAuthors, soldCount: 0 });
             console.log("RP " + JSON.stringify(response))
             if (response.success) {
-                toast.success('Thêm sản phẩm thành công');
+                toast.success('Thêm thành công');
                 onRefresh();
                 onClose();
             } else {

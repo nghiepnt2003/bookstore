@@ -113,7 +113,7 @@ const UpdateProduct = ({ editProduct, onClose, onRefresh }) => {
             console.log("ANH LỚN "+formData.image.length)
             const response = await apiUpdateProduct({ ...formData, categories: selectedCategories, author: selectedAuthors }, editProduct._id);
             if (response.success) {
-                toast.success('Cập nhật sản phẩm thành công');
+                toast.success('Cập nhật thành công');
                 onRefresh();
                 onClose();
             } else {

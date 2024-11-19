@@ -24,7 +24,7 @@ const CreatePublisher = ({ onClose, onRefresh }) => {
         try {
             const response = await apiCreatePublisher(formData);
             if (response.success) {
-                toast.success('Thêm nhà xuất bản thành công');
+                toast.success('Thêm thành công');
                 onRefresh();
                 onClose();
             } else {

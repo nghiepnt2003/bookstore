@@ -113,7 +113,7 @@ const Products = () => {
                                         <div>
                                             <span>Nhập giá phù hợp với bạn</span>
                                             <div className='flex'>
-                                                <div className='flex items-center p-2 gap-2'>
+                                                {/* <div className='flex items-center p-2 gap-2'>
                                                     <label htmlFor='from'>Từ</label>
                                                     <input 
                                                         className='form-input w-[150px]' 
@@ -131,6 +131,32 @@ const Products = () => {
                                                         id="to"
                                                         value={price.to}
                                                         onChange={e => setPrice(prev => ({ ...prev, to: e.target.value }))}
+                                                    />
+                                                </div> */}
+                                                <div className='flex items-center p-2 gap-2'>
+                                                    <label htmlFor='from'>Từ</label>
+                                                    <input
+                                                        className='form-input w-[150px]' 
+                                                        type='number' 
+                                                        id="from"
+                                                        value={price.from}
+                                                        onChange={e => {
+                                                            const value = e.target.value === '' ? '' : Math.max(0, e.target.value); // Nếu rỗng, giữ nguyên giá trị rỗng
+                                                            setPrice(prev => ({ ...prev, from: value }));
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className='flex items-center p-2 gap-2'>
+                                                    <label htmlFor='to'>Đến</label>
+                                                    <input
+                                                        className='form-input w-[150px]' 
+                                                        type='number' 
+                                                        id="to"
+                                                        value={price.to}
+                                                        onChange={e => {
+                                                            const value = e.target.value === '' ? '' : Math.max(0, e.target.value); // Nếu rỗng, giữ nguyên giá trị rỗng
+                                                            setPrice(prev => ({ ...prev, to: value }));
+                                                        }}
                                                     />
                                                 </div>
                                             </div>

@@ -56,7 +56,7 @@ const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
             //     containerId: 'GlobalApplicationToast',
             //   });
             onCancel();
-            toast.success("Cập nhật người dùng thành công");  
+            toast.success("Cập nhật thành công");  
             fetchUsers(); // Đảm bảo rằng bạn gọi fetchUsers ở đây          
         } else {
             toast.error(response.message);
