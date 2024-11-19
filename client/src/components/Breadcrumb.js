@@ -12,7 +12,7 @@ const Breadcrumb = ({name}) => {
   const breadcrumb = useBreadcurmbs(routes)
   // console.log(breadcrumb)
   return (
-    <div className='text-sm flex items-center gap-1'>
+    <div className='text-sm flex items-center gap-1 ml-4'>
        {breadcrumb?.filter(el => !el.match.route==false).map(({match, breadcrumb}, index, self) => (
         <Link className='flex items-center gap-1 hover:text-main' key={match.pathname} to={match.pathname}>
          <span> {breadcrumb}</span>

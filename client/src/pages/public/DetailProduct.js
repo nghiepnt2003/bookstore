@@ -161,7 +161,7 @@ const DetailProduct = () => {
     const handleChangeQuantity = useCallback((flag) => {
         setQuantity(prev => {
             if (flag === 'minus' && prev === 1) return prev;
-            return flag === 'minus' ? prev - 1 : prev + 1;
+            return flag === 'minus' ? +prev - 1 : +prev + 1;
         });
     }, []);
 

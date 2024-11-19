@@ -167,9 +167,10 @@ const EditAuthorForm = ({ author, onUpdate, onCancel, fetchAuthors }) => {
 
         const response = await onUpdate(formData, author._id);
         if (response.success) {
-            toast.success(response.message);
             onCancel();
             fetchAuthors(); // Gọi lại danh sách tác giả
+            toast.success('Cập nhật tác giả thành công')
+            // showToast('Cập nhật tác giả thành công', 'success'); // Gọi showToast từ cha
         } else {
             toast.error(response.message);
         }
@@ -236,7 +237,7 @@ const EditAuthorForm = ({ author, onUpdate, onCancel, fetchAuthors }) => {
                 </div>
                 {/* Nút Cập Nhật và Hủy */}
                 <div className="flex justify-between mt-4">
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                    <button type="submit" className="px-4 py-2 bg-main text-white rounded-md hover:bg-[#FF66CC] transition">
                         Cập nhật
                     </button>
                     <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition">

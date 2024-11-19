@@ -83,7 +83,7 @@ const ManageUser = () => {
     return (
         <div className={clsx('w-full')} style={{ backgroundColor: '#f8f8f8' }}>
             <h1 className='h-[75px] justify-between flex items-center text-3xl font-bold px-4 border-b border-b-main'>
-                <span>Quản Lý Thành Viên</span>
+                <span>Quản Lý Tài Khoản</span>
             </h1>
             <div className='w-full p-4'>
                 <div className='flex justify-end p-4'>
@@ -115,7 +115,7 @@ const ManageUser = () => {
                                 <td className='py-2 px-4'>{index + 1}</td>
                                 <td className='py-2 px-4'>{el.email}</td>
                                 <td className='py-2 px-4'>{el.username}</td>
-                                <td className='py-2 px-4'>{el.role === 1 ? 'admin' : 'user'}</td>
+                                <td className='py-2 px-4'>{el.role === 1 ? 'admin' : 'customer'}</td>
                                 <td className='py-2 px-4'>{el.phone}</td>
                                 <td className='py-2 px-4'>{el.isBlocked ===false ? 'Hoạt động' : 'Đã khóa'}</td>
                                 <td className='py-2 px-4'>{moment(el.createdAt).format('DD/MM/YYYY')}</td>

@@ -31,6 +31,14 @@ const CreateAuthor = ({ onClose, onRefresh }) => {
     const handleAddAuthor = async (e) => {
         e.preventDefault();
         setLoading(true);
+         //  Kiểm tra các trường bắt buộc
+         const { name, description, image} = formData;
+         if (!name || !description ||  !image) {
+             toast.error('Vui lòng điền đầy đủ thông tin');
+             setLoading(false); // Đặt loading về false nếu có lỗi
+             e.stopPropagation();
+             return; // Ngăn không cho tiếp tục
+         }
         try {
             console.log( "FROM DATAT " + JSON.stringify(formData))
             const response = await apiCreateAuthor(formData);
@@ -40,6 +48,7 @@ const CreateAuthor = ({ onClose, onRefresh }) => {
                 onClose();
             } else {
                 toast.error(response?.message);
+                e.stopPropagation();
             }
         } catch (error) {
             console.error(error);
@@ -113,7 +122,7 @@ const CreateAuthor = ({ onClose, onRefresh }) => {
 
                 {/* Nút Thêm và Đóng */}
                 <div className="flex justify-between mt-4">
-                    <button type='submit' onClick={handleAddAuthor} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                    <button type='submit' onClick={handleAddAuthor} className="px-4 py-2 bg-main text-white rounded-md hover:bg-[#FF66CC] transition">
                         Thêm tác giả
                     </button>
                     <button type='button' onClick={onClose} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition">

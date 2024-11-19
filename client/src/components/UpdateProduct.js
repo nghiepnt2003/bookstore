@@ -21,7 +21,7 @@ const UpdateProduct = ({ editProduct, onClose, onRefresh }) => {
         publisher: '',
         categories: [],
         description: '',
-        soldCount: '',
+        soldCount: 0,
         image: '',
     });
     const [avatar, setAvatar] = useState('');
@@ -40,7 +40,7 @@ const UpdateProduct = ({ editProduct, onClose, onRefresh }) => {
                 publisher: editProduct.publisher?._id || '',
                 categories: editProduct.categories?.map(cat => cat._id) || [],
                 description: editProduct.description || '',
-                soldCount: editProduct.soldCount || '',
+                soldCount: editProduct.soldCount || 0,
                 image: editProduct.image || '',
             });
             setAvatar(editProduct.image);
@@ -101,6 +101,13 @@ const UpdateProduct = ({ editProduct, onClose, onRefresh }) => {
     const handleUpdateProduct = async (e) => {
         e.preventDefault();
         setLoading(true);
+        const { name, price, publisher, image , pageNumber} = formData;
+        if (!name || !price  || !pageNumber || selectedCategories.length === 0 || selectedAuthors.length === 0 || !publisher || !image) {
+            toast.error('Vui lòng điền đầy đủ thông tin');
+            setLoading(false); // Đặt loading về false nếu có lỗi
+            e.stopPropagation();
+            return; // Ngăn không cho tiếp tục
+        }
         try {
             console.log("FORMDATA " + JSON.stringify(formData))
             console.log("ANH LỚN "+formData.image.length)
@@ -279,7 +286,7 @@ const UpdateProduct = ({ editProduct, onClose, onRefresh }) => {
 
                 {/* Nút Cập Nhật và Đóng */}
                 <div className="flex justify-between mt-4">
-                    <button type='submit' onClick={handleUpdateProduct} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                    <button type='submit' onClick={handleUpdateProduct} className="px-4 py-2 bg-main text-white rounded-md hover:bg-[#FF66CC] transition">
                         Cập nhật sản phẩm
                     </button>
                     <button type='button' onClick={onClose} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition">

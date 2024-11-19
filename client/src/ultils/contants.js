@@ -112,7 +112,7 @@ export const adminSidebar = [
     },
     {
         id: 2,
-        text: 'Quản lý người dùng',
+        text: 'Quản lý tài khoản',
         path: `/${path.ADMIN}/${path.MANAGE_USER}`,
         icon: <MdGroups />
     },

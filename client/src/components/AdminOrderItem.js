@@ -3,6 +3,7 @@ import { Button } from 'antd';
 import React from 'react'
 import { toast } from 'react-toastify';
 import { apiUpdateOrder } from '../apis/user';
+import { apiCancelOrder } from '../apis';
 
 function AdminOrderItem({ setKey, setReload, listOrder }) {
 
@@ -38,6 +39,22 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                     toast.error('Có lỗi xảy ra khi cập nhật đơn hàng.');
                 }
     }
+
+    const handleCancel = async (oid) => {
+
+        const response = await apiUpdateOrder({ status: 'Cancelled' }, oid);
+
+        if (response.success) {
+
+            setReload(prev => !prev)
+            toast.success("Từ chối đơn hàng thành công")
+        } else {
+            toast.success(response.mess)
+        }
+
+        
+    }
+
     return (
         <>
             {
@@ -116,6 +133,13 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                                         : ""
                                     }
                                 </Button>
+                                {
+                                    order.status === "Pending" ?
+                                        <Button className='ml-[30px]' onClick={() => handleCancel(order._id)} danger type='primary'>
+                                            Từ chối đơn hàng
+                                        </Button>
+                                        : ""
+                                }
                             </div>
                         </div>
                     ))

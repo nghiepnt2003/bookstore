@@ -51,9 +51,13 @@ const EditUserForm = ({ user, onUpdate, onCancel, fetchUsers }) => {
 
         const response = await onUpdate(formData, user._id);
         if (response.success) {
+            // toast.success(`Success: User has been deleted successfully.`, {
+            //     toastId: uniqueId('toast-sucess'),
+            //     containerId: 'GlobalApplicationToast',
+            //   });
             onCancel();
-            fetchUsers(); // Đảm bảo rằng bạn gọi fetchUsers ở đây
-            toast.success("Cập nhật người dùng thành công");
+            toast.success("Cập nhật người dùng thành công");  
+            fetchUsers(); // Đảm bảo rằng bạn gọi fetchUsers ở đây          
         } else {
             toast.error(response.message);
         }

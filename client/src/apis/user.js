@@ -25,7 +25,7 @@ export const apiGetCurrent = () => axios({
 })
 
 export const apiGetUsers = (params) => axios({
-    url: '/user',
+    url: '/user?role=2',
     method: 'get',
     params
 })

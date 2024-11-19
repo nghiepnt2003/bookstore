@@ -19,7 +19,6 @@ function App() {
   return (
     <div className="font-main bg-[#f8f8f8] relative">
     {isShowModal && <Modal>{modalChildren}</Modal>}
-    <ToastContainer />
       <Routes>
         <Route path={path.CHECKOUT} element={<Checkout />} />
         <Route path={path.PUBLIC} element={<Public />}>
@@ -49,6 +48,19 @@ function App() {
         </Route>
         <Route path={path.LOGIN} element={<Login />}></Route>
       </Routes>
+      {/* <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+
+      /> */}
+      <ToastContainer/>
     </div>
   );
 }

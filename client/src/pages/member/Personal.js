@@ -74,11 +74,13 @@ const Personal = () => {
         const response = await apiChangePassword({ oldPassword: password, newPassword: newPassword });
         if (response?.success) 
         {
-            toast.success("Cập nhật mật khẩu thành công")
             setShowDialog(false);
+            toast.success("Cập nhật mật khẩu thành công")
         }
         else 
+        {
             toast.error(response.message)
+        }
            
     };
 
@@ -194,10 +196,6 @@ const Personal = () => {
                         <div>
                             <span className='font-medium mr-2'>Email:</span>
                             <span className='text-main'>{current?.email}</span>
-                        </div>
-                        <div>
-                            <span className='font-medium mr-2'>Trạng thái tài khoản:</span>
-                            <span className='text-main'>{current?.isBlocked ? 'Đã hoạt động' : 'Đã khóa'}</span>
                         </div>
                         <div>
                             <span className='font-medium mr-2'>Ngày tạo tài khoản:</span>

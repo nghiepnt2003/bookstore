@@ -53,6 +53,15 @@ const ManageAuthor = () => {
         });
     };
 
+    // Hàm hiển thị thông báo
+    // const showToast = (message, type) => {
+    //     if (type === 'success') {
+    //         toast.success(message);
+    //     } else {
+    //         toast.error(message);
+    //     }
+    // };
+
     const openEditModal = (author) => {
         dispatch(showModal({ 
             isShowModal: true, 
@@ -61,6 +70,7 @@ const ManageAuthor = () => {
                 onUpdate={handleUpdateAuthor}
                 onCancel={closeModal}
                 fetchAuthors={fetchAuthors}
+                // showToast={showToast} // Truyền hàm showToast vào đây
             />
         }));
     };
