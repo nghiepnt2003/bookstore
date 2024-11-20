@@ -244,7 +244,7 @@ const MyCart = () => {
                         disabled={total === 0}
                         className="mt-6 disabled:bg-slate-200 disabled:text-[#333] w-full rounded-md bg-blue-500 py-1.5 font-medium text-blue-50 hover:bg-blue-600"
                     >
-                        Thanh toán
+                        Đặt hàng
                     </button>
                 </div>
             </div>

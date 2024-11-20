@@ -103,6 +103,7 @@ import path from "../ultils/path";
 import { useNavigate } from "react-router-dom"; 
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCart } from '../store/cart/asyncActions'; 
+import {formatMoney} from '../ultils/helpers'
 
 const Header = () => {
     const { FaPhone, FaTruckFast, IoMdCart, FaUserAlt } = icons;
@@ -172,7 +173,7 @@ const Header = () => {
                         </span>
                         <span className="flex flex-col items-center">                        
                             <Link to="/member/my-cart">{`${cartItems?.length || 0} item(s)`}</Link>
-                            <span className="font-semibold text-[15px]">{`${totalPrice} VNĐ`}</span>
+                            <span className="font-semibold text-[15px]">{`${formatMoney(totalPrice)} VNĐ`}</span>
                         </span>                    
                     </div>
                     </div>

@@ -8,6 +8,7 @@ import { Modal } from './components';
 import { AdminLayout, ManageProduct, ManageOrder, ManageUser, Dashboard, ManageCategory, ManageAuthor, AdminPersonal, ManagePublisher } from './pages/admin';
 import { MemberLayout, Personal, History, MyCart, Checkout } from './pages/member';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const dispatch = useDispatch();
@@ -60,6 +61,7 @@ function App() {
         pauseOnHover
 
       /> */}
+      <ToastContainer/>
       <ToastContainer/>
     </div>
   );
