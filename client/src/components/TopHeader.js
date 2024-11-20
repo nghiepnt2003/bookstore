@@ -13,6 +13,7 @@ const TopHeader = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const {isLoggedIn, current, isLoading, mes} = useSelector(state => state.user)
+  console.log("CURRENT " + JSON.stringify(current))
   useEffect(() => {
     if(isLoggedIn && isLoading==true)
     {
@@ -46,7 +47,7 @@ const TopHeader = () => {
     <div className='h-[38px] w-full bg-[#f73995] flex items-center justify-center'>
         <div className='w-main flex items-center justify-between text-white text-[0.9rem]'>
             <span>ODER ONLINE OR CALL US (+1450) 056 7077</span>
-            {isLoggedIn && current
+            {isLoggedIn && current && current.role === 2
               ? <div className='flex items-center'>
                   <span className='mr-2'>{`Wellcome, ${current?.fullname}`}</span>
                   <span 
