@@ -18,6 +18,7 @@ const TopHeader = () => {
     if(isLoggedIn && isLoading==true)
     {
       dispatch(getCurrent())
+      window.location.reload()
     }
     
   }, [dispatch, isLoggedIn])
@@ -47,7 +48,7 @@ const TopHeader = () => {
     <div className='h-[38px] w-full bg-[#f73995] flex items-center justify-center'>
         <div className='w-main flex items-center justify-between text-white text-[0.9rem]'>
             <span>ODER ONLINE OR CALL US (+1450) 056 7077</span>
-            {isLoggedIn && current && current.role === 2
+            {isLoggedIn && current
               ? <div className='flex items-center'>
                   <span className='mr-2'>{`Wellcome, ${current?.fullname}`}</span>
                   <span 
@@ -64,4 +65,4 @@ const TopHeader = () => {
   )
 }
 
-export default memo(TopHeader)
+export default TopHeader

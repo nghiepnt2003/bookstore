@@ -128,8 +128,10 @@ const Login = () => {
                 setTimeout(() => {
                     if (+response.userData.role === 2) {
                         navigate(`/${path.HOME}`);
+                        window.location.reload()
                     } else {
                         navigate(`/${path.ADMIN}/${path.DASHBOARD}`);
+                        window.location.reload()
                     }
                 }, 100); // Thay đổi thời gian nếu cần
             } else {

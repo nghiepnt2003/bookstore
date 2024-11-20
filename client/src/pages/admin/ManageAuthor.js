@@ -18,18 +18,34 @@ const ManageAuthor = () => {
 
     const fetchAuthors = async (params) => {
         console.log("PR " + JSON.stringify(params))
-        const response = await apiGetAuthors(params);
-        if (response.success) 
-            setAuthors(response.authors);
-        else setAuthors([]);
+        if(params && params.name!=="")
+            {
+                const response = await apiGetAuthors(params);
+                if (response.success) 
+                    setAuthors(response.authors);
+                else setAuthors([]);
+            }
+        else
+        {
+            const response = await apiGetAuthors();
+            if (response.success) 
+                setAuthors(response.authors);
+            else setAuthors([]);
+        }
+       
+       
     };
 
     useEffect(() => {
         console.log("PR TEN" + queries.name)
         if(queries.name && queries.name !=="")
+        {
+            console.log("QU NAME " + queries.name)
             fetchAuthors({ name: queries.name }); // Truyền đúng tham số tìm kiếm
+        }
         else
             fetchAuthors(); // Truyền đúng tham số tìm kiếm
+        // fetchAuthors({ name: queries.name }); // Truyền đúng tham số tìm kiếm
     }, [queries]);
 
     const handleUpdateAuthor = async (updatedAuthorData, authorId) => {
@@ -47,7 +63,7 @@ const ManageAuthor = () => {
                 const response = await apiDeleteAuthor(authorId);
                 if (response.success) {
                     fetchAuthors(queries); // Sử dụng queries để lấy dữ liệu
-                    toast.success(response.message);
+                    toast.success('Xóa thành công');
                 } else toast.error(response.message);
             }
         });

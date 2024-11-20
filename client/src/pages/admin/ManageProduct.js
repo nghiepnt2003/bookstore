@@ -44,7 +44,7 @@ const ManageProduct = () => {
             if (rs.isConfirmed) {
                 const response = await apiDeleteProduct(pid);
                 if (response.success) {
-                    toast.success('Xóa thành công!');
+                    toast.success('Xóa thành công');
                     fetchProducts(10, page); // Cập nhật lại danh sách sản phẩm
                 } else {
                     toast.error('Đã có lỗi xảy ra');

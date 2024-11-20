@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useEffect} from 'react'
 import {Sidebar, Banner, BestSeller, FeaturedProducts, NewProducts} from '../../components'
 import chuProductBestsellers from "../../assets/chuProductBestsellers.png"
 import tipRead from '../../assets/tipRead.png'
@@ -6,6 +6,8 @@ import chuFeaturedProducts from '../../assets/chuFeaturedProducts.png'
 import chuNewProducts from '../../assets/chuNewProducts.png'
 import DanhNgon from '../../assets/DanhNgon.png'
 import { useSelector } from "react-redux"
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const Home = () => {
@@ -37,6 +39,7 @@ const Home = () => {
                 <img src={chuFeaturedProducts} alt="Featured Products" className="h-11"></img>
                 <FeaturedProducts />
             </div>
+            {/* <ToastContainer /> */}
         </div>
     )
 }

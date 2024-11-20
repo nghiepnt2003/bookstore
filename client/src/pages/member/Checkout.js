@@ -49,7 +49,7 @@ const Checkout = () => {
 
 
     React.useEffect(() => {
-        fetchSuggestedAddresses();
+        // fetchSuggestedAddresses();
         setList(listCheckout)
     }, [])
 
@@ -72,7 +72,7 @@ const Checkout = () => {
         }
     };
 
-    console.log("fetchSuggestedAddresses " + suggestedAddresses + " " + typeof(suggestedAddresses))
+    // console.log("fetchSuggestedAddresses " + suggestedAddresses + " " + typeof(suggestedAddresses))
 
     React.useEffect(() => {
 
@@ -266,12 +266,12 @@ const Checkout = () => {
                                     </div>
                                 </label>
                             </div>
-                            <div className='w-full mx-auto'>
-                                {/* <PayPal
+                            {/* <div className='w-full mx-auto'>
+                                <PayPal
                                     payload={payPalPayload}
                                     setIsSuccess={setIsSuccess}
-                                    amount={(total / 24250).toFixed(2)} /> */}
-                            </div>
+                                    amount={(total / 24250).toFixed(2)} />
+                            </div> */}
                         </form>
                         {/* <p class="mt-8 text-lg">Voucher</p>
                         <div className="flex items-center mt-[20px]">

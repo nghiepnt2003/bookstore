@@ -15,7 +15,7 @@ function App() {
   const {isShowModal, modalChildren} = useSelector(state => state.app)
   useEffect(() => {
     dispatch(getCategories());
-  }, []);
+  }, []);  
 
   return (
     <div className="font-main bg-[#f8f8f8] relative">
@@ -49,20 +49,17 @@ function App() {
         </Route>
         <Route path={path.LOGIN} element={<Login />}></Route>
       </Routes>
-      {/* <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={true}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-
-      /> */}
-      <ToastContainer/>
-      <ToastContainer/>
+      <ToastContainer
+        position="top-right" // Vị trí của toast
+        autoClose={5000} // Thời gian tự động đóng (ms)
+        hideProgressBar={false} // Ẩn thanh tiến độ
+        newestOnTop={false} // Toast mới nhất sẽ ở trên cùng
+        closeOnClick // Đóng khi nhấp chuột vào toast
+        rtl={false} // Hỗ trợ ngôn ngữ RTL
+        pauseOnFocusLoss // Tạm dừng khi mất tiêu điểm
+        draggable // Cho phép kéo thả
+        pauseOnHover // Tạm dừng khi hover chuột
+      />
     </div>
   );
 }
