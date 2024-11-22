@@ -50,6 +50,7 @@ function App() {
         <Route path={path.LOGIN} element={<Login />}></Route>
       </Routes>
       <ToastContainer
+        limit={1}
         position="top-right" // Vị trí của toast
         autoClose={5000} // Thời gian tự động đóng (ms)
         hideProgressBar={false} // Ẩn thanh tiến độ

@@ -22,8 +22,8 @@ export const renderStarFromNumber = (number) => {
         stars.push(<FaStar color="#FFCC66"/>)
     for(let i=5; i>+number; i--)
         stars.push(<FaRegStar color="#FFCC66"/>)
-    // if(stars===0)
-    //     stars.push(<FaRegStar color="#FFCC66"/>)
+    if(stars===0)
+        stars.push(<FaRegStar color="#FFCC66"/>)
 
     return stars
 }
