@@ -138,12 +138,7 @@ class CartController {
           populate: { path: "categories" },
         }, // Populate thông tin sản phẩm đầy đủ
       });
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${product.stockQuantity} items available in stock`,
-        });
-      }
+      //   let cart = await Cart.findOne({ user: userId });
       if (!cart) {
         // Nếu không có cart, tạo mới một cart cho user
         cart = new Cart({
@@ -157,19 +152,9 @@ class CartController {
         product,
       });
       if (existingLineItem) {
-        // // Nếu đã tồn tại, cập nhật số lượng
-        // existingLineItem.quantity += quantity;
-        // Nếu sản phẩm đã tồn tại, cập nhật số lượng
-        const newQuantity = existingLineItem.quantity + quantity;
-        // Kiểm tra tồn kho với số lượng mới
-        if (newQuantity > product.stockQuantity) {
-          return res.status(400).json({
-            success: false,
-            message: `Only ${product.stockQuantity} items available in stock`,
-          });
-        }
+        // Nếu đã tồn tại, cập nhật số lượng
+        existingLineItem.quantity += quantity;
 
-        existingLineItem.quantity = newQuantity;
         await existingLineItem.save();
       } else {
         // Nếu chưa tồn tại, tạo một LineItem mới
@@ -201,6 +186,68 @@ class CartController {
     }
   }
 
+  // //[PUT] /cart/items/
+  // async updateCartItem(req, res) {
+  //   try {
+  //     let { productId, quantity } = req.body;
+  //     if (!productId || !quantity || isNaN(productId) || isNaN(quantity)) {
+  //       return res
+  //         .status(400)
+  //         .json({ success: false, message: "Invalid product ID or quantity" });
+  //     }
+  //     productId = parseInt(productId, 10); // Chuyển productId thành số nguyên
+  //     quantity = parseInt(quantity, 10); // Chuyển quantity thành số nguyên
+
+  //     const userId = req.user._id;
+  //     const product = await Product.findById(productId);
+  //     if (!product) {
+  //       return res
+  //         .status(404)
+  //         .json({ success: false, message: "Product not found" });
+  //     }
+  //     // Tìm cart của user hiện tại
+  //     let cart = await Cart.findOne({ user: userId }).populate("items");
+  //     if (!cart) {
+  //       return res
+  //         .status(404)
+  //         .json({ success: false, message: "Cart not found" });
+  //     }
+
+  //     // Kiểm tra xem sản phẩm có tồn tại trong giỏ hàng không
+  //     let existingLineItem = await LineItem.findOne({
+  //       _id: { $in: cart.items }, // Tìm trong các LineItem của cart
+  //       product,
+  //     });
+  //     if (!existingLineItem) {
+  //       return res
+  //         .status(404)
+  //         .json({ success: false, message: "Product not found in cart" });
+  //     }
+  //     if (quantity < 1) {
+  //       // Nếu quantity < 1, xóa LineItem
+  //       await LineItem.deleteOne({ _id: existingLineItem._id });
+  //       // Xóa LineItem khỏi danh sách items trong cart
+  //       cart.items = cart.items.filter(
+  //         (item) => item.toString() !== existingLineItem._id.toString()
+  //       );
+  //       await cart.save();
+  //     } else {
+  //       // Cập nhật số lượng sản phẩm
+  //       existingLineItem.quantity = quantity;
+  //       await existingLineItem.save();
+  //     }
+
+  //     cart = await Cart.findOne({ user: userId }).populate("items");
+
+  //     return res
+  //       .status(200)
+  //       .json({ success: true, message: "Product quantity updated", cart });
+  //   } catch (error) {
+  //     return res
+  //       .status(500)
+  //       .json({ success: false, message: "Server error", error });
+  //   }
+  // }
   async updateCartItem(req, res) {
     try {
       let { productId, quantity } = req.body;
@@ -225,12 +272,6 @@ class CartController {
         return res.status(404).json({
           success: false,
           message: "Product not found",
-        });
-      }
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${product.stockQuantity} items available in stock`,
         });
       }
 

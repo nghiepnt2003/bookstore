@@ -227,12 +227,6 @@ class CartController {
           message: "Product not found",
         });
       }
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${product.stockQuantity} items available in stock`,
-        });
-      }
 
       // Tìm giỏ hàng của user hiện tại
       let cart = await Cart.findOne({ user: userId }).populate({

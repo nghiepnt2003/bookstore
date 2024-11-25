@@ -164,7 +164,7 @@ class OrderController {
       res.status(500).json({ success: false, message: error });
     }
   }
-  // [GET] /order/getAllsByUser
+  // [GET] /order/getByUser
   async getAllsByUser(req, res) {
     try {
       const { _id } = req.user; // Lấy user ID từ access token (phải có middleware xác thực trước đó)
@@ -200,7 +200,6 @@ class OrderController {
       // Sắp xếp nếu có tham số sort
       if (req.query.sort) {
         const sortBy = req.query.sort.split(",").join(" ");
-
         queryCommand = queryCommand.sort(sortBy);
       }
 
@@ -600,52 +599,123 @@ class OrderController {
       let totalPrice = 0; // Biến để lưu tổng giá trị đơn hàng
       // Kiểm tra và cập nhật tồn kho
       for (const item of selectedItems) {
-        // Kiểm tra tồn kho trước khi cập nhật
+        console.log(item);
         const product = await Product.findById(item.product._id);
 
-        if (!product || product.stockQuantity < item.quantity) {
+        if (!product) {
           throw new Error(
-            `Product "${
-              product?.name || "unknown"
-            }" is sold out or insufficient stock.`
+            `Insufficient stock for product "${item.product.name}".`
+          );
+        }
+        if (product?.stockQuantity < item.quantity) {
+          throw new Error(
+            `Product "${product?.name || "unknown"}" is sold out .`
           );
         }
 
-        // Cập nhật tồn kho và số lượng đã bán
-        const updatedProduct = await Product.findOneAndUpdate(
-          {
-            _id: item.product._id,
-            stockQuantity: { $gte: item.quantity },
-          },
-          {
-            $inc: {
-              stockQuantity: -item.quantity,
-              soldCount: item.quantity,
-            },
-          },
-          { new: true }
-        );
+Dưới đây là đoạn code hoàn chỉnh cho phương thức checkout, bao gồm việc kiểm tra tồn kho và xử lý lỗi khi sản phẩm không đủ số lượng:
 
-        if (!updatedProduct) {
-          throw new Error(
-            `Failed to update stock for product "${item.product.name}". Please try again.`
-          );
-        }
+javascript
+Copy code
+// [POST] /order/checkout
+async checkout(req, res) {
+  try {
+    const user = req.user; // Lấy thông tin user từ accessToken
+    const { payment, shippingAddress, recipientName, recipientPhone } = req.body;
 
-        const finalPrice = await updatedProduct.getFinalPrice();
+    if (!payment) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Payment method not provided" });
+    }
+    if (!recipientName || !recipientPhone) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing Inputs" });
+    }
 
-        const orderDetail = new OrderDetail({
-          productId: updatedProduct._id,
-          productName: updatedProduct.name,
-          productImage: updatedProduct.image,
-          productPrice: finalPrice,
-          quantity: item.quantity,
-        });
+    const userInfo = await User.findById(user._id).select("address member");
 
-        const savedOrderDetail = await orderDetail.save();
-        orderDetailsIds.push(savedOrderDetail._id);
-        totalPrice += finalPrice * item.quantity;
+    if (!userInfo.address || userInfo.address.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "User address is required for checkout",
+      });
+    }
+
+    let cart = await Cart.findOne({ user: user._id }).populate({
+      path: "items",
+      select: "selectedForCheckout quantity",
+      populate: {
+        path: "product",
+        model: "Product",
+        populate: { path: "categories" },
+      },
+    });
+
+    if (!cart) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Cart not found" });
+    }
+
+    const selectedItems = cart.items.filter(
+      (item) => item.selectedForCheckout && !item.deleted
+    );
+
+    if (selectedItems.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No items selected for checkout" });
+    }
+
+    const orderDetailsIds = [];
+    let totalPrice = 0; // Tổng giá trị đơn hàng
+
+    // Kiểm tra và cập nhật tồn kho
+    for (const item of selectedItems) {
+      // Kiểm tra tồn kho trước khi cập nhật
+      const product = await Product.findById(item.product._id);
+
+      if (!product || product.stockQuantity < item.quantity) {
+        throw new Error(`Product "${product?.name || 'unknown'}" is sold out or insufficient stock.`);
       }
+
+      // Cập nhật tồn kho và số lượng đã bán
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.product._id,
+          stockQuantity: { $gte: item.quantity },
+        },
+        {
+          $inc: {
+            stockQuantity: -item.quantity,
+            soldCount: item.quantity,
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedProduct) {
+        throw new Error(
+          `Failed to update stock for product "${item.product.name}". Please try again.`
+        );
+      }
+
+      const finalPrice = await updatedProduct.getFinalPrice();
+
+      const orderDetail = new OrderDetail({
+        productId: updatedProduct._id,
+        productName: updatedProduct.name,
+        productImage: updatedProduct.image,
+        productPrice: finalPrice,
+        quantity: item.quantity,
+      });
+
+      const savedOrderDetail = await orderDetail.save();
+      orderDetailsIds.push(savedOrderDetail._id);
+      totalPrice += finalPrice * item.quantity;
+    }
       // Kiểm tra rank của user để áp dụng giảm giá
       const member = await Member.findById(userInfo.member);
       console.log(member);

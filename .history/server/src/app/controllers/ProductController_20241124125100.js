@@ -448,14 +448,6 @@ class ProductController {
             .json({ success: false, message: "Missing inputs" });
         }
 
-        // Kiểm tra costPrice < price
-        if (costPrice >= price) {
-          return res.status(400).json({
-            success: false,
-            message: "Cost price must be smaller than the selling price.",
-          });
-        }
-
         // Nếu có file ảnh, lưu URL vào req.body
         if (req.file && req.file.path) {
           req.body.image = req.file.path; // URL ảnh trên Cloudinary
@@ -509,18 +501,6 @@ class ProductController {
           });
         }
 
-        // Kiểm tra costPrice < price nếu có cập nhật
-        if (
-          req.body.costPrice &&
-          req.body.price &&
-          req.body.costPrice >= req.body.price
-        ) {
-          return res.status(400).json({
-            success: false,
-            message: "Cost price must be smaller than the selling price.",
-          });
-        }
-
         // Xử lý xóa ảnh cũ nếu có ảnh mới được upload
         if (req.file) {
           if (existingProduct.image) {
@@ -537,7 +517,12 @@ class ProductController {
           // Lấy URL của ảnh mới từ Cloudinary
           req.body.image = req.file.path; // Lưu URL của ảnh mới
         }
-
+        if (
+          req.body.stockQuantity &&
+          req.body.stockQuantity !== existingProduct.stockQuantity
+        ) {
+          req.body.lastRestocked = new Date.now();
+        }
         // Cập nhật sản phẩm
         const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
           new: true,

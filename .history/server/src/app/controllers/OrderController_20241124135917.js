@@ -164,7 +164,7 @@ class OrderController {
       res.status(500).json({ success: false, message: error });
     }
   }
-  // [GET] /order/getAllsByUser
+  // [GET] /order/getByUser
   async getAllsByUser(req, res) {
     try {
       const { _id } = req.user; // Lấy user ID từ access token (phải có middleware xác thực trước đó)
@@ -200,7 +200,6 @@ class OrderController {
       // Sắp xếp nếu có tham số sort
       if (req.query.sort) {
         const sortBy = req.query.sort.split(",").join(" ");
-
         queryCommand = queryCommand.sort(sortBy);
       }
 
@@ -533,7 +532,7 @@ class OrderController {
     return res.status(200).json(result.data);
   }
 
-  // [POST] /order/checkout
+  //[POST] /order/checkout
   async checkout(req, res) {
     try {
       const user = req.user; // Lấy thông tin user từ accessToken
@@ -598,53 +597,34 @@ class OrderController {
       // Mảng lưu trữ các _id của OrderDetail đã lưu
       const orderDetailsIds = [];
       let totalPrice = 0; // Biến để lưu tổng giá trị đơn hàng
-      // Kiểm tra và cập nhật tồn kho
+
+      // Vòng lặp for để tạo OrderDetail cho mỗi item
       for (const item of selectedItems) {
-        // Kiểm tra tồn kho trước khi cập nhật
-        const product = await Product.findById(item.product._id);
-
-        if (!product || product.stockQuantity < item.quantity) {
-          throw new Error(
-            `Product "${
-              product?.name || "unknown"
-            }" is sold out or insufficient stock.`
-          );
-        }
-
-        // Cập nhật tồn kho và số lượng đã bán
-        const updatedProduct = await Product.findOneAndUpdate(
-          {
-            _id: item.product._id,
-            stockQuantity: { $gte: item.quantity },
-          },
-          {
-            $inc: {
-              stockQuantity: -item.quantity,
-              soldCount: item.quantity,
-            },
-          },
-          { new: true }
-        );
-
-        if (!updatedProduct) {
-          throw new Error(
-            `Failed to update stock for product "${item.product.name}". Please try again.`
-          );
-        }
-
-        const finalPrice = await updatedProduct.getFinalPrice();
-
+        // Tính giá cuối cùng của sản phẩm (có áp dụng giảm giá nếu có)
+        const finalPrice = await item.product.getFinalPrice();
+        console.log(finalPrice);
+        // Tạo OrderDetail cho mỗi sản phẩm đã chọn
         const orderDetail = new OrderDetail({
-          productId: updatedProduct._id,
-          productName: updatedProduct.name,
-          productImage: updatedProduct.image,
-          productPrice: finalPrice,
+          productId: item.product._id,
+          productName: item.product.name,
+          productImage: item.product.image,
+          productPrice: finalPrice, // Lưu giá đã được giảm (nếu có)
           quantity: item.quantity,
         });
 
+        // Lưu OrderDetail vào cơ sở dữ liệu
         const savedOrderDetail = await orderDetail.save();
         orderDetailsIds.push(savedOrderDetail._id);
+
+        // Tính tổng giá trị đơn hàng
         totalPrice += finalPrice * item.quantity;
+
+        // Cập nhật số lượng sản phẩm đã bán
+        await Product.findByIdAndUpdate(
+          item.product._id,
+          { $inc: { soldCount: item.quantity } }, // Cộng thêm số lượng đã bán
+          { new: true } // Trả về tài liệu đã được cập nhật
+        );
       }
       // Kiểm tra rank của user để áp dụng giảm giá
       const member = await Member.findById(userInfo.member);
@@ -759,6 +739,7 @@ class OrderController {
       });
     }
   }
+
   // [POST] /order/callbackZaloPay/:orderId
   async callbackZaloPay(req, res) {
     let result = {};
@@ -949,10 +930,7 @@ class OrderController {
       }
 
       // Tìm đơn hàng theo ID
-      const order = await Order.findById(id).populate({
-        path: "details", // Populate trường "details"
-        model: "OrderDetail", // Tên của model "OrderDetail"
-      });
+      const order = await Order.findById(id);
       if (!order) {
         return res.status(404).json({
           success: false,
@@ -981,20 +959,6 @@ class OrderController {
           await user.member.save(); // Lưu thay đổi vào Member
         }
       }
-      if (status === "Cancelled") {
-        for (const detail of order.details) {
-          await Product.findOneAndUpdate(
-            { _id: detail.productId },
-            {
-              $inc: {
-                stockQuantity: detail.quantity,
-                soldCount: -detail.quantity,
-              },
-            },
-            { new: true }
-          );
-        }
-      }
 
       res.status(200).json({
         success: true,
@@ -1010,6 +974,39 @@ class OrderController {
   }
 
   // [DELETE] /order/:id
+  // async deleteByUser(req, res) {
+  //   try {
+  //     const { id } = req.params;
+  //     const userId = req.user._id; // Lấy user ID từ access token
+
+  //     // Tìm đơn hàng theo ID và kiểm tra xem nó có thuộc về người dùng không và có trạng thái là "Pending" không
+  //     const order = await Order.findOne({
+  //       _id: id,
+  //       user: userId,
+  //       status: "Pending",
+  //     });
+  //     console.log(order);
+  //     if (!order) {
+  //       return res.status(404).json({
+  //         success: false,
+  //         message: "Order not found or cannot be deleted",
+  //       });
+  //     }
+
+  //     // Xóa đơn hàng
+  //     await order.delete();
+
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "Order deleted successfully",
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: error.message,
+  //     });
+  //   }
+  // }
   async deleteByUser(req, res) {
     try {
       const { id } = req.params;
@@ -1019,10 +1016,8 @@ class OrderController {
       const order = await Order.findOne({
         _id: id,
         user: userId,
-      }).populate({
-        path: "details", // Populate trường "details"
-        model: "OrderDetail", // Tên của model "OrderDetail"
       });
+
       // Kiểm tra trạng thái của đơn hàng
       if (!order) {
         return res.status(404).json({
@@ -1039,41 +1034,24 @@ class OrderController {
         });
       }
 
-      // Hoàn lại số lượng tồn kho
-      for (const detail of order.details) {
-        console.log(detail);
+      // Xóa tất cả OrderDetails liên quan
+      // await OrderDetail.deleteMany({ _id: { $in: order.details } });
 
-        const product = await Product.findOneAndUpdate(
-          { _id: detail.productId }, // Tìm sản phẩm
-          {
-            $inc: {
-              stockQuantity: detail.quantity, // Tăng số lượng tồn kho
-              soldCount: -detail.quantity, // Giảm số lượng đã bán
-            },
-          },
-          { new: true } // Trả về bản ghi đã cập nhật
-        );
-
-        if (!product) {
-          return res.status(500).json({
-            success: false,
-            message: `Failed to update stock for product with ID ${detail.productId}`,
-          });
-        }
-      }
+      // Xóa đơn hàng
+      // await order.delete();
 
       // Cập nhật trạng thái đơn hàng thành "Cancelled"
       order.status = "Cancelled";
       await order.save();
 
-      res
-        .status(200)
-        .json({ success: true, message: "Order cancelled successfully" });
+      res.status(200).json({
+        success: true,
+        message: "Order Cancelled  successfully",
+      });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Failed to cancel order",
-        error: error.message,
+        message: error.message,
       });
     }
   }

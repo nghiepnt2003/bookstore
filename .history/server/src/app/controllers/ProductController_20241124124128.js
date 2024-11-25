@@ -420,15 +420,8 @@ class ProductController {
             error: err.message,
           });
         }
-        const {
-          name,
-          price,
-          costPrice,
-          pageNumber,
-          author,
-          publisher,
-          categories,
-        } = req.body;
+        const { name, price, pageNumber, author, publisher, categories } =
+          req.body;
         if (Object.keys(req.body).length === 0)
           return res
             .status(400)
@@ -437,7 +430,6 @@ class ProductController {
         if (
           !name ||
           !price ||
-          !costPrice ||
           !pageNumber ||
           !author ||
           !publisher ||
@@ -446,14 +438,6 @@ class ProductController {
           return res
             .status(400)
             .json({ success: false, message: "Missing inputs" });
-        }
-
-        // Kiểm tra costPrice < price
-        if (costPrice >= price) {
-          return res.status(400).json({
-            success: false,
-            message: "Cost price must be smaller than the selling price.",
-          });
         }
 
         // Nếu có file ảnh, lưu URL vào req.body
@@ -506,18 +490,6 @@ class ProductController {
           return res.status(404).json({
             success: false,
             message: "Product not found",
-          });
-        }
-
-        // Kiểm tra costPrice < price nếu có cập nhật
-        if (
-          req.body.costPrice &&
-          req.body.price &&
-          req.body.costPrice >= req.body.price
-        ) {
-          return res.status(400).json({
-            success: false,
-            message: "Cost price must be smaller than the selling price.",
           });
         }
 

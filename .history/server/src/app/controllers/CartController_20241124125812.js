@@ -138,12 +138,7 @@ class CartController {
           populate: { path: "categories" },
         }, // Populate thông tin sản phẩm đầy đủ
       });
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${product.stockQuantity} items available in stock`,
-        });
-      }
+      //   let cart = await Cart.findOne({ user: userId });
       if (!cart) {
         // Nếu không có cart, tạo mới một cart cho user
         cart = new Cart({
@@ -157,19 +152,9 @@ class CartController {
         product,
       });
       if (existingLineItem) {
-        // // Nếu đã tồn tại, cập nhật số lượng
-        // existingLineItem.quantity += quantity;
-        // Nếu sản phẩm đã tồn tại, cập nhật số lượng
-        const newQuantity = existingLineItem.quantity + quantity;
-        // Kiểm tra tồn kho với số lượng mới
-        if (newQuantity > product.stockQuantity) {
-          return res.status(400).json({
-            success: false,
-            message: `Only ${product.stockQuantity} items available in stock`,
-          });
-        }
+        // Nếu đã tồn tại, cập nhật số lượng
+        existingLineItem.quantity += quantity;
 
-        existingLineItem.quantity = newQuantity;
         await existingLineItem.save();
       } else {
         // Nếu chưa tồn tại, tạo một LineItem mới
@@ -225,12 +210,6 @@ class CartController {
         return res.status(404).json({
           success: false,
           message: "Product not found",
-        });
-      }
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${product.stockQuantity} items available in stock`,
         });
       }
 

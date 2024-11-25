@@ -14,11 +14,11 @@ const productSchema = new Schema(
     _id: { type: Number },
     name: { type: String, maxLength: 255, required: true },
     image: { type: String },
+    // images: { type: Array },
     description: { type: String },
     price: { type: Number, required: true }, // giá bán
-    costPrice: { type: Number }, // Giá nhập
-    // costPrice: { type: Number, required: true }, // Giá nhập
-    stockQuantity: { type: Number, default: 100 }, // Số lượng tồn kho
+    costPrice: { type: Number, required: true }, // Giá nhập
+    stockQuantity: { type: Number, required: true }, // Số lượng tồn kho
     lastRestocked: { type: Date, default: Date.now }, // Thời gian nhập hàng gần nhất
     datePublic: { type: Date },
     pageNumber: { type: Number, required: true },

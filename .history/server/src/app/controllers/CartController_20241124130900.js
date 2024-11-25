@@ -162,10 +162,12 @@ class CartController {
         // Nếu sản phẩm đã tồn tại, cập nhật số lượng
         const newQuantity = existingLineItem.quantity + quantity;
         // Kiểm tra tồn kho với số lượng mới
-        if (newQuantity > product.stockQuantity) {
+        if (newQuantity > product.stockQuantity + existingLineItem.quantity) {
           return res.status(400).json({
             success: false,
-            message: `Only ${product.stockQuantity} items available in stock`,
+            message: `Only ${
+              product.stockQuantity + existingLineItem.quantity
+            } items available in stock`,
           });
         }
 
@@ -225,12 +227,6 @@ class CartController {
         return res.status(404).json({
           success: false,
           message: "Product not found",
-        });
-      }
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${product.stockQuantity} items available in stock`,
         });
       }
 

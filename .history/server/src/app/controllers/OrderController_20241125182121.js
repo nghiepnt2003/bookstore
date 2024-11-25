@@ -164,7 +164,7 @@ class OrderController {
       res.status(500).json({ success: false, message: error });
     }
   }
-  // [GET] /order/getAllsByUser
+  // [GET] /order/getByUser
   async getAllsByUser(req, res) {
     try {
       const { _id } = req.user; // Lấy user ID từ access token (phải có middleware xác thực trước đó)

@@ -509,18 +509,6 @@ class ProductController {
           });
         }
 
-        // Kiểm tra costPrice < price nếu có cập nhật
-        if (
-          req.body.costPrice &&
-          req.body.price &&
-          req.body.costPrice >= req.body.price
-        ) {
-          return res.status(400).json({
-            success: false,
-            message: "Cost price must be smaller than the selling price.",
-          });
-        }
-
         // Xử lý xóa ảnh cũ nếu có ảnh mới được upload
         if (req.file) {
           if (existingProduct.image) {

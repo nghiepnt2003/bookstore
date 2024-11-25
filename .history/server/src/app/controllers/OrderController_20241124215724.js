@@ -164,7 +164,7 @@ class OrderController {
       res.status(500).json({ success: false, message: error });
     }
   }
-  // [GET] /order/getAllsByUser
+  // [GET] /order/getByUser
   async getAllsByUser(req, res) {
     try {
       const { _id } = req.user; // Lấy user ID từ access token (phải có middleware xác thực trước đó)
@@ -200,7 +200,6 @@ class OrderController {
       // Sắp xếp nếu có tham số sort
       if (req.query.sort) {
         const sortBy = req.query.sort.split(",").join(" ");
-
         queryCommand = queryCommand.sort(sortBy);
       }
 
@@ -600,44 +599,26 @@ class OrderController {
       let totalPrice = 0; // Biến để lưu tổng giá trị đơn hàng
       // Kiểm tra và cập nhật tồn kho
       for (const item of selectedItems) {
-        // Kiểm tra tồn kho trước khi cập nhật
+        console.log(item);
         const product = await Product.findById(item.product._id);
 
-        if (!product || product.stockQuantity < item.quantity) {
+        if (!product) {
           throw new Error(
-            `Product "${
-              product?.name || "unknown"
-            }" is sold out or insufficient stock.`
+            `Insufficient stock for product "${item.product.name}".`
+          );
+        }
+        if (product?.stockQuantity < item.quantity) {
+          throw new Error(
+            `Product "${product?.name || "unknown"}" is sold out .`
           );
         }
 
-        // Cập nhật tồn kho và số lượng đã bán
-        const updatedProduct = await Product.findOneAndUpdate(
-          {
-            _id: item.product._id,
-            stockQuantity: { $gte: item.quantity },
-          },
-          {
-            $inc: {
-              stockQuantity: -item.quantity,
-              soldCount: item.quantity,
-            },
-          },
-          { new: true }
-        );
-
-        if (!updatedProduct) {
-          throw new Error(
-            `Failed to update stock for product "${item.product.name}". Please try again.`
-          );
-        }
-
-        const finalPrice = await updatedProduct.getFinalPrice();
+        const finalPrice = await product.getFinalPrice();
 
         const orderDetail = new OrderDetail({
-          productId: updatedProduct._id,
-          productName: updatedProduct.name,
-          productImage: updatedProduct.image,
+          productId: product._id,
+          productName: product.name,
+          productImage: product.image,
           productPrice: finalPrice,
           quantity: item.quantity,
         });

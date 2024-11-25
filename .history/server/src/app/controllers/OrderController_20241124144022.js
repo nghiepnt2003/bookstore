@@ -164,7 +164,7 @@ class OrderController {
       res.status(500).json({ success: false, message: error });
     }
   }
-  // [GET] /order/getAllsByUser
+  // [GET] /order/getByUser
   async getAllsByUser(req, res) {
     try {
       const { _id } = req.user; // Lấy user ID từ access token (phải có middleware xác thực trước đó)
@@ -200,7 +200,6 @@ class OrderController {
       // Sắp xếp nếu có tham số sort
       if (req.query.sort) {
         const sortBy = req.query.sort.split(",").join(" ");
-
         queryCommand = queryCommand.sort(sortBy);
       }
 
@@ -533,14 +532,240 @@ class OrderController {
     return res.status(200).json(result.data);
   }
 
-  // [POST] /order/checkout
+  //[POST] /order/checkout
+  // async checkout(req, res) {
+  //   const session = await Product.startSession(); // Bắt đầu session cho transaction
+  //   session.startTransaction(); // Bắt đầu transaction
+  //   try {
+  //     const user = req.user; // Lấy thông tin user từ accessToken
+  //     const { payment, shippingAddress, recipientName, recipientPhone } =
+  //       req.body; // Lấy phương thức thanh toán và địa chỉ giao hàng từ yêu cầu
+
+  //     if (!payment) {
+  //       return res
+  //         .status(400)
+  //         .json({ success: false, message: "Payment method not provided" });
+  //     }
+  //     if (!recipientName || !recipientPhone) {
+  //       return res
+  //         .status(400)
+  //         .json({ success: false, message: "Missing Inputs" });
+  //     }
+  //     // Kiểm tra xem người dùng có địa chỉ hay không
+  //     const userInfo = await User.findById(user._id).select("address member");
+
+  //     if (!userInfo.address || userInfo.address.length === 0) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "User address is required for checkout",
+  //       });
+  //     }
+  //     // Kiểm tra xem địa chỉ giao hàng có nằm trong danh sách địa chỉ của người dùng không
+  //     // if (!userInfo.address.includes(shippingAddress)) {
+  //     //   return res.status(400).json({
+  //     //     success: false,
+  //     //     message: "Invalid shipping address",
+  //     //   });
+  //     // }
+
+  //     let cart = await Cart.findOne({ user: user._id }).populate({
+  //       path: "items",
+  //       select: "selectedForCheckout quantity",
+  //       populate: {
+  //         path: "product",
+  //         model: "Product",
+  //         populate: { path: "categories" },
+  //       },
+  //     });
+
+  //     if (!cart) {
+  //       return res
+  //         .status(400)
+  //         .json({ success: false, message: "Cart not found" });
+  //     }
+
+  //     const selectedItems = cart.items.filter(
+  //       (item) => item.selectedForCheckout && !item.deleted
+  //     );
+
+  //     if (selectedItems.length === 0) {
+  //       return res
+  //         .status(400)
+  //         .json({ success: false, message: "No items selected for checkout" });
+  //     }
+
+  //     // Kiểm tra tồn kho trước khi xử lý checkout
+  //     for (const item of selectedItems) {
+  //       if (item.quantity > item.product.stockQuantity) {
+  //         return res.status(400).json({
+  //           success: false,
+  //           message: `Product "${item.product.name}" only has ${item.product.stockQuantity} items left in stock.`,
+  //         });
+  //       }
+  //     }
+
+  //     // Mảng lưu trữ các _id của OrderDetail đã lưu
+  //     const orderDetailsIds = [];
+  //     let totalPrice = 0; // Biến để lưu tổng giá trị đơn hàng
+
+  //     // Vòng lặp for để tạo OrderDetail cho mỗi item
+  //     for (const item of selectedItems) {
+  //       // Tính giá cuối cùng của sản phẩm (có áp dụng giảm giá nếu có)
+  //       const finalPrice = await item.product.getFinalPrice();
+  //       // Tạo OrderDetail cho mỗi sản phẩm đã chọn
+  //       const orderDetail = new OrderDetail({
+  //         productId: item.product._id,
+  //         productName: item.product.name,
+  //         productImage: item.product.image,
+  //         productPrice: finalPrice, // Lưu giá đã được giảm (nếu có)
+  //         quantity: item.quantity,
+  //       });
+
+  //       // Lưu OrderDetail vào cơ sở dữ liệu
+  //       const savedOrderDetail = await orderDetail.save();
+  //       orderDetailsIds.push(savedOrderDetail._id);
+
+  //       // Tính tổng giá trị đơn hàng
+  //       totalPrice += finalPrice * item.quantity;
+
+  //       // Cập nhật số lượng tồn kho
+  //       await Product.findByIdAndUpdate(
+  //         item.product._id,
+  //         {
+  //           $inc: {
+  //             soldCount: item.quantity,
+  //             stockQuantity: -item.quantity,
+  //           },
+  //         },
+  //         { new: true }
+  //       );
+
+  //       // // Cập nhật số lượng sản phẩm đã bán
+  //       // await Product.findByIdAndUpdate(
+  //       //   item.product._id,
+  //       //   { $inc: { soldCount: item.quantity } }, // Cộng thêm số lượng đã bán
+  //       //   { new: true } // Trả về tài liệu đã được cập nhật
+  //       // );
+  //     }
+  //     // Kiểm tra rank của user để áp dụng giảm giá
+  //     const member = await Member.findById(userInfo.member);
+  //     if (member) {
+  //       if (member.rank === "Silver") {
+  //         totalPrice *= 0.98; // Giảm 2%
+  //       } else if (member.rank === "Gold") {
+  //         totalPrice *= 0.95; // Giảm 5%
+  //       } else if (member.rank === "Diamond") {
+  //         totalPrice *= 0.9; // Giảm 10%
+  //       }
+  //     }
+  //     totalPrice = Math.round(totalPrice * 100) / 100;
+
+  //     const orderStatus =
+  //       payment === Payment.OFFLINE ? "Pending" : "Not Yet Paid";
+
+  //     // Tạo đơn hàng mới với thông tin chi tiết đã tạo
+  //     const newOrder = await Order.create({
+  //       details: orderDetailsIds,
+  //       recipientName: recipientName,
+  //       recipientPhone,
+  //       date: new Date(),
+  //       status: orderStatus,
+  //       totalPrice: totalPrice, // Tổng giá trị sau khi áp dụng giảm giá
+  //       payment: payment, // Phương thức thanh toán
+  //       user: user._id,
+  //       shippingAddress: shippingAddress,
+  //     });
+
+  //     // Xóa các item đã checkout khỏi giỏ hàng
+  //     const itemsToRemove = cart.items.filter(
+  //       (item) => item.selectedForCheckout
+  //     );
+  //     cart.items = cart.items.filter((item) => !item.selectedForCheckout);
+  //     await cart.save();
+
+  //     // Xóa các LineItem tương ứng khỏi cơ sở dữ liệu
+  //     for (const item of itemsToRemove) {
+  //       await LineItem.findByIdAndDelete(item._id);
+  //     }
+
+  //     const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
+  //     if (payment === Payment.MOMO) {
+  //       try {
+  //         const momoResponse = await createMoMoOrder(
+  //           user,
+  //           totalPrice,
+  //           // newOrder._id
+  //           uniqueOrderId
+  //         );
+  //         if (momoResponse.success && momoResponse.data.resultCode === 0) {
+  //           res.status(200).json({
+  //             success: true,
+  //             message: "Checkout successful with MoMo",
+  //             order: newOrder,
+  //             momoData: momoResponse.data,
+  //           });
+  //         } else {
+  //           res.status(500).json({
+  //             success: false,
+  //             message: "MoMo payment initialization failed",
+  //             error: momoResponse.error,
+  //           });
+  //         }
+  //       } catch (error) {
+  //         res.status(500).json({
+  //           success: false,
+  //           message: "Unexpected error during MoMo payment",
+  //           error: error.message,
+  //         });
+  //       }
+  //     } else if (payment === Payment.ZALOPAY) {
+  //       const zaloPayResponse = await createZaloPayOrder(
+  //         user,
+  //         totalPrice,
+  //         // newOrder._id
+  //         uniqueOrderId
+  //       );
+
+  //       if (
+  //         zaloPayResponse.success &&
+  //         zaloPayResponse.zalopayData.return_code === 1
+  //       ) {
+  //         res.status(200).json({
+  //           success: true,
+  //           message: "Checkout successful with zalo",
+  //           order: newOrder,
+  //           zalopayResult: zaloPayResponse.zalopayData,
+  //           payment_id: zaloPayResponse.payment_id,
+  //         });
+  //       } else {
+  //         res.status(500).json({
+  //           success: false,
+  //           message: "ZaloPay payment initialization failed",
+  //           error: zaloPayResponse.zalopayData.message || "Unknown error",
+  //         });
+  //       }
+  //     } else {
+  //       res.status(200).json({
+  //         success: true,
+  //         message: "Checkout successful",
+  //         order: newOrder,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Checkout failed",
+  //       error: error.message,
+  //     });
+  //   }
+  // }
   async checkout(req, res) {
+    const session = await Product.startSession(); // Bắt đầu session cho transaction
+    session.startTransaction(); // Bắt đầu transaction
     try {
-      const user = req.user; // Lấy thông tin user từ accessToken
-      // const payment = req.body.payment;
-      // const shippingAddress = req.body.shippingAddress; // Nhận địa chỉ giao hàng từ request
+      const user = req.user;
       const { payment, shippingAddress, recipientName, recipientPhone } =
-        req.body; // Lấy phương thức thanh toán và địa chỉ giao hàng từ yêu cầu
+        req.body;
 
       if (!payment) {
         return res
@@ -552,24 +777,17 @@ class OrderController {
           .status(400)
           .json({ success: false, message: "Missing Inputs" });
       }
-      // Kiểm tra xem người dùng có địa chỉ hay không
-      const userInfo = await User.findById(user._id).select("address member");
 
+      // Lấy thông tin user và cart
+      const userInfo = await User.findById(user._id).select("address member");
       if (!userInfo.address || userInfo.address.length === 0) {
         return res.status(400).json({
           success: false,
           message: "User address is required for checkout",
         });
       }
-      // Kiểm tra xem địa chỉ giao hàng có nằm trong danh sách địa chỉ của người dùng không
-      // if (!userInfo.address.includes(shippingAddress)) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Invalid shipping address",
-      //   });
-      // }
 
-      let cart = await Cart.findOne({ user: user._id }).populate({
+      const cart = await Cart.findOne({ user: user._id }).populate({
         path: "items",
         select: "selectedForCheckout quantity",
         populate: {
@@ -595,170 +813,137 @@ class OrderController {
           .json({ success: false, message: "No items selected for checkout" });
       }
 
-      // Mảng lưu trữ các _id của OrderDetail đã lưu
       const orderDetailsIds = [];
-      let totalPrice = 0; // Biến để lưu tổng giá trị đơn hàng
-      // Kiểm tra và cập nhật tồn kho
+      let totalPrice = 0;
+
+      // Kiểm tra tồn kho và cập nhật
       for (const item of selectedItems) {
-        // Kiểm tra tồn kho trước khi cập nhật
-        const product = await Product.findById(item.product._id);
-
-        if (!product || product.stockQuantity < item.quantity) {
-          throw new Error(
-            `Product "${
-              product?.name || "unknown"
-            }" is sold out or insufficient stock.`
-          );
-        }
-
-        // Cập nhật tồn kho và số lượng đã bán
-        const updatedProduct = await Product.findOneAndUpdate(
-          {
-            _id: item.product._id,
-            stockQuantity: { $gte: item.quantity },
-          },
+        const product = await Product.findOneAndUpdate(
+          { _id: item.product._id, stockQuantity: { $gte: item.quantity } }, // Kiểm tra tồn kho
           {
             $inc: {
-              stockQuantity: -item.quantity,
-              soldCount: item.quantity,
+              stockQuantity: -item.quantity, // Giảm số lượng tồn kho
+              soldCount: item.quantity, // Tăng số lượng đã bán
             },
           },
-          { new: true }
+          { new: true, session } // Sử dụng session để hỗ trợ transaction
         );
 
-        if (!updatedProduct) {
+        if (!product) {
           throw new Error(
-            `Failed to update stock for product "${item.product.name}". Please try again.`
+            `Insufficient stock for product "${item.product.name}".`
           );
         }
 
-        const finalPrice = await updatedProduct.getFinalPrice();
+        const finalPrice = await product.getFinalPrice();
 
+        // Tạo OrderDetail
         const orderDetail = new OrderDetail({
-          productId: updatedProduct._id,
-          productName: updatedProduct.name,
-          productImage: updatedProduct.image,
+          productId: product._id,
+          productName: product.name,
+          productImage: product.image,
           productPrice: finalPrice,
           quantity: item.quantity,
         });
-
-        const savedOrderDetail = await orderDetail.save();
+        const savedOrderDetail = await orderDetail.save({ session });
         orderDetailsIds.push(savedOrderDetail._id);
         totalPrice += finalPrice * item.quantity;
       }
-      // Kiểm tra rank của user để áp dụng giảm giá
+
+      // Áp dụng giảm giá theo hạng thành viên
       const member = await Member.findById(userInfo.member);
-      console.log(member);
       if (member) {
-        if (member.rank === "Silver") {
-          totalPrice *= 0.98; // Giảm 2%
-        } else if (member.rank === "Gold") {
-          totalPrice *= 0.95; // Giảm 5%
-        } else if (member.rank === "Diamond") {
-          totalPrice *= 0.9; // Giảm 10%
-        }
+        if (member.rank === "Silver") totalPrice *= 0.98;
+        else if (member.rank === "Gold") totalPrice *= 0.95;
+        else if (member.rank === "Diamond") totalPrice *= 0.9;
       }
       totalPrice = Math.round(totalPrice * 100) / 100;
 
       const orderStatus =
         payment === Payment.OFFLINE ? "Pending" : "Not Yet Paid";
 
-      // Tạo đơn hàng mới với thông tin chi tiết đã tạo
-      const newOrder = await Order.create({
-        details: orderDetailsIds,
-        recipientName: recipientName,
-        recipientPhone,
-        date: new Date(),
-        status: orderStatus,
-        totalPrice: totalPrice, // Tổng giá trị sau khi áp dụng giảm giá
-        payment: payment, // Phương thức thanh toán
-        user: user._id,
-        shippingAddress: shippingAddress,
-      });
+      // Tạo đơn hàng
+      const newOrder = await Order.create(
+        [
+          {
+            details: orderDetailsIds,
+            recipientName,
+            recipientPhone,
+            date: new Date(),
+            status: orderStatus,
+            totalPrice,
+            payment,
+            user: user._id,
+            shippingAddress,
+          },
+        ],
+        { session }
+      );
 
       // Xóa các item đã checkout khỏi giỏ hàng
-      const itemsToRemove = cart.items.filter(
-        (item) => item.selectedForCheckout
-      );
       cart.items = cart.items.filter((item) => !item.selectedForCheckout);
-      await cart.save();
+      await cart.save({ session });
 
-      // Xóa các LineItem tương ứng khỏi cơ sở dữ liệu
-      for (const item of itemsToRemove) {
-        await LineItem.findByIdAndDelete(item._id);
-      }
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
 
-      const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
+      // Xử lý thanh toán (MoMo hoặc ZaloPay)
+      const uniqueOrderId = `${newOrder[0]._id}-${Date.now()}`;
       if (payment === Payment.MOMO) {
-        try {
-          const momoResponse = await createMoMoOrder(
-            user,
-            totalPrice,
-            // newOrder._id
-            uniqueOrderId
-          );
-          if (momoResponse.success && momoResponse.data.resultCode === 0) {
-            res.status(200).json({
-              success: true,
-              message: "Checkout successful with MoMo",
-              order: newOrder,
-              momoData: momoResponse.data,
-            });
-          } else {
-            res.status(500).json({
-              success: false,
-              message: "MoMo payment initialization failed",
-              error: momoResponse.error,
-            });
-          }
-        } catch (error) {
-          res.status(500).json({
-            success: false,
-            message: "Unexpected error during MoMo payment",
-            error: error.message,
+        const momoResponse = await createMoMoOrder(
+          user,
+          totalPrice,
+          uniqueOrderId
+        );
+        if (momoResponse.success && momoResponse.data.resultCode === 0) {
+          return res.status(200).json({
+            success: true,
+            message: "Checkout successful with MoMo",
+            order: newOrder[0],
+            momoData: momoResponse.data,
           });
+        } else {
+          throw new Error("MoMo payment initialization failed");
         }
       } else if (payment === Payment.ZALOPAY) {
         const zaloPayResponse = await createZaloPayOrder(
           user,
           totalPrice,
-          // newOrder._id
           uniqueOrderId
         );
-
         if (
           zaloPayResponse.success &&
           zaloPayResponse.zalopayData.return_code === 1
         ) {
-          res.status(200).json({
+          return res.status(200).json({
             success: true,
-            message: "Checkout successful with zalo",
-            order: newOrder,
-            zalopayResult: zaloPayResponse.zalopayData,
-            payment_id: zaloPayResponse.payment_id,
+            message: "Checkout successful with ZaloPay",
+            order: newOrder[0],
+            zaloPayResult: zaloPayResponse.zalopayData,
           });
         } else {
-          res.status(500).json({
-            success: false,
-            message: "ZaloPay payment initialization failed",
-            error: zaloPayResponse.zalopayData.message || "Unknown error",
-          });
+          throw new Error("ZaloPay payment initialization failed");
         }
       } else {
-        res.status(200).json({
+        return res.status(200).json({
           success: true,
           message: "Checkout successful",
-          order: newOrder,
+          order: newOrder[0],
         });
       }
     } catch (error) {
-      res.status(500).json({
+      // Rollback transaction nếu có lỗi
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(500).json({
         success: false,
         message: "Checkout failed",
         error: error.message,
       });
     }
   }
+
   // [POST] /order/callbackZaloPay/:orderId
   async callbackZaloPay(req, res) {
     let result = {};
@@ -949,10 +1134,7 @@ class OrderController {
       }
 
       // Tìm đơn hàng theo ID
-      const order = await Order.findById(id).populate({
-        path: "details", // Populate trường "details"
-        model: "OrderDetail", // Tên của model "OrderDetail"
-      });
+      const order = await Order.findById(id);
       if (!order) {
         return res.status(404).json({
           success: false,
@@ -981,20 +1163,6 @@ class OrderController {
           await user.member.save(); // Lưu thay đổi vào Member
         }
       }
-      if (status === "Cancelled") {
-        for (const detail of order.details) {
-          await Product.findOneAndUpdate(
-            { _id: detail.productId },
-            {
-              $inc: {
-                stockQuantity: detail.quantity,
-                soldCount: -detail.quantity,
-              },
-            },
-            { new: true }
-          );
-        }
-      }
 
       res.status(200).json({
         success: true,
@@ -1010,6 +1178,39 @@ class OrderController {
   }
 
   // [DELETE] /order/:id
+  // async deleteByUser(req, res) {
+  //   try {
+  //     const { id } = req.params;
+  //     const userId = req.user._id; // Lấy user ID từ access token
+
+  //     // Tìm đơn hàng theo ID và kiểm tra xem nó có thuộc về người dùng không và có trạng thái là "Pending" không
+  //     const order = await Order.findOne({
+  //       _id: id,
+  //       user: userId,
+  //       status: "Pending",
+  //     });
+  //     console.log(order);
+  //     if (!order) {
+  //       return res.status(404).json({
+  //         success: false,
+  //         message: "Order not found or cannot be deleted",
+  //       });
+  //     }
+
+  //     // Xóa đơn hàng
+  //     await order.delete();
+
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "Order deleted successfully",
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: error.message,
+  //     });
+  //   }
+  // }
   async deleteByUser(req, res) {
     try {
       const { id } = req.params;
@@ -1019,10 +1220,8 @@ class OrderController {
       const order = await Order.findOne({
         _id: id,
         user: userId,
-      }).populate({
-        path: "details", // Populate trường "details"
-        model: "OrderDetail", // Tên của model "OrderDetail"
       });
+
       // Kiểm tra trạng thái của đơn hàng
       if (!order) {
         return res.status(404).json({
@@ -1039,41 +1238,24 @@ class OrderController {
         });
       }
 
-      // Hoàn lại số lượng tồn kho
-      for (const detail of order.details) {
-        console.log(detail);
+      // Xóa tất cả OrderDetails liên quan
+      // await OrderDetail.deleteMany({ _id: { $in: order.details } });
 
-        const product = await Product.findOneAndUpdate(
-          { _id: detail.productId }, // Tìm sản phẩm
-          {
-            $inc: {
-              stockQuantity: detail.quantity, // Tăng số lượng tồn kho
-              soldCount: -detail.quantity, // Giảm số lượng đã bán
-            },
-          },
-          { new: true } // Trả về bản ghi đã cập nhật
-        );
-
-        if (!product) {
-          return res.status(500).json({
-            success: false,
-            message: `Failed to update stock for product with ID ${detail.productId}`,
-          });
-        }
-      }
+      // Xóa đơn hàng
+      // await order.delete();
 
       // Cập nhật trạng thái đơn hàng thành "Cancelled"
       order.status = "Cancelled";
       await order.save();
 
-      res
-        .status(200)
-        .json({ success: true, message: "Order cancelled successfully" });
+      res.status(200).json({
+        success: true,
+        message: "Order Cancelled  successfully",
+      });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Failed to cancel order",
-        error: error.message,
+        message: error.message,
       });
     }
   }

@@ -12,7 +12,7 @@ const discountRouter = require("./discount");
 const messageRouter = require("./message");
 const statictisRouter = require("./statictis");
 const blogRouter = require("./blog");
-const inventoryRouter = require("./inventory");
+// const inventoryRouter = require("./blog");
 
 const { notFound, errHandler } = require("../app/middlewares/ErrorHandler");
 function route(app) {
@@ -30,7 +30,7 @@ function route(app) {
   app.use("/message", messageRouter);
   app.use("/statictis", statictisRouter);
   app.use("/blog", blogRouter);
-  app.use("/inventory", inventoryRouter);
+
   // Nếu không vào route nào thì là err Not found
   app.use(notFound);
   // Nếu có lỗi  ở bất kỳ route nào thì dưới này hứng nếu trên đó catch next(err)
