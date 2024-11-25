@@ -87,7 +87,7 @@ class InventoryController {
     }
   }
 
-  //[GET] /inventory/by-time
+  //[GET] /inventory/byTime
   async getInventoryByTime(req, res) {
     try {
       // Lấy startTime và endTime từ query parameters

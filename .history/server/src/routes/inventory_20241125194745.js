@@ -9,7 +9,7 @@ router.get(
   inventoryController.getAllInventory
 );
 router.get(
-  "/by-time",
+  "/",
   [verifyAccessToken, isAdmin],
   inventoryController.getInventoryByTime
 );

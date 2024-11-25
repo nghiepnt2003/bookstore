@@ -1,6 +1,6 @@
 const Payment = {
   MOMO: "MOMO",
-  PAYPAL: "PAYPAL",
+  VN_PAY: "VN_PAY",
   ZALOPAY: "ZALOPAY",
   OFFLINE: "OFFLINE",
 };

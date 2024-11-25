@@ -8,11 +8,7 @@ router.get(
   [verifyAccessToken, isAdmin],
   inventoryController.getAllInventory
 );
-router.get(
-  "/by-time",
-  [verifyAccessToken, isAdmin],
-  inventoryController.getInventoryByTime
-);
+router.get("/by-time", inventoryController.getInventoryByTime);
 
 router.post(
   "/create",

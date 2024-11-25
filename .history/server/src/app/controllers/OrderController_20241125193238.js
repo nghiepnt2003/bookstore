@@ -183,7 +183,7 @@ class OrderController {
         (matchedEl) => `$${matchedEl}`
       );
       const formatedQueries = JSON.parse(queryString);
-      console.log("Filters applied:", formatedQueries);
+      console.log("Filters applied:", formatedFilters);
 
       // Filtering (có thể lọc theo trạng thái đơn hàng hoặc các tham số khác)
       if (queries?.status) {

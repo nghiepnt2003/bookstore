@@ -4,6 +4,127 @@ const Product = require("../models/Product");
 
 class InventoryController {
   //[GET] inventory/
+  //   async getAllInventory(req, res) {
+  //     try {
+  //       const { page = 1, limit = 10, ...filters } = req.query;
+  //       const skip = (page - 1) * limit;
+
+  //       // Chuyển đổi các operators cho đúng cú pháp MongoDB
+  //       let queryString = JSON.stringify(filters);
+  //       queryString = queryString.replace(
+  //         /\b(gte|gt|lt|lte)\b/g,
+  //         (matchedEl) => `$${matchedEl}`
+  //       );
+  //       const formatedFilters = JSON.parse(queryString);
+
+  //       // Aggregation pipeline
+  //       const inventories = await Inventory.aggregate([
+  //         { $match: formatedFilters }, // Lọc Inventory theo các filters
+  //         { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian tạo mới nhất
+  //         { $skip: skip }, // Phân trang
+  //         { $limit: +limit }, // Giới hạn số lượng tài liệu
+  //         {
+  //           $lookup: {
+  //             from: "inventorydetails", // Tên collection InventoryDetail
+  //             localField: "_id", // Trường `_id` của Inventory
+  //             foreignField: "inventoryId", // Trường `inventoryId` của InventoryDetail
+  //             as: "inventoryDetails", // Tên trường kết quả
+  //           },
+  //         },
+  //         {
+  //           $project: {
+  //             totalCost: 1,
+  //             note: 1,
+  //             createdAt: 1,
+  //             updatedAt: 1,
+  //             inventoryDetails: {
+  //               productId: 1,
+  //               quantity: 1,
+  //               unitCost: 1,
+  //             },
+  //           },
+  //         },
+  //       ]);
+
+  //       // Đếm tổng số lượng Inventory
+  //       const totalCount = await Inventory.countDocuments(formatedFilters);
+
+  //       res.status(200).json({
+  //         success: true,
+  //         totalCount,
+  //         page: +page,
+  //         limit: +limit,
+  //         inventories,
+  //       });
+  //     } catch (error) {
+  //       res.status(500).json({
+  //         success: false,
+  //         message: "Failed to get inventories.",
+  //         error: error.message,
+  //       });
+  //     }
+  //   }
+
+  //   async getAllInventory(req, res) {
+  //     try {
+  //       const { page = 1, limit = 10, ...filters } = req.query;
+  //       const skip = (page - 1) * limit;
+
+  //       // Chuyển đổi các operators cho đúng cú pháp MongoDB
+  //       let queryString = JSON.stringify(filters);
+  //       queryString = queryString.replace(
+  //         /\b(gte|gt|lt|lte)\b/g,
+  //         (matchedEl) => `$${matchedEl}`
+  //       );
+  //       const formatedFilters = JSON.parse(queryString);
+
+  //       // Aggregation pipeline
+  //       const inventories = await Inventory.aggregate([
+  //         { $match: formatedFilters }, // Lọc Inventory theo các filters
+  //         { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian tạo mới nhất
+  //         { $skip: skip }, // Phân trang
+  //         { $limit: +limit }, // Giới hạn số lượng tài liệu
+  //         {
+  //           $lookup: {
+  //             from: "inventorydetails", // Tên collection InventoryDetail
+  //             localField: "_id", // Trường `_id` của Inventory
+  //             foreignField: "inventoryId", // Trường `inventoryId` của InventoryDetail
+  //             as: "inventoryDetails", // Tên trường kết quả
+  //           },
+  //         },
+  //         {
+  //           $project: {
+  //             totalCost: 1,
+  //             note: 1,
+  //             createdAt: 1,
+  //             updatedAt: 1,
+  //             inventoryDetails: {
+  //               productId: 1,
+  //               quantity: 1,
+  //               unitCost: 1,
+  //             },
+  //           },
+  //         },
+  //       ]);
+
+  //       // Đếm tổng số lượng Inventory
+  //       const counts = await Inventory.countDocuments(formatedFilters);
+
+  //       // Trả về kết quả đồng nhất với `getAllOrder`
+  //       res.status(200).json({
+  //         success: inventories.length > 0,
+  //         counts,
+  //         inventories:
+  //           inventories.length > 0 ? inventories : "No inventories found",
+  //       });
+  //     } catch (error) {
+  //       res.status(500).json({
+  //         success: false,
+  //         message: "Failed to get inventories.",
+  //         error: error.message,
+  //       });
+  //     }
+  //   }
   async getAllInventory(req, res) {
     try {
       const { page = 1, limit = 10, ...filters } = req.query;
@@ -15,29 +136,9 @@ class InventoryController {
         /\b(gte|gt|lt|lte)\b/g,
         (matchedEl) => `$${matchedEl}`
       );
-      let formatedFilters = JSON.parse(queryString);
-      if (filters.note) {
-        formatedFilters.note = { $regex: filters.note, $options: "i" }; // Tìm kiếm không phân biệt hoa thường
-      }
+      const formatedFilters = JSON.parse(queryString);
 
-      // Ép kiểu giá trị thành số nếu có thể
-      formatedFilters = Object.fromEntries(
-        Object.entries(formatedFilters).map(([key, value]) => {
-          if (typeof value === "object") {
-            return [
-              key,
-              Object.fromEntries(
-                Object.entries(value).map(([operator, val]) => [
-                  operator,
-                  isNaN(val) ? val : Number(val),
-                ])
-              ),
-            ];
-          }
-          return [key, isNaN(value) ? value : Number(value)];
-        })
-      );
-
+      // Debug log để kiểm tra filters
       console.log("Filters applied:", formatedFilters);
 
       // Aggregation pipeline
@@ -72,112 +173,24 @@ class InventoryController {
       // Đếm tổng số lượng Inventory
       const counts = await Inventory.countDocuments(formatedFilters);
 
+      // Kiểm tra nếu inventories rỗng
+      if (inventories.length === 0) {
+        return res.status(200).json({
+          success: false,
+          counts,
+          inventories: "No inventories found",
+        });
+      }
+
       res.status(200).json({
-        success: inventories.length > 0,
+        success: true,
         counts,
-        inventories:
-          inventories.length > 0 ? inventories : "No inventories found",
+        inventories,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: "Failed to get inventories.",
-        error: error.message,
-      });
-    }
-  }
-
-  //[GET] /inventory/by-time
-  async getInventoryByTime(req, res) {
-    try {
-      // Lấy startTime và endTime từ query parameters
-      const { startTime, endTime, ...filters } = req.query;
-
-      // Kiểm tra nếu startTime hoặc endTime không được cung cấp
-      if (!startTime || !endTime) {
-        return res.status(400).json({
-          success: false,
-          message: "Please provide both startTime and endTime.",
-        });
-      }
-
-      // Chuyển đổi startTime và endTime thành kiểu Date
-      const start = new Date(startTime);
-      const end = new Date(new Date(endTime).setHours(23, 59, 59, 999)); // Đặt thời gian cuối ngày
-
-      // Chuyển đổi các operators cho đúng cú pháp MongoDB
-      let queryString = JSON.stringify(filters);
-      queryString = queryString.replace(
-        /\b(gte|gt|lt|lte)\b/g,
-        (matchedEl) => `$${matchedEl}`
-      );
-      let formatedFilters = JSON.parse(queryString);
-
-      // Ép kiểu giá trị thành số nếu có thể
-      formatedFilters = Object.fromEntries(
-        Object.entries(formatedFilters).map(([key, value]) => {
-          if (typeof value === "object") {
-            return [
-              key,
-              Object.fromEntries(
-                Object.entries(value).map(([operator, val]) => [
-                  operator,
-                  isNaN(val) ? val : Number(val),
-                ])
-              ),
-            ];
-          }
-          return [key, isNaN(value) ? value : Number(value)];
-        })
-      );
-
-      // Thêm điều kiện thời gian
-      formatedFilters.createdAt = { $gte: start, $lte: end };
-
-      console.log("Filters applied:", formatedFilters);
-
-      // Aggregation pipeline
-      const inventories = await Inventory.aggregate([
-        { $match: formatedFilters }, // Lọc Inventory theo các filters
-        { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian tạo mới nhất
-        {
-          $lookup: {
-            from: "inventorydetails", // Tên collection InventoryDetail
-            localField: "_id", // Trường `_id` của Inventory
-            foreignField: "inventoryId", // Trường `inventoryId` của InventoryDetail
-            as: "inventoryDetails", // Tên trường kết quả
-          },
-        },
-        {
-          $project: {
-            totalCost: 1,
-            note: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            inventoryDetails: {
-              productId: 1,
-              quantity: 1,
-              unitCost: 1,
-            },
-          },
-        },
-      ]);
-
-      // Đếm tổng số lượng Inventory
-      const counts = await Inventory.countDocuments(formatedFilters);
-
-      res.status(200).json({
-        success: inventories.length > 0,
-        counts,
-        inventories:
-          inventories.length > 0
-            ? inventories
-            : "No inventories found in the specified time range",
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to get inventories by time.",
         error: error.message,
       });
     }
