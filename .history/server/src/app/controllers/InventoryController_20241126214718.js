@@ -228,7 +228,13 @@ class InventoryController {
 
         // Use costPrice from the product as unitCost
         product.costPrice = unitCost;
-        await product.save();
+
+        if (!unitCost) {
+          return res.status(400).json({
+            success: false,
+            message: `Product with ID ${productId} does not have a valid costPrice.`,
+          });
+        }
 
         // Calculate total cost
         totalCost += quantity * unitCost;

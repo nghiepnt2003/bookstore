@@ -208,12 +208,12 @@ class InventoryController {
 
       // Process each inventory detail and update product stock
       for (const detail of details) {
-        const { productId, quantity, unitCost } = detail;
+        const { productId, quantity, costPrice } = detail;
 
-        if (!productId || !quantity || !unitCost) {
+        if (!productId || !quantity || !costPrice) {
           return res.status(400).json({
             success: false,
-            message: "Product ID and quantity and unitCost are required.",
+            message: "Product ID and quantity and costPrice are required.",
           });
         }
 
@@ -227,8 +227,14 @@ class InventoryController {
         }
 
         // Use costPrice from the product as unitCost
-        product.costPrice = unitCost;
-        await product.save();
+        const unitCost = product.costPrice;
+
+        if (!unitCost) {
+          return res.status(400).json({
+            success: false,
+            message: `Product with ID ${productId} does not have a valid costPrice.`,
+          });
+        }
 
         // Calculate total cost
         totalCost += quantity * unitCost;

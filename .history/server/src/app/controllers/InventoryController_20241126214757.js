@@ -228,7 +228,7 @@ class InventoryController {
 
         // Use costPrice from the product as unitCost
         product.costPrice = unitCost;
-        await product.save();
+        product.save();
 
         // Calculate total cost
         totalCost += quantity * unitCost;
