@@ -686,11 +686,6 @@ class OrderController {
       cart.items = cart.items.filter((item) => !item.selectedForCheckout);
       await cart.save();
 
-      // Gọi hàm điều chỉnh số lượng sản phẩm trong LineItem của tất cả người dùng sau khi cập nhật tồn kho
-      for (const item of selectedItems) {
-        await adjustLineItemsQuantity(item.product._id);
-      }
-
       // Xóa các LineItem tương ứng khỏi cơ sở dữ liệu
       for (const item of itemsToRemove) {
         await LineItem.findByIdAndDelete(item._id);
@@ -1086,39 +1081,55 @@ class OrderController {
     }
   }
 }
-async function adjustLineItemsQuantity(productId) {
-  // Tìm tất cả các giỏ hàng
-  const carts = await Cart.find().populate({
-    path: "items",
-    populate: {
-      path: "product",
-      model: "Product",
-    },
-  });
+async function adjustLineItemsQuantity(cart) {
+  try {
+    const updatedLineItems = [];
+    const removedLineItems = [];
 
-  for (const cart of carts) {
-    for (const item of cart.items) {
-      if (item.product._id.toString() === productId.toString()) {
-        const product = item.product;
+    for (const lineItem of cart.items) {
+      const product = await Product.findById(lineItem.product);
 
-        if (product.stockQuantity === 0) {
-          // Nếu sản phẩm hết hàng, xóa LineItem
-          await LineItem.findByIdAndDelete(item._id);
+      if (!product) {
+        // Nếu sản phẩm không tồn tại, xóa LineItem
+        removedLineItems.push(lineItem._id);
+        continue;
+      }
 
-          // Loại bỏ LineItem khỏi giỏ hàng
-          cart.items = cart.items.filter(
-            (lineItem) => lineItem._id.toString() !== item._id.toString()
-          );
-        } else if (product.stockQuantity < item.quantity) {
-          // Điều chỉnh số lượng nếu tồn kho không đủ
-          item.quantity = product.stockQuantity;
-          await item.save();
-        }
+      if (product.stockQuantity === 0) {
+        // Nếu sản phẩm hết hàng, xóa LineItem
+        console.warn(
+          `Product ${product.name} is out of stock. Removing LineItem.`
+        );
+        removedLineItems.push(lineItem._id);
+      } else if (product.stockQuantity < lineItem.quantity) {
+        // Nếu số lượng tồn kho ít hơn yêu cầu, điều chỉnh số lượng
+        console.warn(
+          `Adjusting LineItem quantity for product ${product.name}: stock (${product.stockQuantity}) < requested (${lineItem.quantity})`
+        );
+        lineItem.quantity = product.stockQuantity;
+        await lineItem.save(); // Cập nhật số lượng mới
+        updatedLineItems.push(lineItem);
+      } else {
+        // Sản phẩm còn đủ số lượng, giữ nguyên LineItem
+        updatedLineItems.push(lineItem);
       }
     }
 
-    // Lưu lại giỏ hàng sau khi đã cập nhật
-    await cart.save();
+    // Xóa các LineItem không hợp lệ khỏi giỏ hàng
+    if (removedLineItems.length > 0) {
+      await Cart.updateOne(
+        { _id: cart._id },
+        { $pull: { items: { $in: removedLineItems } } }
+      );
+
+      // Xóa LineItem khỏi cơ sở dữ liệu
+      await LineItem.deleteMany({ _id: { $in: removedLineItems } });
+    }
+
+    return { updatedLineItems, removedLineItems };
+  } catch (error) {
+    console.error("Error adjusting LineItems:", error.message);
+    throw new Error("Failed to adjust LineItems.");
   }
 }
 

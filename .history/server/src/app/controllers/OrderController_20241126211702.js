@@ -685,8 +685,6 @@ class OrderController {
       );
       cart.items = cart.items.filter((item) => !item.selectedForCheckout);
       await cart.save();
-
-      // Gọi hàm điều chỉnh số lượng sản phẩm trong LineItem của tất cả người dùng sau khi cập nhật tồn kho
       for (const item of selectedItems) {
         await adjustLineItemsQuantity(item.product._id);
       }
