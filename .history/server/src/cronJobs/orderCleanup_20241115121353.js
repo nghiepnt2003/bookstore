@@ -10,6 +10,7 @@ cron.schedule("* * * * *", async () => {
     // Tìm các đơn hàng cần hủy
     const ordersToCancel = await Order.find({
       status: "Not Yet Paid",
+      payment: Payment.MOMO,
       createdAt: { $lt: thirtyMinutesAgo }, // Đơn hàng được tạo hơn 30 phút trước
     });
 
