@@ -133,7 +133,7 @@ const Login = () => {
                         navigate(`/${path.ADMIN}/${path.DASHBOARD}`);
                         window.location.reload()
                     }
-                }, 100); // Thay đổi thời gian nếu cần
+                }, 50); // Thay đổi thời gian nếu cần
             } else {
                 Swal.fire('Opps!', response.message, 'error');
             }

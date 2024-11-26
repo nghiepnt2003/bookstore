@@ -9,8 +9,9 @@ import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { Spin } from 'antd'
 import { updateCart } from '../../store/cart/cartSlice'
-import PayPal from '../../components/PayPal'
 import { useDebounce } from 'use-debounce';
+import {Congrat, PayPal} from '../../components'
+import { getCurrent } from '../../store/user/asyncActions'
 
 const { Option } = Select;
 
@@ -40,9 +41,9 @@ const Checkout = () => {
         // Khởi tạo các trường khác nếu cần
     });
     const [formData, setFormData] = useState({
-        recipient: '',
-        phone: '',
-        address: '',
+        recipient: current?.fullname,
+        phone: current?.phone,
+        address: current?.address[0],
         note: '',
     });
     // const [debouncedFormData] = useDebounce(formData, 5000); // 3000ms là thời gian trì hoãn
@@ -81,7 +82,7 @@ const Checkout = () => {
     }, [list])
 
     const onFinish = async (values) => {
-
+        console.log("VALUES " + JSON.stringify(values))
         const products = list.map(item => ({
             product: item.product._id,
             count: item.quantity,
@@ -181,21 +182,28 @@ const Checkout = () => {
     }
 
     const handleFormChange = (_, allValues) => {
+        console.log("ALLVALUES " + JSON.stringify(allValues))
         setFormData(allValues);
     };
     const createPayPalPayload = () => {
+        console.log("FORMDATA " + JSON.stringify(formData))
         const data = {
             products: list.map(item => ({
                 product: item.product._id,
                 count: item.quantity,
             })),
             paymentMethod: "PayPal",
+            // total,
+            // // Add additional form data here
+            // ...formData
+            // // ...debouncedFormData
             total,
-            // Add additional form data here
-            ...formData
-            // ...debouncedFormData
+            recipientName: formData.recipient, // Add recipient name
+            recipientPhone: formData.phone, // Add recipient phone
+            shippingAddress: formData.address, // Add shipping address
+            note: formData.note, // Include note if necessary
         };
-        console.log(data);
+        console.log("PAYPAL DATA"+ JSON.stringify(data));
         return data;
     };
 
@@ -213,10 +221,13 @@ const Checkout = () => {
         form.setFieldsValue({ address: value }); // Cập nhật giá trị ô Input
         // form.se
     };
+    // React.useEffect(() => {
+    //         if(isSuccess) dispatch(getCurrent())
+    //     }, [isSuccess])
 
     return (
         <Spin spinning={loading} size={"large"}>
-
+            {isSuccess && <Congrat />}
             <div className="pb-[50px]">
                 <div class="flex flex-col items-center border-b bg-white sm:flex-row sm:px-10 lg:px-20 xl:px-32">
                     <Link to="/">
@@ -266,12 +277,12 @@ const Checkout = () => {
                                     </div>
                                 </label>
                             </div>
-                            {/* <div className='w-full mx-auto'>
+                            <div className='w-full mx-auto'>
                                 <PayPal
                                     payload={payPalPayload}
                                     setIsSuccess={setIsSuccess}
                                     amount={(total / 24250).toFixed(2)} />
-                            </div> */}
+                            </div>
                         </form>
                         {/* <p class="mt-8 text-lg">Voucher</p>
                         <div className="flex items-center mt-[20px]">
@@ -325,7 +336,8 @@ const Checkout = () => {
                                 <Form.Item
                                     label="Địa chỉ giao hàng"
                                     name="address"
-                                    initialValue={(current?.address[current?.address.length-1])} // Thiết lập giá trị mặc định
+                                    //current?.address.length-1
+                                    initialValue={(current?.address[0])} // Thiết lập giá trị mặc định
                                     rules={[
                                         {
                                             required: true,
