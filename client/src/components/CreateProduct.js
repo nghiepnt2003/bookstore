@@ -186,6 +186,7 @@ const CreateProduct = ({ onClose, onRefresh }) => {
                                     type='number'
                                     name='price'
                                     value={formData.price}
+                                    min="0"
                                     onChange={handleInputChange}
                                     className="p-2 border border-gray-300 rounded-md text-lg"
                                     required
@@ -196,6 +197,7 @@ const CreateProduct = ({ onClose, onRefresh }) => {
                                 <input
                                     type='number'
                                     name='pageNumber'
+                                    min="0"
                                     value={formData.pageNumber}
                                     onChange={handleInputChange}
                                     className="p-2 border border-gray-300 rounded-md text-lg"

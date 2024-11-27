@@ -4,6 +4,9 @@ import React from 'react'
 import { toast } from 'react-toastify';
 import { apiUpdateOrder } from '../apis/user';
 import { apiCancelOrder } from '../apis';
+import icons from '../ultils/icons';
+
+const {FaTruckFast} = icons
 
 function AdminOrderItem({ setKey, setReload, listOrder }) {
 
@@ -21,7 +24,7 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
         console.log("STATUS " + status)
 
         let updateStatus = status === "Pending" ? "Delivering"
-            : status === "Delivering" ? "Successed"
+            // : status === "Delivering" ? "Successed"
                 : ""
                 console.log("UP STATUS " + updateStatus)
                 try {
@@ -114,14 +117,15 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                             </div>
                             <div className='mt-[20px]'>
                                 <Button
-                                    disabled={order.status === "Successed" || order.status === "Cancelled"}
+                                    disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Delivering"}
                                     className={`cursor-pointer`}
                                     type='primary'
                                     ghost
                                     icon={
                                         order.status === "Successed" ? <CheckCircleOutlined className="text-green-500" />
                                             : order.status === "Cancelled" ? <CloseCircleOutlined className="text-red-500" />
-                                                : ""
+                                                : order.status === "Delivering" ? <FaTruckFast className="text-blue-400" />
+                                                    : ""
                                     }
                                     onClick={() => handleUpdateOrder(order.status, order._id)}
                                 >
@@ -133,13 +137,13 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                                         : ""
                                     }
                                 </Button>
-                                {
+                                {/* {
                                     order.status === "Pending" ?
                                         <Button className='ml-[30px]' onClick={() => handleCancel(order._id)} danger type='primary'>
                                             Từ chối đơn hàng
                                         </Button>
                                         : ""
-                                }
+                                } */}
                             </div>
                         </div>
                     ))

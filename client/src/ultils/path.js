@@ -22,6 +22,7 @@ const path = {
     MANAGE_CATEGORY: 'manage-category',
     MANAGE_INFO_AUTHOR: 'manage-info-author',
     MANAGE_INFO_PUBLISHER: 'manage-info-publisher',
+    MANAGE_STORE:'manage-store',
     // ADMINPERSONAL: 'adminpersonal',
 
     // member

@@ -30,7 +30,7 @@ const ButtonWrapper = ({ currency, showSpinner, amount, payload, setIsSuccess })
 
     const handleSaveOrder = async () => {
         console.log("PAYLOA " + JSON.stringify(payload))
-        const response = await apiOrder({ ...payload, payment: payload.paymentMethod, status: 'Delivering' })
+        const response = await apiOrder({ ...payload, payment: 'PAYPAL', status: 'Delivering' })
 
         if (response.success) {
             setIsSuccess(true)

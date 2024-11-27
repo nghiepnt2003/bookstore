@@ -54,7 +54,6 @@ const ManageProduct = () => {
     };
 
     const openEditModal = (product) => {
-        console.log("PRODUCT " + JSON.stringify(product))
         dispatch(showModal({
             isShowModal: true,
             modalChildren: (

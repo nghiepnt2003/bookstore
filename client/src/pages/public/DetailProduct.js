@@ -204,6 +204,17 @@ const DetailProduct = () => {
                 if (rs.isConfirmed) navigate(`/${path.LOGIN}`);
             });
         }
+
+         // Kiểm tra số lượng sản phẩm trong kho
+        if (quantity > productData.stockQuantity) {
+            return Swal.fire({
+                title: 'Số lượng không đủ',
+                text: `Chỉ còn ${productData.stockQuantity} sản phẩm trong kho.`,
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        }
+
         const response = await apiUpdateCart({ productId: productData._id, quantity });
         if (response.success) {
             // const getCarts = await apiGetUserCart()
@@ -227,7 +238,10 @@ const DetailProduct = () => {
                     </div>
                 </div>
                 <div className="flex-4">
-                    <h2 className="font-semibold text-[25px] mb-4">{name}</h2>
+                    <div className="flex justify-between">
+                        <h2 className="font-semibold text-[25px] mb-4">{name}</h2>
+                        <span className="text-sm italic text-main mr-4">{`Kho: ${productData?.stockQuantity}`}</span>
+                    </div>
                     <span>{`${formatMoney(formatPrice(productData?.price))} VNĐ`}</span>
                     <div className="flex items-center gap-1">
                         {renderStarFromNumber(productData?.averageRating)?.map((el, index) => (

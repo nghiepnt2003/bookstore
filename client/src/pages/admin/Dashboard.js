@@ -4,9 +4,12 @@ import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts'
 import { DatePicker, Select } from 'antd'
 import dayjs from 'dayjs'
 import { apiGetAllOrderByTime, apiGetAllOrder } from '../../apis/user'
+import { apiGetInventories, apiGetProducts } from '../../apis';
 import { useSelector } from 'react-redux';
+import icons from '../../ultils/icons'
 
 const { RangePicker } = DatePicker
+const {FaStoreAlt, MdOutlineAttachMoney} = icons
 
 const options = [
     {
@@ -135,6 +138,9 @@ const Dashboard = () => {
     const [listAllOrders, setListAllOrders] = React.useState([])
     const [chartFilter, setChartFilter] = React.useState(options[0])
     const [data, setData] = React.useState([])
+    const [totalIncomes, setTotalIncomes] = React.useState(0)
+    const [totalInventories, setTotalInventories] = React.useState(0)
+    const [store, setStore] = React.useState(0);
 
     const handleChangeDateFilter = (value, dayValues) => {
 
@@ -237,41 +243,100 @@ const Dashboard = () => {
         }
         console.log(dataChart)
         setData(dataChart)
+        const newtotalIncomes = listAllOrders.reduce((acc, curr) => acc + curr.totalPrice, 0)
+        setTotalIncomes(newtotalIncomes)
+        fetchInventories()
+        fetchProducts()
 
     }, [chartFilter, listAllOrders])
 
+
+    const fetchInventories = async () => {
+        const response = await apiGetInventories();
+        if (response.success) {
+            const totalvon = response.inventories.reduce((acc, curr) => acc + curr.totalCost, 0)
+            setTotalInventories(totalvon)
+        }
+    };
+    const fetchProducts = async () => {
+        const response = await apiGetProducts({ limit: 1000 });
+        if (response.success) {
+            const availableProducts = response?.products?.filter(product => product.stockQuantity > 0);
+            setStore(availableProducts.length)
+        }
+    };
+
+
     return (
-        <div className='w-full flex gap-[20px] p-[20px] h-full items-center justify-center'>
-            <div className="flex-[2] p-[20px] bg-white shadow-sm rounded-[24px]">
-                <div className='p-[20px]'>
-                    <p className='text-[13px] mb-[10px] text-[#333] font-[500]'>Lọc theo: </p>
-                    <Select onChange={handleChangeFilter} value={chartFilter} options={options} />
+        <>
+           <div className='flex justify-between items-center gap-[20px]'>
+                <div className='flex-[1] h-max p-[20px] bg-[#cce9ff] shadow-sm rounded-[24px]'>
+                    <div className='mt-[20px] flex flex-col items-center'>
+                        <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
+                            <MdOutlineAttachMoney />
+                            Tổng vốn
+                        </p>
+                        <p className='text-[1.2rem] uppercase font-[500] text-[#333]'>
+                        {numeral(totalInventories).format("0,0")} VNĐ  VNĐ
+                        </p>
+                    </div>
                 </div>
-                <div className='flex flex-col items-center'>
-                    <h1 className='text-[1.4rem] mb-[10px] uppercase font-[500] text-[#333]'>Biểu đồ doanh thu</h1>
-                    <LineChart width={600} height={300} data={data}>
-                        <Line type="monotone" dataKey="income" stroke="#8884d8" />
-                        <CartesianGrid stroke="#ccc" />
-                        <XAxis dataKey="time" tick={{ fontSize: "13px" }} label={{ fontSize: "13px" }} />
-                        <YAxis tickFormatter={formatPrice} tick={{ fontSize: "13px" }} label={{ fontSize: "13px" }} />
-                        <Tooltip formatter={formatPrice} fontSize={13} />
-                    </LineChart>
+                <div className='flex-[1] h-max p-[20px] bg-[#cce9ff] shadow-sm rounded-[24px]'>
+                    <div className='mt-[20px] flex flex-col items-center'>
+                        <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
+                            <MdOutlineAttachMoney/>
+                            Tổng Doanh Thu
+                        </p>
+                        <p className='text-[1.2rem] uppercase font-[500] text-[#333]'>
+                            {numeral(totalIncomes).format("0,0")} VNĐ
+                        </p>
+                    </div>
+                </div>
+                <div className='flex-[1] h-max p-[20px] bg-[#cce9ff] shadow-sm rounded-[24px]'>
+                    <div className='mt-[20px] flex flex-col items-center'>
+                        <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
+                            <FaStoreAlt className='mr-2'/>
+                            Kho
+                        </p>
+                        <p className='text-[1.2rem] uppercase font-[500] text-[#333]'>
+                            {store} sản phẩm
+                        </p>
+                    </div>
+                </div>
+           </div>
+
+            <div className='w-full flex gap-[20px] h-[550px] items-center justify-center'>
+                <div className="flex-[2] p-[20px] bg-white shadow-sm rounded-[24px]">
+                    <div className='p-[20px]'>
+                        <p className='text-[13px] mb-[10px] text-[#333] font-[500]'>Lọc theo: </p>
+                        <Select onChange={handleChangeFilter} value={chartFilter} options={options} />
+                    </div>
+                    <div className='flex flex-col items-center'>
+                        <h1 className='text-[1.4rem] mb-[10px] uppercase font-[500] text-[#333]'>Biểu đồ doanh thu</h1>
+                        <LineChart width={600} height={300} data={data}>
+                            <Line type="monotone" dataKey="income" stroke="#8884d8" />
+                            <CartesianGrid stroke="#ccc" />
+                            <XAxis dataKey="time" tick={{ fontSize: "13px" }} label={{ fontSize: "13px" }} />
+                            <YAxis tickFormatter={formatPrice} tick={{ fontSize: "13px" }} label={{ fontSize: "13px" }} />
+                            <Tooltip formatter={formatPrice} fontSize={13} />
+                        </LineChart>
+                    </div>
+                </div>
+                <div className='flex-[1] h-max p-[20px] bg-white shadow-sm rounded-[24px]'>
+                    <h1 className='text-[1.4rem] uppercase font-[500] text-[#333]'>Doanh thu</h1>
+                    <div className='flex flex-col p-[10px]'>
+                        <p className='text-[13px] mb-[10px] text-[#333] font-[500]'>Lọc theo: </p>
+                        <RangePicker onChange={handleChangeDateFilter} format={"DD/MM/YYYY"} />
+                    </div>
+                    <div className='mt-[20px] flex flex-col items-center'>
+                        <p className='text-[13px] mb-[10px] text-[#333] font-[500]'>{dateFilter.label}</p>
+                        <p className='text-[1.4rem] uppercase font-[500] text-[#333]'>
+                            {numeral(incomes).format("0,0")} VNĐ
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div className='flex-[1] h-max p-[20px] bg-white shadow-sm rounded-[24px]'>
-                <h1 className='text-[1.4rem] uppercase font-[500] text-[#333]'>Doanh thu</h1>
-                <div className='flex flex-col p-[10px]'>
-                    <p className='text-[13px] mb-[10px] text-[#333] font-[500]'>Lọc theo: </p>
-                    <RangePicker onChange={handleChangeDateFilter} format={"DD/MM/YYYY"} />
-                </div>
-                <div className='mt-[20px] flex flex-col items-center'>
-                    <p className='text-[13px] mb-[10px] text-[#333] font-[500]'>{dateFilter.label}</p>
-                    <p className='text-[1.4rem] uppercase font-[500] text-[#333]'>
-                        {numeral(incomes).format("0,0")} VNĐ
-                    </p>
-                </div>
-            </div>
-        </div>
+        </>
     )
 }
 

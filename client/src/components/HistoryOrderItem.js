@@ -2,6 +2,7 @@ import { Button } from 'antd'
 import React from 'react'
 import { toast } from 'react-toastify';
 import { apiCancelOrder } from '../apis';
+import Swal from 'sweetalert2';
 
 function HistoryOrderItem({ setFetch, listOrder }) {
     console.log("listOrder " + JSON.stringify(listOrder) )
@@ -27,6 +28,29 @@ function HistoryOrderItem({ setFetch, listOrder }) {
         } else {
             toast.success(response.mess)
         }
+    }
+
+    const handleReceived = async (oid) => {
+        const result = await Swal.fire({
+            title: 'Xác nhận nhận hàng',
+            text: 'Nếu bạn xác nhận, bạn sẽ không được hoàn trả đơn hàng này.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy'
+        });
+    
+        // if (result.isConfirmed) {
+        //     // Gọi API để cập nhật trạng thái đơn hàng
+        //     const response = await apiUpdateOrderStatus(oid, { status: 'Successed' });
+            
+        //     if (response.success) {
+        //         setFetch(prev => !prev); // Cập nhật lại danh sách đơn hàng
+        //         toast.success("Xác nhận thành công");
+        //     } else {
+        //         toast.error(response.message || "Đã xảy ra lỗi");
+        //     }
+        // }
     }
 
     return (
@@ -101,6 +125,14 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                         </Button>
                                         : ""
                                 }
+                                {
+                                    order.status === "Delivering" ?
+                                        <Button onClick={() => handleReceived(order._id)} type='primary'>
+                                            Đã nhận được hàng
+                                        </Button>
+                                        : ""
+                                }
+
 
                             </div>
                         </div>

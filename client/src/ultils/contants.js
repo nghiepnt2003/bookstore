@@ -102,7 +102,7 @@ export const voteOptions = [
 
 ]
 
-const { AiOutlineDashboard, MdGroups, TbBrandProducthunt, RiBillLine, MdOutlineCategory, ImProfile, BiCategoryAlt, GrContactInfo } = icons
+const { AiOutlineDashboard, MdGroups, TbBrandProducthunt, RiBillLine, MdOutlineCategory, ImProfile, BiCategoryAlt, GrContactInfo, FaStoreAlt } = icons
 export const adminSidebar = [
     {
         id: 1,
@@ -142,6 +142,12 @@ export const adminSidebar = [
     },
     {
         id: 7,
+        text: 'Quản lý kho hàng',
+        path: `/${path.ADMIN}/${path.MANAGE_STORE}`,
+        icon: <FaStoreAlt />,
+    },
+    {
+        id: 8,
         text: 'Quản lý đơn hàng',
         path: `/${path.ADMIN}/${path.MANAGE_ORDER}`,
         icon: <RiBillLine />

@@ -3,7 +3,6 @@ import * as apis from '../../apis';
 
 // Tạo action để lấy giỏ hàng
 export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { rejectWithValue }) => {
-    console.log("HELLLLLJDJ")
     try {
         const response = await apis.apiGetUserCart();
         if (!response.success) {
