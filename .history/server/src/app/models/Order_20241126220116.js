@@ -29,14 +29,7 @@ const orderSchema = new Schema(
     status: {
       type: String,
       default: "Not Yet Paid",
-      enum: [
-        "Not Yet Paid",
-        "Pending",
-        "Cancelled",
-        "Delivering",
-        "Transported",
-        "Successed",
-      ],
+      enum: ["Not Yet Paid", "Pending", "Cancelled", "Delivering", "Successed"],
     },
     totalPrice: { type: Number, required: true },
     payment: {

@@ -49,11 +49,6 @@ router.put(
   [verifyAccessToken, isAdmin],
   orderController.updateStatus
 );
-router.put(
-  "/confirmOrder/:id",
-  [verifyAccessToken],
-  orderController.confirmOrder
-);
 
 router.put("/:id", verifyAccessToken, orderController.deleteByUser);
 

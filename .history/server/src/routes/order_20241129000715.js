@@ -51,7 +51,7 @@ router.put(
 );
 router.put(
   "/confirmOrder/:id",
-  [verifyAccessToken],
+  [verifyAccessToken, isAdmin],
   orderController.confirmOrder
 );
 

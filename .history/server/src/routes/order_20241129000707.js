@@ -50,9 +50,9 @@ router.put(
   orderController.updateStatus
 );
 router.put(
-  "/confirmOrder/:id",
-  [verifyAccessToken],
-  orderController.confirmOrder
+  "/updateStatus/:id",
+  [verifyAccessToken, isAdmin],
+  orderController.updateStatus
 );
 
 router.put("/:id", verifyAccessToken, orderController.deleteByUser);

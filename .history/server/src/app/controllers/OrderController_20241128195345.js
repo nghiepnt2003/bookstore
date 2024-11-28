@@ -1016,69 +1016,6 @@ class OrderController {
     }
   }
 
-  // [PUT] /order/confirmOrder/:id
-  async confirmOrder(req, res) {
-    try {
-      const { id } = req.params;
-
-      // Tìm đơn hàng theo ID
-      const order = await Order.findById(id).populate({
-        path: "details", // Populate trường "details"
-        model: "OrderDetail", // Tên của model "OrderDetail"
-      });
-
-      // Kiểm tra nếu không tìm thấy đơn hàng
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "Order not found",
-        });
-      }
-
-      // Kiểm tra nếu trạng thái hiện tại không phải là "Delivering"
-      if (order.status !== "Delivering") {
-        return res.status(400).json({
-          success: false,
-          message: "Only orders that are being delivered can be confirmed",
-        });
-      }
-
-      // Cập nhật trạng thái đơn hàng thành "Successed"
-      order.status = "Successed";
-      await order.save();
-
-      // Tính tổng số lượng sản phẩm trong đơn hàng
-      const orderDetails = await OrderDetail.find({
-        _id: { $in: order.details },
-      });
-      const totalQuantity = orderDetails.reduce(
-        (acc, detail) => acc + detail.quantity,
-        0
-      );
-
-      // Cộng điểm cho người dùng (2 điểm cho mỗi sản phẩm trong đơn hàng)
-      const user = await User.findById(order.user).populate("member");
-      if (user && user.member) {
-        user.member.score += 2 * totalQuantity; // Cộng thêm 2 điểm cho mỗi sản phẩm
-        await user.member.save(); // Lưu thay đổi vào Member
-      }
-
-      // Gửi phản hồi thành công
-      res.status(200).json({
-        success: true,
-        message: "Order confirmed and status updated to Successed",
-        order,
-      });
-    } catch (error) {
-      // Xử lý lỗi
-      res.status(500).json({
-        success: false,
-        message: "Error confirming order",
-        error: error.message,
-      });
-    }
-  }
-
   // [DELETE] /order/:id
   async deleteByUser(req, res) {
     try {
@@ -1148,8 +1085,6 @@ class OrderController {
     }
   }
 }
-
-// Out of controller
 async function adjustLineItemsQuantity(productId) {
   // Tìm tất cả các giỏ hàng
   const carts = await Cart.find().populate({
