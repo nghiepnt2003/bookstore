@@ -1039,7 +1039,7 @@ class OrderController {
       if (order.status !== "Transported") {
         return res.status(400).json({
           success: false,
-          message: "Only orders that are being Transported can be confirmed",
+          message: "Only orders that are being delivered can be confirmed",
         });
       }
 
