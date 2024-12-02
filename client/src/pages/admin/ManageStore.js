@@ -52,7 +52,11 @@ const ManageStore = () => {
     const handleDetailChange = (index, event) => {
         const { name, value } = event.target;
         const newDetails = [...details];
-        newDetails[index][name] = value;
+        // Chỉ cập nhật nếu giá trị là số dương hoặc bằng 0
+        if (value === '' || Number(value) >= 0) {
+            newDetails[index][name] = value;
+        }
+        
         setDetails(newDetails);
     };
 

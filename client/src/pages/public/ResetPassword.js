@@ -117,7 +117,13 @@ const ResetPassword = () => {
         }
     }, [password])
     return (
-        <div className='absolute animate-slide-right top-0 left-0 bottom-0 right-0 bg-[#f893cb] rounded flex flex-col items-center py-8 z-50 h-screen justify-center'>
+        <div className='absolute animate-slide-right top-0 left-0 bottom-0 right-0 bg-[#f893cb] rounded flex flex-col items-center py-8 z-50 h-screen justify-center'
+            style={{
+                backgroundImage: 'url(https://marketplace.canva.com/EAEu1Y_agD8/1/0/1600w/canva-v%C3%A0ng-v%C3%A0-xanh-l%C3%A1-c%C3%B3-hoa-minh-h%E1%BB%8Da-m%C3%B9a-xu%C3%A2n-h%C3%ACnh-n%E1%BB%81n-m%C3%A1y-t%C3%ADnh-evdxW2OYtvA.jpg)', // Đường dẫn tới hình ảnh
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            }}
+        >
             <div className='p-[20px] bg-white rounded-[12px] w-[34vw]'>
                 <div className='flex flex-col gap-4 '>
                     <label htmlFor="password">Enter your new password:</label>

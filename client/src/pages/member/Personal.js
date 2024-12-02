@@ -311,6 +311,7 @@ const Personal = () => {
     const [loading, setLoading] = useState(false); // State cho loading
     const [isShowPassword, setIsShowPassWord] = useState(false)
     const [compare, setCompare] = useState(true)
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
         dispatch(getCurrent());
@@ -336,6 +337,10 @@ const Personal = () => {
     const [birthday, setBirthday] = useState(current?.birthday ? moment(current.birthday).format('YYYY-MM-DD') : '');
 
     const handleResetPassword = async () => {
+        const isPasswordComplex = (password) => {
+            const passwordComplexityPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+            return passwordComplexityPattern.test(password);
+        };
         if (!password) {
             setError(prev => ({ ...prev, password: "Vui lòng nhập mật khẩu hiện tại" }));
             return;
@@ -344,6 +349,14 @@ const Personal = () => {
             setError(prev => ({ ...prev, newPassword: "Vui lòng nhập mật khẩu mới" }));
             return;
         }
+        if (!isPasswordComplex(newPassword)) {
+            setError(prev => ({ ...prev, newPassword: "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt." }));
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setError(prev => ({ ...prev, confirmPassword: "Mật khẩu mới và xác nhận mật khẩu không khớp" }));
+            return;
+        }    
 
         console.log(password + " " + newPassword)
 
@@ -351,7 +364,7 @@ const Personal = () => {
         if (response?.success) 
         {
             setShowDialog(false);
-            toast.success("Cập nhật mật khẩu thành công")
+            toast.success("Đổi mật khẩu thành công")
         }
         else 
         {
@@ -434,6 +447,15 @@ const Personal = () => {
                             onChange={e => setNewPassword(e.target.value)}
                         />
                         <p className='text-red-500 mt-[4px]'>{error?.newPassword}</p>
+                        <input 
+                            type={isShowPassword ? "text" : "password"}
+                            id="confirmPassword"
+                            className='w-full h-[50px] pl-2 border rounded border-main outline-none placeholder:text-sm placeholder:text-main'
+                            placeholder='Xác nhận mật khẩu mới'
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                        />
+                        <p className='text-red-500 mt-[4px]'>{error?.confirmPassword}</p>
                     </div >
                     <div className='mt-2 flex justify-end w-full'>
                         <Checkbox checked={isShowPassword} onChange={() => setIsShowPassWord(prev => !prev)}>

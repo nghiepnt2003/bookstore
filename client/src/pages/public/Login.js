@@ -21,6 +21,7 @@ const Login = () => {
     const [payload, setPayload] = useState({
         email: '',
         password: '',
+        confirmPassword: '', // Trường mới cho xác nhận mật khẩu
         username: '',
         fullname: '',
         phone: '',
@@ -73,16 +74,26 @@ const Login = () => {
 
     const handleSubmit = async () => {
         if (isRegister) {
-            const { email, password, username, fullname, phone, address } = payload;
+            const { email, password, confirmPassword, username, fullname, phone, address } = payload;
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
             const phonePattern = /^[0-9]{10,15}$/; 
+            const passwordComplexityPattern = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/; // Ít nhất 8 ký tự, 1 chữ hoa, 1 số, 1 ký tự đặc biệt
+
+            if (!email || !password || !username || !fullname || !phone || !address || !confirmPassword) {
+                toast.error('Vui lòng nhập đầy đủ các trường');
+                return;
+            }
         
             if (!email || !emailPattern.test(email)) {
                 toast.error('Vui lòng nhập địa chỉ email hợp lệ.');
                 return;
             }
-            if (!password || password.length < 6) {
-                toast.error('Mật khẩu phải có ít nhất 6 ký tự.');
+            if (!password || !passwordComplexityPattern.test(password)) {
+                toast.error('Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, số và ký tự đặc biệt.');
+                return;
+            }
+            if (password !== confirmPassword) {
+                toast.error('Mật khẩu và xác nhận mật khẩu không khớp.');
                 return;
             }
             if (!username) {
@@ -110,10 +121,10 @@ const Login = () => {
             loadingBarRef.current.complete();
 
             if (response.success) {
-                toast.success('OTP đã được gửi đến email của bạn!');
+                toast.success('Hãy kiểm tra email của bạn!');
                 setIsSendOTP(true);
             } else {
-                toast.error('Gửi OTP không thành công, email đã tồn tại. Vui lòng thử lại.');
+                toast.error('Email đăng ký đã tồn tại. Vui lòng thử lại.');
             }
         } else {
             const { username, password } = payload;
@@ -215,8 +226,19 @@ const Login = () => {
                         type='password'
                     />
                     {isRegister && (
+                        <>
+                            <InputField
+                                value={payload.confirmPassword}
+                                setValue={setPayload}
+                                nameKey='confirmPassword'
+                                type='password'
+                                placeholder="Xác nhận mật khẩu"
+                            />
+                        </>
+                    )}
+                    {isRegister && (
                         <Button
-                            name="Gửi OTP"
+                            name="Đăng ký"
                             handleOnClick={handleSubmit}
                             style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 mt-3 w-full hover:bg-opacity-80 transition'
                             disabled={loading}
@@ -317,7 +339,7 @@ const Login = () => {
                             />
                             <div className="flex justify-between">
                                 <Button
-                                    name="Gửi Email"
+                                    name="Đặt lại mật khẩu"
                                     handleOnClick={handleForgotPasswordSubmit}
                                     style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 hover:bg-opacity-80 transition'
                                     disabled={loading}

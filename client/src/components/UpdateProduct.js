@@ -162,6 +162,10 @@ const UpdateProduct = ({ editProduct, onClose, onRefresh }) => {
     // Hàm cập nhật formData khi nhập
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        // Chỉ cập nhật nếu giá trị không âm
+        if ((name === 'price' || name === 'pageNumber') && Number(value) < 0) {
+            return; // Ngăn không cho cập nhật giá trị âm
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 

@@ -205,6 +205,16 @@ const DetailProduct = () => {
             });
         }
 
+        // Kiểm tra số lượng sản phẩm trong kho
+        if (productData.stockQuantity === 0) {
+            return Swal.fire({
+                title: 'Sản phẩm đã hết hàng',
+                text: 'Xin lỗi, sản phẩm này hiện tại không còn trong kho.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        }
+
          // Kiểm tra số lượng sản phẩm trong kho
         if (quantity > productData.stockQuantity) {
             return Swal.fire({

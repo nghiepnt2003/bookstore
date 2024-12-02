@@ -1,7 +1,7 @@
 import { Button } from 'antd'
 import React from 'react'
 import { toast } from 'react-toastify';
-import { apiCancelOrder } from '../apis';
+import { apiCancelOrder, apiConfirmOrder } from '../apis';
 import Swal from 'sweetalert2';
 
 function HistoryOrderItem({ setFetch, listOrder }) {
@@ -40,17 +40,17 @@ function HistoryOrderItem({ setFetch, listOrder }) {
             cancelButtonText: 'Hủy'
         });
     
-        // if (result.isConfirmed) {
-        //     // Gọi API để cập nhật trạng thái đơn hàng
-        //     const response = await apiUpdateOrderStatus(oid, { status: 'Successed' });
+        if (result.isConfirmed) {
+            // Gọi API để cập nhật trạng thái đơn hàng
+            const response = await apiConfirmOrder(oid);
             
-        //     if (response.success) {
-        //         setFetch(prev => !prev); // Cập nhật lại danh sách đơn hàng
-        //         toast.success("Xác nhận thành công");
-        //     } else {
-        //         toast.error(response.message || "Đã xảy ra lỗi");
-        //     }
-        // }
+            if (response.success) {
+                setFetch(prev => !prev); // Cập nhật lại danh sách đơn hàng
+                toast.success("Xác nhận thành công");
+            } else {
+                toast.error(response.message || "Đã xảy ra lỗi");
+            }
+        }
     }
 
     return (
@@ -109,15 +109,26 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                 ))
                             }
                             <div className='mt-[20px] flex items-center gap-[40px]'>
-                                <Button className='cursor-default '>
+                                {/* <Button className='cursor-default '>
                                     {
                                         order.status === "Pending" ? "Chờ xác nhận"
                                             : order.status === "Successed" ? "Hoàn thành"
                                                 : order.status === "Delivering" ? "Đang giao"
-                                                    : order.status === "Cancelled" ? "Đã hủy"
-                                                        : ""
+                                                    : order.status === "Transported" ? "Đã giao đến"
+                                                        : order.status === "Cancelled" ? "Đã hủy"
+                                                            : ""
                                     }
-                                </Button>
+                                </Button> */}
+                                <div className='text-[16px] text-blue-500 font-[600] mb-[10px]'>
+                                            {
+                                                order.status === "Pending" ? "Chờ xác nhận"
+                                                    : order.status === "Successed" ? "Hoàn thành"
+                                                        : order.status === "Delivering" ? "Đang giao"
+                                                            : order.status === "Transported" ? "Đã giao đến"
+                                                                : order.status === "Cancelled" ? "Đã hủy"
+                                                                    : ""
+                                            }
+                                </div>
                                 {
                                     order.status === "Pending" ?
                                         <Button onClick={() => handleCancel(order._id)} danger type='primary'>
@@ -126,7 +137,7 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                         : ""
                                 }
                                 {
-                                    order.status === "Delivering" ?
+                                    order.status === "Transported" ?
                                         <Button onClick={() => handleReceived(order._id)} type='primary'>
                                             Đã nhận được hàng
                                         </Button>

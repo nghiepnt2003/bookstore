@@ -120,3 +120,9 @@ export const apiResetPassword = (data) => axios({
     method: 'put',
     data
 })
+
+export const apiConfirmOrder = (id) => axios({
+    url: `/order/confirmOrder/${id}`,
+    method: 'put',
+})
+

@@ -24,7 +24,7 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
         console.log("STATUS " + status)
 
         let updateStatus = status === "Pending" ? "Delivering"
-            // : status === "Delivering" ? "Successed"
+            : status === "Delivering" ? "Transported"
                 : ""
                 console.log("UP STATUS " + updateStatus)
                 try {
@@ -117,14 +117,14 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                             </div>
                             <div className='mt-[20px]'>
                                 <Button
-                                    disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Delivering"}
+                                    disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Transported"}
                                     className={`cursor-pointer`}
                                     type='primary'
                                     ghost
                                     icon={
                                         order.status === "Successed" ? <CheckCircleOutlined className="text-green-500" />
                                             : order.status === "Cancelled" ? <CloseCircleOutlined className="text-red-500" />
-                                                : order.status === "Delivering" ? <FaTruckFast className="text-blue-400" />
+                                                // : order.status === "Delivering" ? <FaTruckFast className="text-blue-400" />
                                                     : ""
                                     }
                                     onClick={() => handleUpdateOrder(order.status, order._id)}
@@ -132,9 +132,10 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                     {
                                         order.status === "Pending" ? "Xác nhận đơn hàng"
                                             : order.status === "Delivering" ? "Đang giao"
-                                                : order.status === "Successed" ? "Hoàn thành"
-                                                    : order.status === "Cancelled" ? "Đã hủy"
-                                                        : ""
+                                                : order.status === "Transported" ? "Đã giao đến"
+                                                    : order.status === "Successed" ? "Hoàn thành"
+                                                        : order.status === "Cancelled" ? "Đã hủy"
+                                                            : ""
                                     }
                                 </Button>
                                 {/* {

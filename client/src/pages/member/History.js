@@ -52,6 +52,9 @@ const History = () => {
                             <TabPane tab="Đang giao" key="Delivering">
                                 <HistoryOrderItem setFetch={setFetch} listOrder={filterListOrder} />
                             </TabPane>
+                            <TabPane tab="Đã giao đến" key="Transported">
+                                <HistoryOrderItem setFetch={setFetch} listOrder={filterListOrder} />
+                            </TabPane>
                             <TabPane tab="Hoàn thành" key="Successed">
                                 <HistoryOrderItem setFetch={setFetch} listOrder={filterListOrder} />
                             </TabPane>
