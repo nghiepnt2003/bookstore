@@ -99,7 +99,6 @@ class OrderService {
 
       // Lấy số lượng đơn hàng
       const counts = await Order.find({
-        user: userId,
         ...formatedQueries,
       }).countDocuments();
 
@@ -167,149 +166,72 @@ class OrderService {
     }
   }
 
-  // async getOrdersByTimes(userId, query) {
-  //   const { startTime, endTime, sort, fields, page, limit, ...filters } = query;
+  async getOrdersByTimes(userId, query) {
+    const { startTime, endTime, sort, fields, page, limit, ...filters } = query;
 
-  //   if (!startTime || !endTime) {
-  //     throw new Error("Please provide both startTime and endTime.");
-  //   }
-
-  //   // Convert startTime and endTime to Date objects
-  //   const start = new Date(startTime);
-  //   const end = new Date(new Date(endTime).setHours(23, 59, 59, 999));
-
-  //   // Format filters for mongoose query
-  //   let queryString = JSON.stringify(filters);
-  //   queryString = queryString.replace(
-  //     /\b(gte|gt|lt|lte)\b/g,
-  //     (match) => `$${match}`
-  //   );
-  //   const formattedFilters = JSON.parse(queryString);
-
-  //   // Add date range and status filter
-  //   formattedFilters.date = { $gte: start, $lte: end };
-  //   formattedFilters.status = "Successed";
-
-  //   // Prepare mongoose query
-  //   let queryCommand = Order.find({ ...formattedFilters }).populate({
-  //     path: "details",
-  //     model: "OrderDetail",
-  //   });
-
-  //   // Apply sorting
-  //   if (sort) {
-  //     const sortBy = sort.split(",").join(" ");
-  //     queryCommand = queryCommand.sort(sortBy);
-  //   }
-
-  //   // Select specific fields
-  //   if (fields) {
-  //     const selectedFields = fields.split(",").join(" ");
-  //     queryCommand = queryCommand.select(selectedFields);
-  //   }
-
-  //   // Pagination
-  //   const pageNum = +page || 1;
-  //   const pageLimit = +limit || process.env.LIMIT_ORDERS || 10;
-  //   const skip = (pageNum - 1) * pageLimit;
-  //   queryCommand = queryCommand.skip(skip).limit(pageLimit);
-
-  //   // Execute query
-  //   const orders = await queryCommand.exec();
-
-  //   // Calculate total amount
-  //   const totalAmount = orders.reduce(
-  //     (sum, order) => sum + order.totalPrice,
-  //     0
-  //   );
-
-  //   // Count total matching documents
-  //   const totalOrders = await Order.find({
-  //     ...formattedFilters,
-  //   }).countDocuments();
-
-  //   return {
-  //     orders,
-  //     totalAmount,
-  //     totalOrders,
-  //   };
-  // }
-
-  async getOrdersByTimes(userId, startTime, endTime, queryParams) {
-    try {
-      // Chuyển đổi startTime và endTime thành kiểu Date
-      const start = new Date(startTime);
-      const end = new Date(new Date(endTime).setHours(23, 59, 59, 999)); // Đặt thời gian cuối ngày
-
-      // Tạo một bản sao của queryParams để xử lý các operators
-      const filteredQueryParams = { ...queryParams };
-
-      // Loại bỏ các trường không cần thiết trong bản sao
-      const excludeFields = ["sort", "fields", "startTime", "endTime"];
-      excludeFields.forEach((el) => delete filteredQueryParams[el]);
-
-      // Format lại các operators cho đúng cú pháp mongoose
-      let queryString = JSON.stringify(filteredQueryParams);
-      queryString = queryString.replace(
-        /\b(gte|gt|lt|lte)\b/g,
-        (matchedEl) => `$${matchedEl}`
-      );
-      const formatedQueries = JSON.parse(queryString);
-
-      // Thêm điều kiện thời gian và trạng thái vào formatedQueries
-      formatedQueries.date = { $gte: start, $lte: end };
-      formatedQueries.status = "Successed";
-
-      // Tìm các đơn hàng trong khoảng thời gian đã chỉ định
-      let queryCommand = Order.find({ ...formatedQueries }).populate({
-        path: "details",
-        model: "OrderDetail",
-      });
-
-      // Sắp xếp nếu có tham số sort
-      if (queryParams.sort) {
-        const sortBy = queryParams.sort.split(",").join(" ");
-        queryCommand = queryCommand.sort(sortBy);
-      }
-
-      // Lọc các trường cần thiết nếu có tham số fields
-      if (queryParams.fields) {
-        const fields = queryParams.fields.split(",").join(" ");
-        queryCommand = queryCommand.select(fields);
-      }
-
-      // Phân trang
-      const page = +queryParams.page || 1;
-      const limit = +queryParams.limit || process.env.LIMIT_ORDERS || 100; // Giới hạn số lượng đơn hàng trên mỗi trang
-      const skip = (page - 1) * limit;
-      queryCommand.skip(skip).limit(limit);
-
-      // Thực thi query
-      const response = await queryCommand.exec();
-
-      // Tính tổng tiền của các đơn hàng tìm được
-      const totalAmount = response.reduce(
-        (sum, order) => sum + order.totalPrice,
-        0
-      );
-
-      // Lấy số lượng đơn hàng
-      const counts = await Order.find({
-        ...formatedQueries,
-      }).countDocuments();
-
-      return {
-        success: response.length > 0,
-        counts,
-        totalAmount,
-        orders:
-          response.length > 0
-            ? response
-            : "No successful orders found in the specified time range",
-      };
-    } catch (error) {
-      throw new Error(error.message);
+    if (!startTime || !endTime) {
+      throw new Error("Please provide both startTime and endTime.");
     }
+
+    // Convert startTime and endTime to Date objects
+    const start = new Date(startTime);
+    const end = new Date(new Date(endTime).setHours(23, 59, 59, 999));
+
+    // Format filters for mongoose query
+    let queryString = JSON.stringify(filters);
+    queryString = queryString.replace(
+      /\b(gte|gt|lt|lte)\b/g,
+      (match) => `$${match}`
+    );
+    const formattedFilters = JSON.parse(queryString);
+
+    // Add date range and status filter
+    formattedFilters.date = { $gte: start, $lte: end };
+    formattedFilters.status = "Successed";
+
+    // Prepare mongoose query
+    let queryCommand = Order.find({ ...formattedFilters }).populate({
+      path: "details",
+      model: "OrderDetail",
+    });
+
+    // Apply sorting
+    if (sort) {
+      const sortBy = sort.split(",").join(" ");
+      queryCommand = queryCommand.sort(sortBy);
+    }
+
+    // Select specific fields
+    if (fields) {
+      const selectedFields = fields.split(",").join(" ");
+      queryCommand = queryCommand.select(selectedFields);
+    }
+
+    // Pagination
+    const pageNum = +page || 1;
+    const pageLimit = +limit || process.env.LIMIT_ORDERS || 10;
+    const skip = (pageNum - 1) * pageLimit;
+    queryCommand = queryCommand.skip(skip).limit(pageLimit);
+
+    // Execute query
+    const orders = await queryCommand.exec();
+
+    // Calculate total amount
+    const totalAmount = orders.reduce(
+      (sum, order) => sum + order.totalPrice,
+      0
+    );
+
+    // Count total matching documents
+    const totalOrders = await Order.find({
+      ...formattedFilters,
+    }).countDocuments();
+
+    return {
+      orders,
+      totalAmount,
+      totalOrders,
+    };
   }
 
   async checkPaymentStatusZaloPay(appTransId) {

@@ -67,7 +67,7 @@ class OrderController {
       const { limit, sort, page, fields, ...filterQueries } = queries;
 
       // Gọi service để lấy dữ liệu
-      const { response, counts } = await orderService.getAllOrdersByUser({
+      const { response, counts } = await orderService.getAllsByUser({
         userId,
         filterQueries,
         limit,
@@ -90,25 +90,12 @@ class OrderController {
   //[GET] /order/getAll
   async getAllByAdmin(req, res) {
     try {
-      const queries = { ...req.query };
+      const queryParams = req.query;
 
-      // Tách các giá trị đặc biệt
-      const { limit, sort, page, fields, ...filterQueries } = queries;
+      // Gọi service để xử lý logic
+      const result = await orderService.getAllOrdersByAdmin(queryParams);
 
-      // Gọi service để lấy dữ liệu
-      const { response, counts } = await orderService.getAllOrdersByAdmin({
-        filterQueries,
-        limit,
-        sort,
-        page,
-        fields,
-      });
-
-      res.status(200).json({
-        success: response.length > 0,
-        counts,
-        orders: response.length > 0 ? response : "Cannot get orders",
-      });
+      res.status(200).json(result);
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -118,37 +105,121 @@ class OrderController {
   //GET /order/byTime?startTime=2023-01-01&endTime=2023-01-31
   async getOrdersByTimes(req, res) {
     try {
-      const { _id } = req.user; // Lấy user ID từ access token (middleware xác thực)
-      const { startTime, endTime, ...queryParams } = req.query;
+      const { _id: userId } = req.user; // Extract user ID from the authenticated request
+      const query = req.query;
 
-      // Kiểm tra nếu startTime hoặc endTime không được cung cấp
-      if (!startTime || !endTime) {
-        return res.status(400).json({
-          success: false,
-          message: "Please provide both startTime and endTime.",
-        });
-      }
+      // Fetch orders using the service
+      const { orders, totalAmount, totalOrders } =
+        await orderService.getOrdersByTimes(userId, query);
 
-      // Gọi service để xử lý
-      const { success, counts, totalAmount, orders, message } =
-        await orderService.getOrdersByTimes(
-          _id,
-          startTime,
-          endTime,
-          queryParams
-        );
-
-      res.status(success ? 200 : 404).json({
-        success,
-        counts,
+      res.status(200).json({
+        success: orders.length > 0,
+        counts: totalOrders,
         totalAmount,
-        orders,
-        message,
+        orders:
+          orders.length > 0
+            ? orders
+            : "No successful orders found in the specified time range",
       });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
+
+  // async getOrdersByTimes(req, res) {
+  //   try {
+  //     const { _id } = req.user; // Lấy user ID từ access token (phải có middleware xác thực trước đó)
+
+  //     // Lấy startTime và endTime từ query params
+  //     const { startTime, endTime } = req.query;
+
+  //     // Kiểm tra nếu startTime hoặc endTime không được cung cấp
+  //     if (!startTime || !endTime) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "Please provide both startTime and endTime.",
+  //       });
+  //     }
+
+  //     // Chuyển đổi startTime và endTime thành kiểu Date
+  //     const start = new Date(startTime);
+  //     const end = new Date(new Date(endTime).setHours(23, 59, 59, 999)); // Đặt thời gian cuối ngày
+
+  //     // Lấy các query parameters
+  //     const queries = { ...req.query };
+  //     const excludeFields = [
+  //       "limit",
+  //       "sort",
+  //       "page",
+  //       "fields",
+  //       "startTime",
+  //       "endTime",
+  //     ];
+  //     excludeFields.forEach((el) => delete queries[el]);
+
+  //     // Format lại các operators cho đúng cú pháp mongoose
+  //     let queryString = JSON.stringify(queries);
+  //     queryString = queryString.replace(
+  //       /\b(gte|gt|lt|lte)\b/g,
+  //       (matchedEl) => `$${matchedEl}`
+  //     );
+  //     const formatedQueries = JSON.parse(queryString);
+
+  //     // Thêm điều kiện thời gian và trạng thái Successed vào formatedQueries
+  //     formatedQueries.date = { $gte: start, $lte: end };
+  //     formatedQueries.status = "Successed";
+
+  //     // Tìm các đơn hàng trong khoảng thời gian đã chỉ định và thuộc về người dùng
+  //     let queryCommand = Order.find({ ...formatedQueries }).populate({
+  //       path: "details",
+  //       model: "OrderDetail",
+  //     });
+
+  //     // Sắp xếp nếu có tham số sort
+  //     if (req.query.sort) {
+  //       const sortBy = req.query.sort.split(",").join(" ");
+  //       queryCommand = queryCommand.sort(sortBy);
+  //     }
+
+  //     // Lọc các trường cần thiết nếu có tham số fields
+  //     if (req.query.fields) {
+  //       const fields = req.query.fields.split(",").join(" ");
+  //       queryCommand = queryCommand.select(fields);
+  //     }
+
+  //     // Phân trang
+  //     const page = +req.query.page || 1;
+  //     const limit = +req.query.limit || process.env.LIMIT_ORDERS || 10; // Giới hạn số lượng đơn hàng trên mỗi trang
+  //     const skip = (page - 1) * limit;
+  //     queryCommand.skip(skip).limit(limit);
+
+  //     // Thực thi query
+  //     const response = await queryCommand.exec();
+
+  //     // Tính tổng tiền của các đơn hàng tìm được
+  //     const totalAmount = response.reduce(
+  //       (sum, order) => sum + order.totalPrice,
+  //       0
+  //     );
+
+  //     // Lấy số lượng đơn hàng
+  //     const counts = await Order.find({
+  //       ...formatedQueries,
+  //     }).countDocuments();
+
+  //     res.status(200).json({
+  //       success: response.length > 0,
+  //       counts,
+  //       totalAmount,
+  //       orders:
+  //         response.length > 0
+  //           ? response
+  //           : "No successful orders found in the specified time range",
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ success: false, message: error.message });
+  //   }
+  // }
 
   //[GET] /order/checkOrderStatus
 

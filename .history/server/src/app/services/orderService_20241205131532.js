@@ -280,7 +280,7 @@ class OrderService {
 
       // Phân trang
       const page = +queryParams.page || 1;
-      const limit = +queryParams.limit || process.env.LIMIT_ORDERS || 100; // Giới hạn số lượng đơn hàng trên mỗi trang
+      const limit = +queryParams.limit || process.env.LIMIT_ORDERS || 10; // Giới hạn số lượng đơn hàng trên mỗi trang
       const skip = (page - 1) * limit;
       queryCommand.skip(skip).limit(limit);
 
