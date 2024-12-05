@@ -27,17 +27,7 @@ class ProductController {
   async getProducts(req, res) {
     try {
       const queries = { ...req.query };
-
-      // Tách các giá trị đặc biệt
-      const { limit, sort, page, fields, ...filterQueries } = queries;
-
-      const { response, counts } = await productService.getProducts({
-        filterQueries,
-        limit,
-        sort,
-        page,
-        fields,
-      });
+      const { response, counts } = await productService.getProducts(queries);
 
       res.status(200).json({
         success: response.length > 0,
@@ -57,6 +47,7 @@ class ProductController {
   //     // Tách các trường đặc biệt ra khỏi query
   //     const excludeFields = ["limit", "sort", "page", "fields"];
   //     excludeFields.forEach((el) => delete queries[el]);
+
   //     // Format lại các operators cho đúng cú pháp mongoose
   //     let queryString = JSON.stringify(queries);
   //     queryString = queryString.replace(
@@ -152,7 +143,6 @@ class ProductController {
   //     res.status(500).json({ success: false, message: error.message });
   //   }
   // }
-
   // [GET] /product/suggest
   async suggestProducts(req, res) {
     try {

@@ -5,7 +5,6 @@ const Publisher = require("../models/Publisher");
 const LineItem = require("../models/LineItem");
 const cloudinary = require("cloudinary").v2;
 const Cloud = require("../../config/cloud/cloudinary.config");
-const User = require("../models/User");
 class ProductService {
   async getById(productId) {
     try {
@@ -19,51 +18,58 @@ class ProductService {
       throw error;
     }
   }
-  async getProducts({ filterQueries, limit, sort, page, fields }) {
+  async getProducts(queries) {
     try {
+      // Tách các trường đặc biệt ra khỏi query
+      const excludeFields = ["limit", "sort", "page", "fields"];
+      excludeFields.forEach((el) => delete queries[el]);
+
       // Format lại các operators cho đúng cú pháp mongoose
-      let queryString = JSON.stringify(filterQueries);
+      let queryString = JSON.stringify(queries);
       queryString = queryString.replace(
         /\b(gte|gt|lt|lte)\b/g,
         (matchedEl) => `$${matchedEl}`
       );
       const formatedQueries = JSON.parse(queryString);
 
-      // Filtering
-      if (filterQueries?.name) {
-        formatedQueries.name = { $regex: filterQueries.name, $options: "i" };
+      // Filtering theo tên sản phẩm
+      if (queries?.name) {
+        formatedQueries.name = { $regex: queries.name, $options: "i" };
       }
 
-      // Lọc theo tên tác giả
-      if (filterQueries.authorName) {
+      // Lọc theo tên tác giả nếu có
+      if (queries.authorName) {
         const authors = await Author.find({
-          name: { $regex: filterQueries.authorName, $options: "i" },
+          name: { $regex: queries.authorName, $options: "i" },
         }).select("_id");
         const authorIds = authors.map((author) => author._id);
         if (authorIds.length > 0) {
           formatedQueries.author = { $in: authorIds };
         }
+        delete formatedQueries.authorName;
       }
 
-      // Lọc theo tên danh mục
-      if (filterQueries.categoryName) {
+      // Lọc theo tên category nếu có
+      if (queries.categoryName) {
         const categories = await Category.find({
-          name: { $regex: filterQueries.categoryName, $options: "i" },
+          name: { $regex: queries.categoryName, $options: "i" },
         }).select("_id");
         const categoryIds = categories.map((category) => category._id);
         if (categoryIds.length > 0) {
           formatedQueries.categories = { $in: categoryIds };
         }
+        delete formatedQueries.categoryName;
       }
 
-      // Lọc theo nhà xuất bản
-      if (filterQueries.publisherName) {
+      // Lọc theo tên nhà xuất bản nếu có
+      if (queries.publisherName) {
         const publisher = await Publisher.findOne({
-          name: { $regex: filterQueries.publisherName, $options: "i" },
+          name: { $regex: queries.publisherName, $options: "i" },
         }).select("_id");
         if (publisher) {
           formatedQueries.publisher = publisher._id;
         }
+        delete formatedQueries.publisherName;
       }
 
       // Tạo query command
@@ -72,33 +78,37 @@ class ProductService {
         .populate("author")
         .populate("publisher");
 
-      // Sắp xếp
-      if (sort) {
-        const sortBy = sort.split(",").join(" ");
+      // Sorting
+      if (queries.sort) {
+        const sortBy = queries.sort.split(",").join(" ");
         queryCommand = queryCommand.sort(sortBy);
       }
 
-      // Giới hạn trường trả về
-      if (fields) {
-        const selectedFields = fields.split(",").join(" ");
-        queryCommand = queryCommand.select(selectedFields);
+      // fields limiting
+      if (queries.fields) {
+        const fields = queries.fields.split(",").join(" ");
+        queryCommand = queryCommand.select(fields);
       }
 
-      // Phân trang
-      const currentPage = +page || 1;
-      const perPage = +limit || process.env.LIMIT_PRODUCTS || 100;
-      const skip = (currentPage - 1) * perPage;
-      queryCommand.skip(skip).limit(perPage);
+      // Pagination
+      const page = +queries.page || 1;
+      const limit = +queries.limit || process.env.LIMIT_PRODUCTS;
+      const skip = (page - 1) * limit;
+      queryCommand.skip(skip).limit(limit);
 
-      // Lấy danh sách sản phẩm
-      const response = await queryCommand.exec();
+      // Execute query
+      const products = await queryCommand.exec();
 
-      // Lấy số lượng sản phẩm
+      // Đếm số lượng sản phẩm
       const counts = await Product.find(formatedQueries).countDocuments();
 
-      return { response, counts };
+      return {
+        success: products.length > 0,
+        counts,
+        products: products.length > 0 ? products : "Cannot get products",
+      };
     } catch (error) {
-      throw new Error(error.message);
+      throw error;
     }
   }
 

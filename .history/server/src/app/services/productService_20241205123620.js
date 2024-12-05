@@ -86,7 +86,7 @@ class ProductService {
 
       // Phân trang
       const currentPage = +page || 1;
-      const perPage = +limit || process.env.LIMIT_PRODUCTS || 100;
+      const perPage = +limit || process.env.LIMIT_PRODUCTS || 10;
       const skip = (currentPage - 1) * perPage;
       queryCommand.skip(skip).limit(perPage);
 

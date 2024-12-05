@@ -5,7 +5,6 @@ const Publisher = require("../models/Publisher");
 const LineItem = require("../models/LineItem");
 const cloudinary = require("cloudinary").v2;
 const Cloud = require("../../config/cloud/cloudinary.config");
-const User = require("../models/User");
 class ProductService {
   async getById(productId) {
     try {
@@ -19,10 +18,14 @@ class ProductService {
       throw error;
     }
   }
-  async getProducts({ filterQueries, limit, sort, page, fields }) {
+  async getProducts(queries) {
     try {
+      // Tách các trường đặc biệt ra khỏi query
+      const excludeFields = ["limit", "sort", "page", "fields"];
+      excludeFields.forEach((el) => delete queries[el]);
+
       // Format lại các operators cho đúng cú pháp mongoose
-      let queryString = JSON.stringify(filterQueries);
+      let queryString = JSON.stringify(queries);
       queryString = queryString.replace(
         /\b(gte|gt|lt|lte)\b/g,
         (matchedEl) => `$${matchedEl}`
@@ -30,75 +33,89 @@ class ProductService {
       const formatedQueries = JSON.parse(queryString);
 
       // Filtering
-      if (filterQueries?.name) {
-        formatedQueries.name = { $regex: filterQueries.name, $options: "i" };
+      if (queries?.name) {
+        formatedQueries.name = { $regex: queries.name, $options: "i" };
       }
 
-      // Lọc theo tên tác giả
-      if (filterQueries.authorName) {
+      // Lọc theo tên tác giả nếu có
+      if (queries.authorName) {
         const authors = await Author.find({
-          name: { $regex: filterQueries.authorName, $options: "i" },
+          name: { $regex: queries.authorName, $options: "i" },
         }).select("_id");
-        const authorIds = authors.map((author) => author._id);
+        const authorIds = authors.map((author) => author._id); // Thực hiện map để lấy ObjectId
+        console.log("Author IDs:", authorIds);
         if (authorIds.length > 0) {
           formatedQueries.author = { $in: authorIds };
         }
+        delete formatedQueries.authorName;
       }
-
-      // Lọc theo tên danh mục
-      if (filterQueries.categoryName) {
+      // Lọc theo tên category nếu có
+      if (queries.categoryName) {
         const categories = await Category.find({
-          name: { $regex: filterQueries.categoryName, $options: "i" },
+          name: { $regex: queries.categoryName, $options: "i" },
         }).select("_id");
-        const categoryIds = categories.map((category) => category._id);
+        const categoryIds = categories.map((category) => category._id); // Thực hiện map để lấy ObjectId
         if (categoryIds.length > 0) {
           formatedQueries.categories = { $in: categoryIds };
         }
+        delete formatedQueries.categoryName;
       }
 
-      // Lọc theo nhà xuất bản
-      if (filterQueries.publisherName) {
+      // Lọc theo tên nhà xuất bản nếu có
+      if (queries.publisherName) {
         const publisher = await Publisher.findOne({
-          name: { $regex: filterQueries.publisherName, $options: "i" },
+          name: { $regex: queries.publisherName, $options: "i" },
         }).select("_id");
+        console.log("Publisher ID:", publisher ? publisher._id : null);
         if (publisher) {
-          formatedQueries.publisher = publisher._id;
+          formatedQueries.publisher = publisher._id; // Gán trực tiếp ID của publisher
         }
+        delete formatedQueries.publisherName;
       }
 
-      // Tạo query command
+      // Execute query
       let queryCommand = Product.find(formatedQueries)
-        .populate("categories")
-        .populate("author")
-        .populate("publisher");
+        .populate("categories") // Populate thông tin category
+        .populate("author") // Populate thông tin author nếu cần
+        .populate("publisher"); // Populate thông tin publisher nếu cần
 
-      // Sắp xếp
-      if (sort) {
-        const sortBy = sort.split(",").join(" ");
+      // Sorting
+      if (req.query.sort) {
+        // abc,exg => [abc,exg] => "abc exg"
+        const sortBy = req.query.sort.split(",").join(" ");
+        // sort lần lượt bởi publisher author category nếu truyền  sort("publisher author categories")
         queryCommand = queryCommand.sort(sortBy);
       }
 
-      // Giới hạn trường trả về
-      if (fields) {
-        const selectedFields = fields.split(",").join(" ");
-        queryCommand = queryCommand.select(selectedFields);
+      // fields limiting
+      if (req.query.fields) {
+        const fields = req.query.fields.split(",").join(" ");
+        queryCommand = queryCommand.select(fields);
       }
 
-      // Phân trang
-      const currentPage = +page || 1;
-      const perPage = +limit || process.env.LIMIT_PRODUCTS || 100;
-      const skip = (currentPage - 1) * perPage;
-      queryCommand.skip(skip).limit(perPage);
+      //Pagination
+      // limit: số docs lấy về 1 lần gọi API
+      // skip:
+      // Dấu + nằm trước số để chuyển sang số
+      // +'2' => 2
+      // +'asdasd' => NaN
+      const page = +req.query.page || 1;
+      const limit = +req.query.limit || process.env.LIMIT_PRODUCTS;
+      const skip = (page - 1) * limit;
+      queryCommand.skip(skip).limit(limit);
+      // Execute query
+      const products = await queryCommand.exec();
 
-      // Lấy danh sách sản phẩm
-      const response = await queryCommand.exec();
-
-      // Lấy số lượng sản phẩm
+      // Đếm số lượng sản phẩm
       const counts = await Product.find(formatedQueries).countDocuments();
 
-      return { response, counts };
+      return {
+        success: products.length > 0,
+        counts,
+        products: products.length > 0 ? products : "Cannot get products",
+      };
     } catch (error) {
-      throw new Error(error.message);
+      throw error;
     }
   }
 
