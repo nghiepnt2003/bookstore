@@ -52,7 +52,7 @@ class InventoryService {
         })
           .populate({
             path: "productId", // Tên trường được populate
-            model: "Product",
+            select: "name price category", // Các trường cần lấy từ Product
           })
           .lean();
       }
@@ -66,66 +66,85 @@ class InventoryService {
     }
   }
 
-  async getInventoriesByTime({ startTime, endTime, filters }) {
+  async getInventoryByTime(startTime, endTime, queryParams) {
     try {
-      // Chuyển đổi thời gian thành kiểu Date
       const start = new Date(startTime);
-      const end = new Date(new Date(endTime).setHours(23, 59, 59, 999));
+      const end = new Date(new Date(endTime).setHours(23, 59, 59, 999)); // Đặt thời gian cuối ngày
 
-      // Chuyển đổi các operators cho đúng cú pháp MongoDB
-      let queryString = JSON.stringify(filters);
-      queryString = queryString.replace(
-        /\b(gte|gt|lt|lte)\b/g,
-        (matchedEl) => `$${matchedEl}`
+      // Chuẩn bị bộ lọc
+      const filteredQueryParams = { ...queryParams };
+      const excludeFields = [
+        "sort",
+        "fields",
+        "page",
+        "limit",
+        "startTime",
+        "endTime",
+      ];
+      excludeFields.forEach((el) => delete filteredQueryParams[el]);
+
+      let queryString = JSON.stringify(filteredQueryParams).replace(
+        /\b(gte|gt|lte|lt)\b/g,
+        (match) => `$${match}`
       );
-      let formatedFilters = JSON.parse(queryString);
+      const formatedQueries = JSON.parse(queryString);
 
-      // Ép kiểu giá trị thành số nếu có thể
-      formatedFilters = Object.fromEntries(
-        Object.entries(formatedFilters).map(([key, value]) => {
-          if (typeof value === "object") {
-            return [
-              key,
-              Object.fromEntries(
-                Object.entries(value).map(([operator, val]) => [
-                  operator,
-                  isNaN(val) ? val : Number(val),
-                ])
-              ),
-            ];
-          }
-          return [key, isNaN(value) ? value : Number(value)];
-        })
-      );
+      formatedQueries.createdAt = { $gte: start, $lte: end };
 
-      // Thêm điều kiện thời gian
-      formatedFilters.createdAt = { $gte: start, $lte: end };
+      // Tạo query với điều kiện
+      let queryCommand = Inventory.find({ ...formatedQueries }).populate({
+        path: "details",
+        model: "InventoryDetail",
+        populate: {
+          path: "productId",
+          model: "Product",
+        },
+      });
 
-      console.log("Filters applied:", formatedFilters);
-
-      // Lấy dữ liệu inventory
-      const inventories = await Inventory.find(formatedFilters)
-        .sort({ createdAt: -1 })
-        .lean();
-
-      for (const inventory of inventories) {
-        // Lấy thông tin chi tiết inventory và populate product
-        inventory.inventoryDetails = await InventoryDetail.find({
-          inventoryId: inventory._id,
-        })
-          .populate({
-            path: "productId",
-            model: "Product",
-          })
-          .lean();
+      // Sắp xếp nếu có tham số sort
+      if (queryParams.sort) {
+        const sortBy = queryParams.sort.split(",").join(" ");
+        queryCommand = queryCommand.sort(sortBy);
       }
 
-      // Đếm tổng số lượng Inventory
-      const counts = await Inventory.countDocuments(formatedFilters);
+      // Chọn các trường nếu có tham số fields
+      if (queryParams.fields) {
+        const fields = queryParams.fields.split(",").join(" ");
+        queryCommand = queryCommand.select(fields);
+      }
 
-      return { inventories, counts };
+      // Phân trang
+      const page = +queryParams.page || 1;
+      const limit = +queryParams.limit || 10;
+      const skip = (page - 1) * limit;
+      queryCommand.skip(skip).limit(limit);
+
+      // Thực thi query
+      const response = await queryCommand.exec();
+
+      // Tính tổng giá trị (totalCost) của tất cả inventories
+      const totalCost = response.reduce(
+        (sum, inventory) => sum + inventory.totalCost,
+        0
+      );
+
+      // Đếm tổng số lượng inventories
+      const counts = await Inventory.find({
+        ...formatedQueries,
+      }).countDocuments();
+
+      return {
+        success: response.length > 0,
+        counts,
+        totalCost,
+        inventories: response.length > 0 ? response : "No inventories found.",
+        message:
+          response.length > 0
+            ? "Inventories fetched successfully."
+            : "No inventories found.",
+      };
     } catch (error) {
-      throw new Error(`Failed to get inventories by time: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -153,11 +172,7 @@ class InventoryService {
       if (!product) {
         throw new Error(`Product with ID ${productId} not found.`);
       }
-      if (unitCost >= product.price) {
-        throw new Error(
-          `Cost price (${unitCost}) cannot be greater than or equal to selling price (${product.price}) for product ID: ${productId}.`
-        );
-      }
+
       totalCost += quantity * unitCost;
 
       await new InventoryDetail({
@@ -171,7 +186,7 @@ class InventoryService {
         { _id: productId },
         {
           $inc: { stockQuantity: Number(quantity) },
-          $set: { lastRestocked: new Date(), costPrice: unitCost },
+          $set: { lastRestocked: new Date() },
         },
         { new: true }
       );

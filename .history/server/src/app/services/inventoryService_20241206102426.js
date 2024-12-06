@@ -153,11 +153,7 @@ class InventoryService {
       if (!product) {
         throw new Error(`Product with ID ${productId} not found.`);
       }
-      if (unitCost >= product.price) {
-        throw new Error(
-          `Cost price (${unitCost}) cannot be greater than or equal to selling price (${product.price}) for product ID: ${productId}.`
-        );
-      }
+
       totalCost += quantity * unitCost;
 
       await new InventoryDetail({
@@ -171,7 +167,7 @@ class InventoryService {
         { _id: productId },
         {
           $inc: { stockQuantity: Number(quantity) },
-          $set: { lastRestocked: new Date(), costPrice: unitCost },
+          $set: { lastRestocked: new Date() },
         },
         { new: true }
       );

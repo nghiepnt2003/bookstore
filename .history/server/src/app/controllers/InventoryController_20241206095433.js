@@ -1,20 +1,18 @@
 const Inventory = require("../models/Inventory");
 const InventoryDetail = require("../models/InventoryDetail");
 const Product = require("../models/Product");
-const inventoryService = require("../services/inventoryService");
+const inventoryService = require("../services/InventoryService");
 
 class InventoryController {
   //[GET] inventory/
-  async getAll(req, res) {
+  async getAllInventory(req, res) {
     try {
       const { page = 1, limit = 10, ...filters } = req.query;
-
-      // Gọi service để xử lý logic
-      const { inventories, counts } = await inventoryService.getAllInventories({
+      const { inventories, counts } = await inventoryService.getAllInventory(
         filters,
-        page: Number(page),
-        limit: Number(limit),
-      });
+        page,
+        limit
+      );
 
       res.status(200).json({
         success: inventories.length > 0,
@@ -34,8 +32,9 @@ class InventoryController {
   //[GET] /inventory/by-time
   async getInventoryByTime(req, res) {
     try {
-      const { startTime, endTime, ...filters } = req.query;
+      const { startTime, endTime, ...queryParams } = req.query;
 
+      // Kiểm tra startTime và endTime
       if (!startTime || !endTime) {
         return res.status(400).json({
           success: false,
@@ -43,26 +42,20 @@ class InventoryController {
         });
       }
 
-      // Gọi service để xử lý logic
-      const { inventories, counts } =
-        await inventoryService.getInventoriesByTime({
-          startTime,
-          endTime,
-          filters,
-        });
+      const { success, counts, totalCost, inventories, message } =
+        await inventoryService.getAllInventory(startTime, endTime, queryParams);
 
-      res.status(200).json({
-        success: inventories.length > 0,
+      res.status(success ? 200 : 404).json({
+        success,
         counts,
-        inventories:
-          inventories.length > 0
-            ? inventories
-            : "No inventories found in the specified time range",
+        totalCost,
+        inventories,
+        message,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Failed to get inventories by time.",
+        message: "Failed to fetch inventories.",
         error: error.message,
       });
     }

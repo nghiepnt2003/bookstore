@@ -3,7 +3,11 @@ const inventoryController = require("../app/controllers/InventoryController");
 const { verifyAccessToken, isAdmin } = require("../app/middlewares/jwt");
 const router = express.Router();
 
-router.get("/", [verifyAccessToken, isAdmin], inventoryController.getAll);
+router.get(
+  "/",
+  [verifyAccessToken, isAdmin],
+  inventoryController.getAllInventory
+);
 router.get(
   "/by-time",
   [verifyAccessToken, isAdmin],

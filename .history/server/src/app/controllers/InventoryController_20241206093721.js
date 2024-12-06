@@ -1,20 +1,18 @@
 const Inventory = require("../models/Inventory");
 const InventoryDetail = require("../models/InventoryDetail");
 const Product = require("../models/Product");
-const inventoryService = require("../services/inventoryService");
+const inventoryService = require("../services/InventoryService");
 
 class InventoryController {
   //[GET] inventory/
-  async getAll(req, res) {
+  async getAllInventory(req, res) {
     try {
       const { page = 1, limit = 10, ...filters } = req.query;
-
-      // Gọi service để xử lý logic
-      const { inventories, counts } = await inventoryService.getAllInventories({
+      const { inventories, counts } = await inventoryService.getAllInventory(
         filters,
-        page: Number(page),
-        limit: Number(limit),
-      });
+        page,
+        limit
+      );
 
       res.status(200).json({
         success: inventories.length > 0,
@@ -43,13 +41,11 @@ class InventoryController {
         });
       }
 
-      // Gọi service để xử lý logic
-      const { inventories, counts } =
-        await inventoryService.getInventoriesByTime({
-          startTime,
-          endTime,
-          filters,
-        });
+      const { inventories, counts } = await inventoryService.getInventoryByTime(
+        filters,
+        startTime,
+        endTime
+      );
 
       res.status(200).json({
         success: inventories.length > 0,
