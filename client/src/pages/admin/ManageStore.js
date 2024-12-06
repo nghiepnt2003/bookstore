@@ -85,13 +85,14 @@ const ManageStore = () => {
             setDetails([]);
             toast.success('Thêm kho thành công');
             fetchInventories();
-            setActiveTab('list'); // Chuyển đến tab lịch sử nhập hàng
+            setActiveTab('history'); // Chuyển đến tab lịch sử nhập hàng
         } else {
             toast.error('Thêm kho thất bại: ' + response.message);
         }
     };
 
     const openViewDetails = (inventory) => {
+        
         dispatch(showModal({
             isShowModal: true,
             modalChildren: (

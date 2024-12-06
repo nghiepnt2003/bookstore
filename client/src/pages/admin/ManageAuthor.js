@@ -110,7 +110,7 @@ const ManageAuthor = () => {
     return (
         <div className={clsx('w-full')} style={{ backgroundColor: '#f8f8f8' }}>
             <h1 className='h-[75px] justify-between flex items-center text-3xl font-bold px-4 border-b border-b-main'>
-                <span>Quản Lý Tác Giả</span>
+                <span>Thông tin Tác Giả</span>
             </h1>
             <div className='w-full p-4'>
                 <div className='flex justify-end p-4'>

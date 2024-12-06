@@ -5,10 +5,14 @@ import { toast } from 'react-toastify';
 import { apiUpdateOrder } from '../apis/user';
 import { apiCancelOrder } from '../apis';
 import icons from '../ultils/icons';
+import DetailOrder from './DetailOrder'
+import { useDispatch } from 'react-redux';
+import { showModal } from '../store/app/appSlice';
 
 const {FaTruckFast} = icons
 
 function AdminOrderItem({ setKey, setReload, listOrder }) {
+    const dispatch = useDispatch();
 
     const formatDate = (dataDate) => {
 
@@ -54,8 +58,23 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
         } else {
             toast.success(response.mess)
         }
-
         
+    }
+
+    const handleViewDetails = (recipientName,recipientPhone,shippingAddress,totalPrice,details) => {
+        dispatch(showModal({
+            isShowModal: true,
+            modalChildren: (
+                <DetailOrder
+                    recipientName={recipientName}
+                    recipientPhone={recipientPhone}
+                    shippingAddress={shippingAddress}
+                    totalPrice={totalPrice}
+                    details={details}
+                    onClose={() => dispatch(showModal({ isShowModal: false, modalChildren: null }))}
+                />
+            ),
+        }));        
     }
 
     return (
@@ -115,7 +134,7 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                 </div>
 
                             </div>
-                            <div className='mt-[20px]'>
+                            <div className='mt-[20px] flex justify-between items-center'>
                                 <Button
                                     disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Transported"}
                                     className={`cursor-pointer`}
@@ -145,6 +164,12 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                         </Button>
                                         : ""
                                 } */}
+                                <Button
+                                    className={`cursor-pointer border-2 border-main text-main hover:border-pink-400 hover:text-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-50 transition duration-200 ease-in-out py-2 px-4 rounded`}
+                                    onClick={() => handleViewDetails(order.recipientName, order.recipientPhone, order.shippingAddress, order.totalPrice, order.details)}
+                                >
+                                    Xem chi tiết
+                                </Button>
                             </div>
                         </div>
                     ))

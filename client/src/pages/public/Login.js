@@ -139,12 +139,12 @@ const Login = () => {
                 setTimeout(() => {
                     if (+response.userData.role === 2) {
                         navigate(`/${path.HOME}`);
-                        window.location.reload()
+                        // window.location.reload()
                     } else {
                         navigate(`/${path.ADMIN}/${path.DASHBOARD}`);
-                        window.location.reload()
+                        // window.location.reload()
                     }
-                }, 50); // Thay đổi thời gian nếu cần
+                }, 100); // Thay đổi thời gian nếu cần
             } else {
                 Swal.fire('Opps!', response.message, 'error');
             }

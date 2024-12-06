@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { showModal } from '../../store/app/appSlice'; // Import action để hiển thị modal
 import UpdateProduct from '../../components/UpdateProduct';
 import { apiDeleteProduct, apiGetProducts } from '../../apis/product';
@@ -17,10 +17,16 @@ const ManageProduct = () => {
     const [count, setCount] = useState(0);
     const [products, setProducts] = useState([]);
     const [page, setPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState(''); // State cho tìm kiếm
 
-    const fetchProducts = async (limit, page) => {
+    // Hàm gọi API để lấy sản phẩm
+    const fetchProducts = async (limit, page, name) => {
         try {
-            const response = await apiGetProducts({ limit, page });
+            let response;
+            if(name)
+                response = await apiGetProducts({ limit, page, name });
+            else
+                response = await apiGetProducts({ limit, page});
             if (response.success) {
                 setProducts(response.products);
                 setCount(response.counts);
@@ -31,8 +37,8 @@ const ManageProduct = () => {
     };
 
     useEffect(() => {
-        fetchProducts(10, page);
-    }, [page]);
+        fetchProducts(10, page, searchTerm); // Gọi hàm fetch với tham số tìm kiếm
+    }, [page, searchTerm]); // Thay đổi khi page hoặc searchTerm thay đổi
 
     const handleDeleteProduct = (pid) => {
         Swal.fire({
@@ -45,7 +51,7 @@ const ManageProduct = () => {
                 const response = await apiDeleteProduct(pid);
                 if (response.success) {
                     toast.success('Xóa thành công');
-                    fetchProducts(10, page); // Cập nhật lại danh sách sản phẩm
+                    fetchProducts(10, 1); // Cập nhật lại danh sách sản phẩm
                 } else {
                     toast.error('Đã có lỗi xảy ra');
                 }
@@ -60,11 +66,11 @@ const ManageProduct = () => {
                 <UpdateProduct
                     editProduct={product}
                     onClose={() => dispatch(showModal({ isShowModal: false, modalChildren: null }))}
-                    onRefresh={fetchProducts} // Gọi lại fetch sau khi cập nhật
+                    onRefresh={() => fetchProducts(10, 1)} // Gọi lại fetch sau khi cập nhật
                 />
             ),
         }));
-        setPage(1)
+        setPage(1);
     };
 
     const openAddModal = () => {
@@ -73,13 +79,17 @@ const ManageProduct = () => {
             modalChildren: (
                 <CreateProduct
                     onClose={() => dispatch(showModal({ isShowModal: false, modalChildren: null }))}
-                    onRefresh={fetchProducts} // Gọi lại fetch sau khi cập nhật
+                    onRefresh={() => fetchProducts(10, 1)} // Gọi lại fetch sau khi cập nhật
                 />
             ),
         }));
-        setPage(1)
+        setPage(1);
     };
 
+    const onSearch = (value) => {
+        setSearchTerm(value); // Cập nhật giá trị tìm kiếm
+        setPage(1); // Reset về trang đầu
+    };
 
     return (
         <div className='w-full flex flex-col gap-3 relative overflow-x-auto'>
@@ -87,14 +97,15 @@ const ManageProduct = () => {
                 <h1 className='text-3xl font-bold tracking-tight'>Quản lý sản phẩm</h1>
             </div>
             <div className='px-[20px]'>
-                {/* <div className='flex w-full justify-end items-center py-4 px-2 mb-[20px]'>
+                <div className='flex w-full justify-end items-center py-4 px-2 mb-[20px]'>
                     <Search
-                        className="w-[60vw]"
+                        className="w-full h-[50px]"
                         placeholder="Nhập tên sản phẩm..."
                         allowClear
-                        enterButton="Search"
+                        onSearch={onSearch} // Sử dụng hàm onSearch
+                        enterButton="Tìm kiếm"
                     />
-                </div> */}
+                </div>
                 <div className='w-[40px] h-[30px] bg-main text-white rounded text-center justify-center float-end items-center flex cursor-pointer mb-1' onClick={() => openAddModal()}>
                     <FaPlus />
                 </div>
