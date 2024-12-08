@@ -11,6 +11,9 @@ import { ImProfile } from "react-icons/im";
 import { TiCameraOutline, TiDeleteOutline } from "react-icons/ti";
 import { BiCategoryAlt } from "react-icons/bi";
 import { GrContactInfo } from "react-icons/gr";
+import { CiSearch } from "react-icons/ci";
+import { FaMoneyBillWave } from "react-icons/fa";
+
 
 const icons = {
     FaPhone,
@@ -52,7 +55,9 @@ const icons = {
     FaStoreAlt,
     TiDeleteOutline,
     FaEye,
-    MdOutlineAttachMoney
+    MdOutlineAttachMoney,
+    CiSearch,
+    FaMoneyBillWave
 }
 
 export default icons

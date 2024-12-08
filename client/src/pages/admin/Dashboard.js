@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import icons from '../../ultils/icons'
 
 const { RangePicker } = DatePicker
-const {FaStoreAlt, MdOutlineAttachMoney} = icons
+const {FaStoreAlt, MdOutlineAttachMoney, FaMoneyBillWave} = icons
 
 const options = [
     {
@@ -270,21 +270,21 @@ const Dashboard = () => {
     return (
         <>
            <div className='flex justify-between items-center gap-[20px]'>
-                <div className='flex-[1] h-max p-[20px] bg-[#cce9ff] shadow-sm rounded-[24px]'>
+                <div className='flex-[1] h-max p-[20px] bg-white border-main border-4  shadow-sm rounded-[24px]'>
                     <div className='mt-[20px] flex flex-col items-center'>
-                        <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
-                            <MdOutlineAttachMoney />
+                        <p className='text-[1.2rem] uppercase font-[500] text-main flex items-center'>
+                            <FaMoneyBillWave />
                             Tổng vốn
                         </p>
                         <p className='text-[1.2rem] uppercase font-[500] text-[#333]'>
-                        {numeral(totalInventories).format("0,0")} VNĐ  VNĐ
+                        {numeral(totalInventories).format("0,0")} VNĐ
                         </p>
                     </div>
                 </div>
-                <div className='flex-[1] h-max p-[20px] bg-[#cce9ff] shadow-sm rounded-[24px]'>
+                <div className='flex-[1] h-max p-[20px] bg-white border-main border-4 shadow-sm rounded-[24px]'>
                     <div className='mt-[20px] flex flex-col items-center'>
                         <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
-                            <MdOutlineAttachMoney/>
+                            <FaMoneyBillWave/>
                             Tổng Doanh Thu
                         </p>
                         <p className='text-[1.2rem] uppercase font-[500] text-[#333]'>
@@ -292,7 +292,7 @@ const Dashboard = () => {
                         </p>
                     </div>
                 </div>
-                <div className='flex-[1] h-max p-[20px] bg-[#cce9ff] shadow-sm rounded-[24px]'>
+                <div className='flex-[1] h-max p-[20px] bg-white border-main border-4 shadow-sm rounded-[24px]'>
                     <div className='mt-[20px] flex flex-col items-center'>
                         <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
                             <FaStoreAlt className='mr-2'/>
