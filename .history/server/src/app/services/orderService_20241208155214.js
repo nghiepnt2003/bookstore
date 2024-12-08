@@ -494,11 +494,7 @@ class OrderService {
     totalPrice = Math.round(totalPrice * 100) / 100;
 
     const orderStatus =
-      payment === Payment.OFFLINE
-        ? "Pending"
-        : payment === Payment.PAYPAL
-        ? "Awaiting"
-        : "Not Yet Paid";
+      payment === Payment.OFFLINE ? "Pending" : payment === Payment.PAYPAL;
 
     const newOrder = await Order.create({
       details: orderDetailsIds,
@@ -563,7 +559,7 @@ class OrderService {
     }
 
     // Cập nhật trạng thái đơn hàng
-    order.status = "Awaiting"; // Cập nhật trạng thái đơn hàng thành Awaiting
+    order.status = "Pending"; // Cập nhật trạng thái đơn hàng thành Pending
     await order.save();
     console.log("Order updated:", order);
 
@@ -590,7 +586,7 @@ class OrderService {
       }
 
       // Cập nhật trạng thái đơn hàng
-      order.status = "Awaiting"; // Đánh dấu trạng thái đơn hàng là Awaiting
+      order.status = "Pending"; // Đánh dấu trạng thái đơn hàng là Pending
       await order.save();
       console.log("Order updated:", order);
 

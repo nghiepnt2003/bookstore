@@ -5,9 +5,9 @@ class CommentService {
   async getAllComments(queries) {
     const queryCopy = { ...queries };
     const excludeFields = ["limit", "sort", "page", "fields"];
-    excludeFields.forEach((el) => delete queryCopy[el]);
+    excludeFields.forEach((el) => delete queries[el]);
 
-    let queryString = JSON.stringify(queryCopy);
+    let queryString = JSON.stringify(queries);
     queryString = queryString.replace(
       /\b(gte|gt|lt|lte)\b/g,
       (matchedEl) => `$${matchedEl}`
@@ -40,12 +40,11 @@ class CommentService {
     if (!productExists) {
       throw new Error("Product not found");
     }
-    const queriesCopy = { ...queries };
 
     const excludeFields = ["limit", "sort", "page", "fields"];
-    excludeFields.forEach((el) => delete queriesCopy[el]);
+    excludeFields.forEach((el) => delete queries[el]);
 
-    let queryString = JSON.stringify(queriesCopy);
+    let queryString = JSON.stringify(queries);
     queryString = queryString.replace(
       /\b(gte|gt|lt|lte)\b/g,
       (matchedEl) => `$${matchedEl}`

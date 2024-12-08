@@ -6,9 +6,9 @@ class RatingService {
   async getRatings(queries) {
     const queryCopy = { ...queries };
     const excludeFields = ["limit", "sort", "page", "fields"];
-    excludeFields.forEach((el) => delete queryCopy[el]);
+    excludeFields.forEach((el) => delete queries[el]);
     // Format lại các operators cho đúng cú pháp mongoose
-    let queryString = JSON.stringify(queryCopy);
+    let queryString = JSON.stringify(queries);
     queryString = queryString.replace(
       /\b(gte|gt|lt|lte)\b/g,
       (matchedEl) => `$${matchedEl}`
