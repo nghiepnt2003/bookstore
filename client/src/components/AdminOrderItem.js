@@ -135,35 +135,38 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
 
                             </div>
                             <div className='mt-[20px] flex justify-between items-center'>
-                                <Button
-                                    disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Transported"}
-                                    className={`cursor-pointer`}
-                                    type='primary'
-                                    ghost
-                                    icon={
-                                        order.status === "Successed" ? <CheckCircleOutlined className="text-green-500" />
-                                            : order.status === "Cancelled" ? <CloseCircleOutlined className="text-red-500" />
-                                                // : order.status === "Delivering" ? <FaTruckFast className="text-blue-400" />
-                                                    : ""
-                                    }
-                                    onClick={() => handleUpdateOrder(order.status, order._id)}
-                                >
+                                <div>
+                                    <Button
+                                        disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Transported"}
+                                        className={`cursor-pointer`}
+                                        type='primary'
+                                        ghost
+                                        icon={
+                                            order.status === "Successed" ? <CheckCircleOutlined className="text-green-500" />
+                                                : order.status === "Cancelled" ? <CloseCircleOutlined className="text-red-500" />
+                                                    // : order.status === "Delivering" ? <FaTruckFast className="text-blue-400" />
+                                                        : ""
+                                        }
+                                        onClick={() => handleUpdateOrder(order.status, order._id)}
+                                    >
+                                        {
+                                            order.status === "Pending" ? "Xác nhận đơn hàng"
+                                                : order.status === "Awaiting" ? "Chờ lấy hàng"
+                                                    : order.status === "Delivering" ? "Đang giao"
+                                                        : order.status === "Transported" ? "Đã giao đến"
+                                                            : order.status === "Successed" ? "Hoàn thành"
+                                                                : order.status === "Cancelled" ? "Đã hủy"
+                                                                    : ""
+                                        }
+                                    </Button>
                                     {
-                                        order.status === "Pending" ? "Xác nhận đơn hàng"
-                                            : order.status === "Delivering" ? "Đang giao"
-                                                : order.status === "Transported" ? "Đã giao đến"
-                                                    : order.status === "Successed" ? "Hoàn thành"
-                                                        : order.status === "Cancelled" ? "Đã hủy"
-                                                            : ""
+                                        (order.status === "Pending" || order.status==="Awaiting" || order.status === "Delivering")?
+                                            <Button className='ml-[30px]' onClick={() => handleCancel(order._id)} danger type='primary'>
+                                                Hủy đơn hàng
+                                            </Button>
+                                            : ""
                                     }
-                                </Button>
-                                {/* {
-                                    order.status === "Pending" ?
-                                        <Button className='ml-[30px]' onClick={() => handleCancel(order._id)} danger type='primary'>
-                                            Từ chối đơn hàng
-                                        </Button>
-                                        : ""
-                                } */}
+                                </div>
                                 <Button
                                     className={`cursor-pointer border-2 border-main text-main hover:border-pink-400 hover:text-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-50 transition duration-200 ease-in-out py-2 px-4 rounded`}
                                     onClick={() => handleViewDetails(order.recipientName, order.recipientPhone, order.shippingAddress, order.totalPrice, order.details)}

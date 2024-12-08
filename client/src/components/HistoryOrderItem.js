@@ -123,10 +123,11 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                             {
                                                 order.status === "Pending" ? "Chờ xác nhận"
                                                     : order.status === "Successed" ? "Hoàn thành"
-                                                        : order.status === "Delivering" ? "Đang giao"
-                                                            : order.status === "Transported" ? "Đã giao đến"
-                                                                : order.status === "Cancelled" ? "Đã hủy"
-                                                                    : ""
+                                                        : order.status === "Awaiting" ? "Chờ lấy hàng"
+                                                            : order.status === "Delivering" ? "Đang giao"
+                                                                : order.status === "Transported" ? "Đã giao đến"
+                                                                    : order.status === "Cancelled" ? "Đã hủy"
+                                                                        : ""
                                             }
                                 </div>
                                 {

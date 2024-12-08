@@ -283,7 +283,7 @@ const Dashboard = () => {
                 </div>
                 <div className='flex-[1] h-max p-[20px] bg-white border-main border-4 shadow-sm rounded-[24px]'>
                     <div className='mt-[20px] flex flex-col items-center'>
-                        <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
+                        <p className='text-[1.2rem] uppercase font-[500] text-main flex items-center'>
                             <FaMoneyBillWave/>
                             Tổng Doanh Thu
                         </p>
@@ -294,7 +294,7 @@ const Dashboard = () => {
                 </div>
                 <div className='flex-[1] h-max p-[20px] bg-white border-main border-4 shadow-sm rounded-[24px]'>
                     <div className='mt-[20px] flex flex-col items-center'>
-                        <p className='text-[1.2rem] uppercase font-[500] text-[#333] flex items-center'>
+                        <p className='text-[1.2rem] uppercase font-[500] text-main flex items-center'>
                             <FaStoreAlt className='mr-2'/>
                             Kho
                         </p>

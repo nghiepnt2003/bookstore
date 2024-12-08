@@ -55,6 +55,9 @@ const ManageOrder = () => {
                             <TabPane tab="Chờ xác nhận" key="Pending">
                                 <AdminOrderItem setKey={setKey} setReload={setReload} listOrder={filterListOrder} />
                             </TabPane>
+                            <TabPane tab="Chờ lấy hàng" key="Awaiting">
+                                <AdminOrderItem setKey={setKey} setReload={setReload} listOrder={filterListOrder} />
+                            </TabPane>
                             <TabPane tab="Đang giao" key="Delivering">
                                 <AdminOrderItem setKey={setKey} setReload={setReload} listOrder={filterListOrder} />
                             </TabPane>
