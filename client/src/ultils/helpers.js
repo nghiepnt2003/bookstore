@@ -1,6 +1,6 @@
 import icons from "./icons";
 
-const { FaStar, FaRegStar} = icons
+const { FaStar, FaRegStar, FaStarHalfAlt} = icons
 
 export const createSlug = string => 
     string.toLowerCase()
@@ -14,16 +14,27 @@ export const formatMoney = number =>
 
 export const renderStarFromNumber = (number) => {
 
+    console.log("SỐ SAO " + number)
+    const integerPart = Math.floor(number);
+    const du = number - integerPart;
+    const roundedNumber = Math.ceil(number);
+
     // if(!Number(number)) return
     // 4 => [1,1,1,1,0]
     // 3 => [1,1,1,0,0]
-    const stars = []  
-    for(let i=0; i<+number; i++)
+    const stars = [] 
+    let j =0; 
+    for(let i=0; i<+integerPart; i++)
+    {
         stars.push(<FaStar color="#FFCC66"/>)
-    for(let i=5; i>+number; i--)
+        j=i;
+    }
+    if(du !== 0)
+        stars.push(<FaStarHalfAlt color="#FFCC66"/>)
+    for(let i=5; i>+roundedNumber; i--)
         stars.push(<FaRegStar color="#FFCC66"/>)
-    if(stars===0)
-        stars.push(<FaRegStar color="#FFCC66"/>)
+    // if(stars===0)
+    //     stars.push(<FaRegStar color="#FFCC66"/>)
 
     return stars
 }

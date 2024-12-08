@@ -1,7 +1,7 @@
 import { FaPhone, FaArrowRightArrowLeft, FaShieldHalved, FaPlus } from "react-icons/fa6";
 import { FaTruckFast, FaLocationDot, FaInstagram } from "react-icons/fa6";
 import { IoMdCart, IoIosArrowForward } from "react-icons/io";
-import { FaUserAlt, FaRegStar, FaStar, FaCheck, FaFacebookSquare, FaTiktok, FaMale, FaFemale, FaGift,FaReplyAll,FaTty, FaRegEdit, FaTrashAlt, FaStoreAlt, FaEye } from "react-icons/fa";
+import { FaUserAlt, FaRegStar, FaStar, FaCheck, FaFacebookSquare, FaTiktok, FaMale, FaFemale, FaGift,FaReplyAll,FaTty, FaRegEdit, FaTrashAlt, FaStoreAlt, FaEye, FaStarHalfAlt } from "react-icons/fa";
 import { MdOutlineEmail, MdSupportAgent, MdGroups, MdOutlineCategory, MdOutlineAttachMoney } from "react-icons/md";
 import { AiOutlineLogout, AiOutlineDown, AiOutlineDashboard } from "react-icons/ai";
 import { IoSearchOutline } from "react-icons/io5";
@@ -57,7 +57,8 @@ const icons = {
     FaEye,
     MdOutlineAttachMoney,
     CiSearch,
-    FaMoneyBillWave
+    FaMoneyBillWave,
+    FaStarHalfAlt
 }
 
 export default icons
