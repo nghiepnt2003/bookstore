@@ -412,140 +412,6 @@ class OrderService {
     }
   }
 
-  // async checkout({
-  //   user,
-  //   payment,
-  //   shippingAddress,
-  //   recipientName,
-  //   recipientPhone,
-  // }) {
-  //   if (!payment) throw new Error("Payment method not provided");
-  //   if (!recipientName || !recipientPhone) throw new Error("Missing Inputs");
-
-  //   const userInfo = await User.findById(user._id).select("address member");
-  //   if (!userInfo.address || userInfo.address.length === 0) {
-  //     throw new Error("User address is required for checkout");
-  //   }
-
-  //   const cart = await Cart.findOne({ user: user._id }).populate({
-  //     path: "items",
-  //     select: "selectedForCheckout quantity",
-  //     populate: {
-  //       path: "product",
-  //       model: "Product",
-  //       populate: { path: "categories" },
-  //     },
-  //   });
-
-  //   if (!cart) throw new Error("Cart not found");
-  //   const selectedItems = cart.items.filter(
-  //     (item) => item.selectedForCheckout && !item.deleted
-  //   );
-
-  //   if (selectedItems.length === 0) {
-  //     throw new Error("No items selected for checkout");
-  //   }
-
-  //   const orderDetailsIds = [];
-  //   let totalPrice = 0;
-
-  //   for (const item of selectedItems) {
-  //     const product = await Product.findById(item.product._id);
-  //     if (!product || product.stockQuantity < item.quantity) {
-  //       throw new Error(
-  //         `Product "${
-  //           product?.name || "unknown"
-  //         }" is sold out or insufficient stock.`
-  //       );
-  //     }
-
-  //     const updatedProduct = await Product.findOneAndUpdate(
-  //       { _id: item.product._id, stockQuantity: { $gte: item.quantity } },
-  //       { $inc: { stockQuantity: -item.quantity, soldCount: item.quantity } },
-  //       { new: true }
-  //     );
-
-  //     if (!updatedProduct) {
-  //       throw new Error(
-  //         `Product "${item.product.name}" is sold out or insufficient stock.`
-  //       );
-  //     }
-
-  //     const finalPrice = await updatedProduct.getFinalPrice();
-
-  //     const orderDetail = new OrderDetail({
-  //       productId: updatedProduct._id,
-  //       productName: updatedProduct.name,
-  //       productImage: updatedProduct.image,
-  //       productPrice: finalPrice,
-  //       quantity: item.quantity,
-  //     });
-
-  //     const savedOrderDetail = await orderDetail.save();
-  //     orderDetailsIds.push(savedOrderDetail._id);
-  //     totalPrice += finalPrice * item.quantity;
-  //   }
-
-  //   const member = await Member.findById(userInfo.member);
-  //   if (member) {
-  //     if (member.rank === "Silver") totalPrice *= 0.98;
-  //     else if (member.rank === "Gold") totalPrice *= 0.95;
-  //     else if (member.rank === "Diamond") totalPrice *= 0.9;
-  //   }
-  //   totalPrice = Math.round(totalPrice * 100) / 100;
-
-  //   const orderStatus =
-  //     payment === Payment.OFFLINE
-  //       ? "Pending"
-  //       : payment === Payment.PAYPAL
-  //       ? "Awaiting"
-  //       : "Not Yet Paid";
-
-  //   const newOrder = await Order.create({
-  //     details: orderDetailsIds,
-  //     recipientName,
-  //     recipientPhone,
-  //     date: new Date(),
-  //     status: orderStatus,
-  //     totalPrice,
-  //     payment,
-  //     user: user._id,
-  //     shippingAddress,
-  //   });
-
-  //   const itemsToRemove = cart.items.filter((item) => item.selectedForCheckout);
-  //   cart.items = cart.items.filter((item) => !item.selectedForCheckout);
-  //   await cart.save();
-
-  //   for (const item of selectedItems) {
-  //     await adjustLineItemsQuantity(item.product._id);
-  //   }
-
-  //   for (const item of itemsToRemove) {
-  //     await LineItem.findByIdAndDelete(item._id);
-  //   }
-
-  //   const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
-
-  //   if (payment === Payment.MOMO) {
-  //     const momoResponse = await createMoMoOrder(
-  //       user,
-  //       totalPrice,
-  //       uniqueOrderId
-  //     );
-  //     return { order: newOrder, momoResponse };
-  //   } else if (payment === Payment.ZALOPAY) {
-  //     const zaloPayResponse = await createZaloPayOrder(
-  //       user,
-  //       totalPrice,
-  //       uniqueOrderId
-  //     );
-  //     return { order: newOrder, zaloPayResponse };
-  //   } else {
-  //     return { order: newOrder };
-  //   }
-  // }
-
   async checkout({
     user,
     payment,
@@ -583,119 +449,100 @@ class OrderService {
     const orderDetailsIds = [];
     let totalPrice = 0;
 
-    // Prepare bulkWrite operations for product stock updates
-    const bulkOperations = selectedItems.map((item) => ({
-      updateOne: {
-        filter: {
-          _id: item.product._id,
-          stockQuantity: { $gte: item.quantity },
-        },
-        update: {
-          $inc: { stockQuantity: -item.quantity, soldCount: item.quantity },
-        },
-      },
-    }));
-
-    try {
-      // Execute bulkWrite to update stock in one operation
-      const bulkResult = await Product.bulkWrite(bulkOperations);
-
-      // Check if all updates succeeded
-      if (bulkResult.matchedCount !== selectedItems.length) {
-        throw new Error("One or more products are out of stock.");
+    for (const item of selectedItems) {
+      const product = await Product.findById(item.product._id);
+      if (!product || product.stockQuantity < item.quantity) {
+        throw new Error(
+          `Product "${
+            product?.name || "unknown"
+          }" is sold out or insufficient stock.`
+        );
       }
 
-      // Create order details for each item
-      for (const item of selectedItems) {
-        const product = await Product.findById(item.product._id);
-        const finalPrice = await product.getFinalPrice();
+      const updatedProduct = await Product.findOneAndUpdate(
+        { _id: item.product._id, stockQuantity: { $gte: item.quantity } },
+        { $inc: { stockQuantity: -item.quantity, soldCount: item.quantity } },
+        { new: true }
+      );
 
-        const orderDetail = new OrderDetail({
-          productId: product._id,
-          productName: product.name,
-          productImage: product.image,
-          productPrice: finalPrice,
-          quantity: item.quantity,
-        });
-
-        const savedOrderDetail = await orderDetail.save();
-        orderDetailsIds.push(savedOrderDetail._id);
-        totalPrice += finalPrice * item.quantity;
+      if (!updatedProduct) {
+        throw new Error(
+          `Failed to update stock for product "${item.product.name}".`
+        );
       }
 
-      // Apply discounts based on membership
-      const member = await Member.findById(userInfo.member);
-      if (member) {
-        if (member.rank === "Silver") totalPrice *= 0.98;
-        else if (member.rank === "Gold") totalPrice *= 0.95;
-        else if (member.rank === "Diamond") totalPrice *= 0.9;
-      }
-      totalPrice = Math.round(totalPrice * 100) / 100;
+      const finalPrice = await updatedProduct.getFinalPrice();
 
-      const orderStatus =
-        payment === Payment.OFFLINE
-          ? "Pending"
-          : payment === Payment.PAYPAL
-          ? "Awaiting"
-          : "Not Yet Paid";
-
-      // Create the order
-      const newOrder = await Order.create({
-        details: orderDetailsIds,
-        recipientName,
-        recipientPhone,
-        date: new Date(),
-        status: orderStatus,
-        totalPrice,
-        payment,
-        user: user._id,
-        shippingAddress,
+      const orderDetail = new OrderDetail({
+        productId: updatedProduct._id,
+        productName: updatedProduct.name,
+        productImage: updatedProduct.image,
+        productPrice: finalPrice,
+        quantity: item.quantity,
       });
 
-      // Remove items from the cart
-      const itemsToRemove = cart.items.filter(
-        (item) => item.selectedForCheckout
+      const savedOrderDetail = await orderDetail.save();
+      orderDetailsIds.push(savedOrderDetail._id);
+      totalPrice += finalPrice * item.quantity;
+    }
+
+    const member = await Member.findById(userInfo.member);
+    if (member) {
+      if (member.rank === "Silver") totalPrice *= 0.98;
+      else if (member.rank === "Gold") totalPrice *= 0.95;
+      else if (member.rank === "Diamond") totalPrice *= 0.9;
+    }
+    totalPrice = Math.round(totalPrice * 100) / 100;
+
+    const orderStatus =
+      payment === Payment.OFFLINE
+        ? "Pending"
+        : payment === Payment.PAYPAL
+        ? "Awaiting"
+        : "Not Yet Paid";
+
+    const newOrder = await Order.create({
+      details: orderDetailsIds,
+      recipientName,
+      recipientPhone,
+      date: new Date(),
+      status: orderStatus,
+      totalPrice,
+      payment,
+      user: user._id,
+      shippingAddress,
+    });
+
+    const itemsToRemove = cart.items.filter((item) => item.selectedForCheckout);
+    cart.items = cart.items.filter((item) => !item.selectedForCheckout);
+    await cart.save();
+
+    for (const item of selectedItems) {
+      await adjustLineItemsQuantity(item.product._id);
+    }
+
+    for (const item of itemsToRemove) {
+      await LineItem.findByIdAndDelete(item._id);
+    }
+
+    const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
+
+    if (payment === Payment.MOMO) {
+      const momoResponse = await createMoMoOrder(
+        user,
+        totalPrice,
+        uniqueOrderId
       );
-      cart.items = cart.items.filter((item) => !item.selectedForCheckout);
-      await cart.save();
-
-      for (const item of itemsToRemove) {
-        await LineItem.findByIdAndDelete(item._id);
-      }
-
-      const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
-
-      if (payment === Payment.MOMO) {
-        const momoResponse = await createMoMoOrder(
-          user,
-          totalPrice,
-          uniqueOrderId
-        );
-        return { order: newOrder, momoResponse };
-      } else if (payment === Payment.ZALOPAY) {
-        const zaloPayResponse = await createZaloPayOrder(
-          user,
-          totalPrice,
-          uniqueOrderId
-        );
-        return { order: newOrder, zaloPayResponse };
-      } else {
-        return { order: newOrder };
-      }
-    } catch (error) {
-      // Rollback logic if error occurs
-      await Product.bulkWrite(
-        selectedItems.map((item) => ({
-          updateOne: {
-            filter: { _id: item.product._id },
-            update: {
-              $inc: { stockQuantity: item.quantity, soldCount: -item.quantity },
-            },
-          },
-        }))
+      return { order: newOrder, momoResponse };
+    } else if (payment === Payment.ZALOPAY) {
+      const zaloPayResponse = await createZaloPayOrder(
+        user,
+        totalPrice,
+        uniqueOrderId
       );
-
-      throw new Error(error.message || "Checkout failed");
+      return { order: newOrder, zaloPayResponse };
+    } else {
+      return { order: newOrder };
     }
   }
 
