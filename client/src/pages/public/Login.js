@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
-import { InputField, Button , GoogleLoginButton} from '../../components';
+import { InputField, Button , GoogleLoginButton, GoogleAuth} from '../../components';
 import { apiSendOTPCreateAccount, apiRegister, apiLogin, apiForgotPassword } from "../../apis/user"; 
 import { ToastContainer, toast } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
@@ -190,9 +190,9 @@ const Login = () => {
             <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center gap-5">
                 <div className="p-8 bg-white rounded-md w-[360px]">
                     <h1 className="text-[28px] font-semibold text-main">{isRegister ? 'Đăng Ký' : 'Đăng Nhập'}</h1>
-                    {/* {!isRegister && (
-                        <GoogleLoginButton/>
-                    )} */}
+                    {!isRegister && (
+                        <GoogleLoginButton />
+                    )}
                     <InputField
                                 value={payload.username}
                                 setValue={setPayload}

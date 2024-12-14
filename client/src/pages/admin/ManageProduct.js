@@ -278,7 +278,7 @@ const ManageProduct = () => {
                         enterButton="Tìm kiếm"
                     />
                 </div>
-                <div className='flex items-center mb-4'>
+                <div className='flex items-center  justify-between mb-4'>
                     <Select
                         defaultValue="name"
                         onChange={handleSortChange}

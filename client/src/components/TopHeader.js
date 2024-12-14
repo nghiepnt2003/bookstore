@@ -30,6 +30,8 @@ const TopHeader = () => {
       showCancelButton: true
     }).then((result) => {
       if (result.isConfirmed) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('idToken');
         dispatch(logout());
       }
     });

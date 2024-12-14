@@ -126,3 +126,18 @@ export const apiConfirmOrder = (id) => axios({
     method: 'put',
 })
 
+export const apiLoginWithGoogle = ({ idToken, accessToken }) => {
+    console.log("ID " + idToken)
+    console.log("AS " + accessToken)
+  return axios({
+    url: '/user/loginWithGoogle',
+    method: 'post',
+    headers: {
+      Authorization: `Bearer ${idToken}`, // Đảm bảo rằng điều này được thiết lập đúng
+    },
+    data: {
+      accessToken // Gửi accessToken trong body nếu API của bạn yêu cầu
+    }
+  });
+};
+

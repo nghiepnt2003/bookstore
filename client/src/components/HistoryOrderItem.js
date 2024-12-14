@@ -60,7 +60,7 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                     listOrder?.map(order => (
 
                         <div key={order._id} className=" bg-white sm:flex-row pb-[40px] border-b">
-                            <div className='grid gap-[20px] grid-cols-3 py-[10px] border-b'>
+                            <div className='grid gap-[20px] grid-cols-4 py-[10px] border-b'>
                                 <div>
                                     <p className="text-[16px] text-[#333] font-[600] mb-[10px]">
                                         Mã đơn hàng
@@ -88,6 +88,14 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                             style: 'currency',
                                             currency: 'VND',
                                         }) : "0"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[16px] text-[#333] font-[600] mb-[10px]">
+                                        Phương thức thanh toán
+                                    </p>
+                                    <p className="text-[14px] uppercase text-[#999] font-[500]">
+                                        {(order?.payment && order.payment==="OFFLINE" )? "Tiền mặt":"PayPal" }
                                     </p>
                                 </div>
                             </div>

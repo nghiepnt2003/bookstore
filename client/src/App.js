@@ -4,7 +4,7 @@ import { Login, Home, Public, FAQ, Blog, Products, DetailProduct, ResetPassword 
 import path from './ultils/path';
 import { getCategories} from './store/app/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
-import { Modal } from './components';
+import { Modal, CallbackComponent } from './components';
 import { AdminLayout, ManageProduct, ManageOrder, ManageUser, Dashboard, ManageCategory, ManageAuthor, AdminPersonal, ManagePublisher, ManageStore } from './pages/admin';
 import { MemberLayout, Personal, History, MyCart, Checkout } from './pages/member';
 import { ToastContainer } from 'react-toastify';
@@ -29,7 +29,8 @@ function App() {
           <Route path={path.PRODUCTS} element={<Products />}></Route>
           <Route path={path.RESET_PASSWORD} element={<ResetPassword />}></Route>
           <Route path={path.DETAIL_PRODUCT__PID__TITLE} element={<DetailProduct />}></Route>
-          <Route path={path.ALL} element={<Home />}></Route>
+          <Route path="/callback" element={<CallbackComponent />} />
+          {/* <Route path={path.ALL} element={<Home />}></Route> */}
         </Route>
         <Route path={path.ADMIN} element={<AdminLayout />}>
           <Route path={path.DASHBOARD} element={<Dashboard />} />
