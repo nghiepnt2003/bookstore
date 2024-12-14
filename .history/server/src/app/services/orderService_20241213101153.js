@@ -467,7 +467,7 @@ class OrderService {
 
   //     if (!updatedProduct) {
   //       throw new Error(
-  //         `Product "${item.product.name}" is sold out or insufficient stock.`
+  //         `Failed to update stock for product "${item.product.name}".`
   //       );
   //     }
 
@@ -546,158 +546,158 @@ class OrderService {
   //   }
   // }
 
-  async checkout({
-    user,
-    payment,
-    shippingAddress,
-    recipientName,
-    recipientPhone,
-  }) {
-    if (!payment) throw new Error("Payment method not provided");
-    if (!recipientName || !recipientPhone) throw new Error("Missing Inputs");
+  // async checkout({
+  //   user,
+  //   payment,
+  //   shippingAddress,
+  //   recipientName,
+  //   recipientPhone,
+  // }) {
+  //   if (!payment) throw new Error("Payment method not provided");
+  //   if (!recipientName || !recipientPhone) throw new Error("Missing Inputs");
+  //   const session = await mongoose.startSession();
+  //   session.startTransaction(); // Bắt đầu transaction
+  //   try {
+  //     const userInfo = await User.findById(user._id)
+  //       .select("address member")
+  //       .session(session);
+  //     if (!userInfo.address || userInfo.address.length === 0) {
+  //       throw new Error("User address is required for checkout");
+  //     }
 
-    const userInfo = await User.findById(user._id).select("address member");
-    if (!userInfo.address || userInfo.address.length === 0) {
-      throw new Error("User address is required for checkout");
-    }
+  //     const cart = await Cart.findOne({ user: user._id })
+  //       .populate({
+  //         path: "items",
+  //         select: "selectedForCheckout quantity",
+  //         populate: {
+  //           path: "product",
+  //           model: "Product",
+  //           populate: { path: "categories" },
+  //         },
+  //       })
+  //       .session(session);
 
-    const cart = await Cart.findOne({ user: user._id }).populate({
-      path: "items",
-      select: "selectedForCheckout quantity",
-      populate: {
-        path: "product",
-        model: "Product",
-        populate: { path: "categories" },
-      },
-    });
+  //     if (!cart) throw new Error("Cart not found");
+  //     const selectedItems = cart.items.filter(
+  //       (item) => item.selectedForCheckout && !item.deleted
+  //     );
 
-    if (!cart) throw new Error("Cart not found");
-    const selectedItems = cart.items.filter(
-      (item) => item.selectedForCheckout && !item.deleted
-    );
+  //     if (selectedItems.length === 0) {
+  //       throw new Error("No items selected for checkout");
+  //     }
 
-    if (selectedItems.length === 0) {
-      throw new Error("No items selected for checkout");
-    }
+  //     const orderDetailsIds = [];
+  //     let totalPrice = 0;
 
-    const orderDetailsIds = [];
-    let totalPrice = 0;
+  //     for (const item of selectedItems) {
+  //       const product = await Product.findById(item.product._id).session(
+  //         session
+  //       );
+  //       if (!product || product.stockQuantity < item.quantity) {
+  //         throw new Error(
+  //           `Product "${
+  //             product?.name || "unknown"
+  //           }" is sold out or insufficient stock.`
+  //         );
+  //       }
 
-    // Prepare bulkWrite operations for product stock updates
-    const bulkOperations = selectedItems.map((item) => ({
-      updateOne: {
-        filter: {
-          _id: item.product._id,
-          stockQuantity: { $gte: item.quantity },
-        },
-        update: {
-          $inc: { stockQuantity: -item.quantity, soldCount: item.quantity },
-        },
-      },
-    }));
+  //       const updatedProduct = await Product.findOneAndUpdate(
+  //         { _id: item.product._id, stockQuantity: { $gte: item.quantity } },
+  //         { $inc: { stockQuantity: -item.quantity, soldCount: item.quantity } },
+  //         { new: true, session }
+  //       );
 
-    try {
-      // Execute bulkWrite to update stock in one operation
-      const bulkResult = await Product.bulkWrite(bulkOperations);
+  //       if (!updatedProduct) {
+  //         throw new Error(
+  //           `Failed to update stock for product "${item.product.name}".`
+  //         );
+  //       }
 
-      // Check if all updates succeeded
-      if (bulkResult.matchedCount !== selectedItems.length) {
-        throw new Error("One or more products are out of stock.");
-      }
+  //       const finalPrice = await updatedProduct.getFinalPrice();
 
-      // Create order details for each item
-      for (const item of selectedItems) {
-        const product = await Product.findById(item.product._id);
-        const finalPrice = await product.getFinalPrice();
+  //       const orderDetail = new OrderDetail({
+  //         productId: updatedProduct._id,
+  //         productName: updatedProduct.name,
+  //         productImage: updatedProduct.image,
+  //         productPrice: finalPrice,
+  //         quantity: item.quantity,
+  //       });
 
-        const orderDetail = new OrderDetail({
-          productId: product._id,
-          productName: product.name,
-          productImage: product.image,
-          productPrice: finalPrice,
-          quantity: item.quantity,
-        });
+  //       const savedOrderDetail = await orderDetail.save({ session });
+  //       orderDetailsIds.push(savedOrderDetail._id);
+  //       totalPrice += finalPrice * item.quantity;
+  //     }
 
-        const savedOrderDetail = await orderDetail.save();
-        orderDetailsIds.push(savedOrderDetail._id);
-        totalPrice += finalPrice * item.quantity;
-      }
+  //     const member = await Member.findById(userInfo.member).session(session);
+  //     if (member) {
+  //       if (member.rank === "Silver") totalPrice *= 0.98;
+  //       else if (member.rank === "Gold") totalPrice *= 0.95;
+  //       else if (member.rank === "Diamond") totalPrice *= 0.9;
+  //     }
+  //     totalPrice = Math.round(totalPrice * 100) / 100;
 
-      // Apply discounts based on membership
-      const member = await Member.findById(userInfo.member);
-      if (member) {
-        if (member.rank === "Silver") totalPrice *= 0.98;
-        else if (member.rank === "Gold") totalPrice *= 0.95;
-        else if (member.rank === "Diamond") totalPrice *= 0.9;
-      }
-      totalPrice = Math.round(totalPrice * 100) / 100;
+  //     const orderStatus =
+  //       payment === Payment.OFFLINE
+  //         ? "Pending"
+  //         : payment === Payment.PAYPAL
+  //         ? "Awaiting"
+  //         : "Not Yet Paid";
 
-      const orderStatus =
-        payment === Payment.OFFLINE
-          ? "Pending"
-          : payment === Payment.PAYPAL
-          ? "Awaiting"
-          : "Not Yet Paid";
+  //     const newOrder = Order.create({
+  //       details: orderDetailsIds,
+  //       recipientName,
+  //       recipientPhone,
+  //       date: new Date(),
+  //       status: orderStatus,
+  //       totalPrice,
+  //       payment,
+  //       user: user._id,
+  //       shippingAddress,
+  //     });
+  //     await newOrder.save({ session });
+  //     const itemsToRemove = cart.items.filter(
+  //       (item) => item.selectedForCheckout
+  //     );
+  //     cart.items = cart.items.filter((item) => !item.selectedForCheckout);
+  //     await cart.save({ session });
 
-      // Create the order
-      const newOrder = await Order.create({
-        details: orderDetailsIds,
-        recipientName,
-        recipientPhone,
-        date: new Date(),
-        status: orderStatus,
-        totalPrice,
-        payment,
-        user: user._id,
-        shippingAddress,
-      });
+  //     for (const item of selectedItems) {
+  //       await adjustLineItemsQuantity(item.product._id, { session });
+  //     }
 
-      // Remove items from the cart
-      const itemsToRemove = cart.items.filter(
-        (item) => item.selectedForCheckout
-      );
-      cart.items = cart.items.filter((item) => !item.selectedForCheckout);
-      await cart.save();
+  //     for (const item of itemsToRemove) {
+  //       await LineItem.findByIdAndDelete(item._id, { session });
+  //     }
+  //     await session.commitTransaction();
+  //     session.endSession();
+  //   } catch (error) {
+  //     // Rollback nếu có lỗi
+  //     await session.abortTransaction();
+  //     session.endSession();
+  //     throw new Error(error.message || "Checkout failed");
+  //   }
 
-      for (const item of itemsToRemove) {
-        await LineItem.findByIdAndDelete(item._id);
-      }
+  //   const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
 
-      const uniqueOrderId = `${newOrder._id}-${Date.now()}`;
+  //   if (payment === Payment.MOMO) {
+  //     const momoResponse = await createMoMoOrder(
+  //       user,
+  //       totalPrice,
+  //       uniqueOrderId
+  //     );
+  //     return { order: newOrder, momoResponse };
+  //   } else if (payment === Payment.ZALOPAY) {
+  //     const zaloPayResponse = await createZaloPayOrder(
+  //       user,
+  //       totalPrice,
+  //       uniqueOrderId
+  //     );
 
-      if (payment === Payment.MOMO) {
-        const momoResponse = await createMoMoOrder(
-          user,
-          totalPrice,
-          uniqueOrderId
-        );
-        return { order: newOrder, momoResponse };
-      } else if (payment === Payment.ZALOPAY) {
-        const zaloPayResponse = await createZaloPayOrder(
-          user,
-          totalPrice,
-          uniqueOrderId
-        );
-        return { order: newOrder, zaloPayResponse };
-      } else {
-        return { order: newOrder };
-      }
-    } catch (error) {
-      // Rollback logic if error occurs
-      await Product.bulkWrite(
-        selectedItems.map((item) => ({
-          updateOne: {
-            filter: { _id: item.product._id },
-            update: {
-              $inc: { stockQuantity: item.quantity, soldCount: -item.quantity },
-            },
-          },
-        }))
-      );
-
-      throw new Error(error.message || "Checkout failed");
-    }
-  }
+  //     return { order: newOrder, zaloPayResponse };
+  //   } else {
+  //     return { order: newOrder };
+  //   }
+  // }
 
   async handleZaloPayCallback({ data, mac }, orderId) {
     // Tạo lại MAC để xác thực dữ liệu từ ZaloPay

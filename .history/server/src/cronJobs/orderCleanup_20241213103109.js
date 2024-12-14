@@ -4,7 +4,7 @@ const Order = require("../app/models/Order");
 
 // Chạy công việc này mỗi phút (có thể tùy chỉnh thời gian theo yêu cầu)
 cron.schedule("* * * * *", async () => {
-  const thirtyMinutesAgo = new Date(Date.now() - 100 * 60 * 1000); // Thời gian 1h40p = 100 phút trước
+  const thirtyMinutesAgo = new Date(Date.now() - 100 * 60 * 1000); // Thời gian 1h40p phút trước
 
   try {
     // Tìm các đơn hàng cần hủy
