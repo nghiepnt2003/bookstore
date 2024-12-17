@@ -39,7 +39,6 @@ app.use(
     cookie: { secure: false, maxAge: 60000 },
   })
 );
-
 app.use(xss());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));

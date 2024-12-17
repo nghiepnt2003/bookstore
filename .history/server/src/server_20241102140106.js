@@ -13,7 +13,7 @@ const session = require("express-session");
 require("dotenv").config();
 require("./cronJobs/discountCleanup");
 require("./cronJobs/orderCleanup");
-const xss = require("xss-clean");
+
 const socketHandler = require("./socket/socket");
 
 const app = express();
@@ -40,7 +40,6 @@ app.use(
   })
 );
 
-app.use(xss());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
