@@ -15,42 +15,36 @@ const CallbackComponent = () => {
     const idToken = params.get("id_token");
     const accessToken = params.get("access_token");
 
-    console.log("ID TOKEN "+idToken);
-    console.log("ACCESS "+accessToken);
+    if (idToken && accessToken) {
+      localStorage.setItem("idToken", idToken);
+      localStorage.setItem("accessToken", accessToken);
 
-    if (idToken) {
-      console.log("AA " + idToken  )
-      console.log("BB " + accessToken  )
-        // Gửi idToken đến API của bạn
-        apiLoginWithGoogle({ idToken, accessToken }) // Sử dụng hàm API đã định nghĩa
+      // Gửi idToken đến API của bạn
+      apiLoginWithGoogle({ idToken, accessToken })
         .then(response => {
-          console.log(response)
+          console.log(response);
           if (response.success) {
-            localStorage.setItem("idToken", idToken);
-            localStorage.setItem("accessToken", accessToken);
             dispatch(register({ isLoggedIn: true, token: response.accessToken, userData: response.userData }));
-            // navigate("/home");
+            navigate("/home");
           } else {
             alert(response.data.message);
-            // navigate("/login");
+            navigate("/login");
           }
         })
         .catch(error => {
           console.error("Error during login with Google: ", error);
           alert("Đăng nhập không thành công");
-          // navigate("/login");
+          navigate("/login");
         });
-
-      // navigate("/home");
     } else {
       alert("Failed to login");
       navigate("/");
     }
-  }, [location, navigate]);
+  }, [location, navigate, dispatch]);
 
   return (
-    <div>
-      <h1>Processing login...</h1>
+    <div className="absolute animate-slide-right top-0 left-0 bottom-0 right-0 bg-[#f893cb] rounded flex flex-col items-center py-8 z-50 h-screen justify-center">
+      <h1 className="text-2xl text-white">Processing login...</h1>
     </div>
   );
 };

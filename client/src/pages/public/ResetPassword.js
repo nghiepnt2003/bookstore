@@ -23,7 +23,7 @@ const ResetPassword = () => {
             if (response.success) {
                 toast.success(response.mess)
                 setTimeout(async () => {
-                    await navigate(`/${path.HOME}`);
+                    await navigate(`/${path.LOGIN}`);
                 }, 1000); // 3000ms
             }
             else {

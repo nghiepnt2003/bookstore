@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import logo from "../../assets/logo.png"
 import { cash } from '../../ultils/contants'
 import { useLocation, useNavigate } from "react-router-dom"
 import { Button, Form, Input, message, Modal, Select } from 'antd';
-import { apiGetAddress, apiGetUserCart, apiOrder } from '../../apis'
+import { apiGetAddress, apiGetUserCart, apiOrder ,apiCheckout} from '../../apis'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { Spin } from 'antd'
@@ -47,6 +47,28 @@ const Checkout = () => {
         note: '',
     });
     // const [debouncedFormData] = useDebounce(formData, 5000); // 3000ms là thời gian trì hoãn
+
+    // Hàm cập nhật trạng thái sản phẩm
+    const updateCheckoutStatus = async () => {
+        const productIds = listCheckout.map(item => item.product._id);
+        try {
+            // Duyệt qua từng sản phẩm trong listCheckout và gọi apiCheckout
+            for (const item of listCheckout) {
+                const response = await apiCheckout(item._id, {
+                    selectedForCheckout: false, // Giả sử muốn đặt selectedForCheckout là true
+                });
+            }
+        } catch (error) {
+            toast.error("Lỗi khi thanh toán: " + error.message);
+        }
+    };
+
+    // Gọi hàm khi component unmount
+    useEffect(() => {
+        return () => {
+            updateCheckoutStatus(); // Cập nhật trạng thái khi người dùng rời trang
+        };
+    }, []);
 
 
     React.useEffect(() => {
@@ -170,7 +192,6 @@ const Checkout = () => {
                         });
                     }
                 } else {
-
                     toast.error(response.mess)
                 }
             }
@@ -278,10 +299,14 @@ const Checkout = () => {
                                 </label>
                             </div>
                             <div className='w-full mx-auto'>
+                            {(!total)? (
+                                <p>Giá trị tiền không hợp lệ.</p>
+                            ) : (
                                 <PayPal
                                     payload={payPalPayload}
                                     setIsSuccess={setIsSuccess}
                                     amount={(total / 24250).toFixed(2)} />
+                            )}
                             </div>
                         </form>
                         {/* <p class="mt-8 text-lg">Voucher</p>

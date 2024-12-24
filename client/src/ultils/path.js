@@ -31,6 +31,9 @@ const path = {
     MY_CART: 'my-cart',
     HISTORY: 'buy-history',
 
+
+    LOGIN_GG: 'callback',
+
 }
 
 export default path

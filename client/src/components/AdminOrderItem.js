@@ -27,7 +27,8 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
     const handleUpdateOrder = async (status, oid) => {
         console.log("STATUS " + status)
 
-        let updateStatus = status === "Pending" ? "Delivering"
+        let updateStatus = status === "Pending" ? "Awaiting"
+            : status === "Awaiting" ? "Delivering"
             : status === "Delivering" ? "Transported"
                 : ""
                 console.log("UP STATUS " + updateStatus)

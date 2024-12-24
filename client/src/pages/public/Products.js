@@ -36,6 +36,7 @@ const Products = () => {
     const selectedCategory = categories ? categories.find(cat => createSlug(cat.name) === category) : null;
 
     const fetchProductsByCategory = async () => {
+        const tam = currentPage;
         const params = {
             page: currentPage,
             limit: limit,
@@ -53,9 +54,10 @@ const Products = () => {
             params.sort = sort;
         }
         if (debouncedSearchTerm) {
-            params.page = 1;
             params.name = debouncedSearchTerm;
         }
+
+        // params.page = tam;
 
         const response = await apiGetProducts(params);
         if (response.success) {
@@ -69,13 +71,24 @@ const Products = () => {
 
         }
     };
+      // useEffect riêng để kiểm tra và thiết lập lại trang
+      useEffect(() => {
+        if (debouncedFrom || debouncedTo || debouncedSearchTerm) {
+            setCurrentPage(1);
+        }
+    }, [debouncedFrom, debouncedTo, debouncedSearchTerm]);
 
     useEffect(() => {
         fetchProductsByCategory();
     }, [debouncedFrom, debouncedTo, sort, selectedCategory, currentPage, limit, debouncedSearchTerm]);
 
+    const u = useCallback(() => {
+
+    },[])
+
     const changeValue = useCallback((value) => {
-        setSort(value);
+        // setSort(value);
+        setSort(prevSort => (prevSort === value ? null : value));
         setCurrentPage(1); 
     }, []);
 

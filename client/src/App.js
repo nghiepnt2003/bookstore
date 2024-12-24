@@ -29,8 +29,8 @@ function App() {
           <Route path={path.PRODUCTS} element={<Products />}></Route>
           <Route path={path.RESET_PASSWORD} element={<ResetPassword />}></Route>
           <Route path={path.DETAIL_PRODUCT__PID__TITLE} element={<DetailProduct />}></Route>
-          <Route path="/callback" element={<CallbackComponent />} />
-          {/* <Route path={path.ALL} element={<Home />}></Route> */}
+          <Route path={path.LOGIN_GG} element={<CallbackComponent />} />
+          <Route path={path.ALL} element={<Home />}></Route>
         </Route>
         <Route path={path.ADMIN} element={<AdminLayout />}>
           <Route path={path.DASHBOARD} element={<Dashboard />} />

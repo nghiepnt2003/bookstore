@@ -135,7 +135,8 @@ const MyCart = () => {
                 });
     
                 if (!response.success) {
-                    toast.error("Thanh toán không thành công cho sản phẩm: " + item.product.name);
+                    toast.error("Đặt hàng không thành công cho sản phẩm: " + item.product.name);
+                    // selectedForCheckout: false
                     return; // Dừng quá trình thanh toán nếu có lỗi
                 }
             }

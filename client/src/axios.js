@@ -11,6 +11,8 @@ axios.defaults.withCredentials = true;
 instance.interceptors.request.use(function (config) {
     // Do something before request is sent
     let localStorageData = window.localStorage.getItem('persist:shop/user')
+    let idTokengg = localStorage.getItem("idToken");
+    let accessTokengg = localStorage.getItem("accessToken");
     if(localStorageData && typeof localStorageData === 'string')
     {
       localStorageData = JSON.parse(localStorageData)
