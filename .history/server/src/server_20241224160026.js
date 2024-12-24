@@ -56,23 +56,39 @@ app.use(express.static(path.join(__dirname, "/public")));
 // method overide
 app.use(methodOverride("_method"));
 // CORS
-const corsOptions = {
-  origin: ["http://localhost:3001"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Phương thức HTTP cho phép
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "Accept",
-    "X-Requested-With",
-  ], // Các header cho phép
-  credentials: true, // Cho phép gửi cookies và thông tin xác thực
-};
+// app.use(function (req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type,Content-Length, Authorization, Accept,X-Requested-With"
+//   );
+//   res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+//   next();
+// });
 
-// Sử dụng cors với cấu hình đã định
-app.use(cors(corsOptions));
+//
+// app.use((req, res, next) => {
+//   const allowedOrigins = ["http://localhost:3001"]; // Chỉ định nguồn được phép
+//   const origin = req.headers.origin;
 
-// Middleware xử lý OPTIONS request
-app.options("*", cors(corsOptions)); // Dùng OPTIONS cho mọi route
+//   if (allowedOrigins.includes(origin)) {
+//     res.header("Access-Control-Allow-Origin", origin);
+//   }
+
+//   res.header("Access-Control-Allow-Credentials", "true"); // Cho phép thông tin xác thực
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type,Content-Length, Authorization, Accept,X-Requested-With"
+//   );
+//   res.header("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS");
+
+//   // Xử lý OPTIONS request
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200);
+//   }
+
+//   next();
+// });
 
 // -----------------------
 

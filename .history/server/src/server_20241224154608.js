@@ -56,25 +56,15 @@ app.use(express.static(path.join(__dirname, "/public")));
 // method overide
 app.use(methodOverride("_method"));
 // CORS
-const corsOptions = {
-  origin: ["http://localhost:3001"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Phương thức HTTP cho phép
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "Accept",
-    "X-Requested-With",
-  ], // Các header cho phép
-  credentials: true, // Cho phép gửi cookies và thông tin xác thực
-};
-
-// Sử dụng cors với cấu hình đã định
-app.use(cors(corsOptions));
-
-// Middleware xử lý OPTIONS request
-app.options("*", cors(corsOptions)); // Dùng OPTIONS cho mọi route
-
-// -----------------------
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Content-Length, Authorization, Accept,X-Requested-With"
+  );
+  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+  next();
+});
 
 // Route init
 route(app);
