@@ -17,14 +17,14 @@ const GoogleLoginButton = () => {
   return (
     <button
       onClick={handleLogin}
-      className="flex items-center justify-center px-4 py-2 bg-[#f8f8f8] text-white rounded-md hover:bg-[#e2e1e1] transition duration-200"
+      className="w-[296px] flex items-center px-4 py-2 bg-white text-white rounded-md border mt-1 hover:bg-[#e2e1e1] transition duration-200"
     >
       <img 
         src={gg_logo}
         alt="Google Logo" 
-        className="h-5 mr-2" 
+        className="h-8 mr-[20px]" 
       />
-      Login with Google
+     <p className="text-black">Login with Google</p>
     </button>
   );
 };

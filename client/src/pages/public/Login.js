@@ -16,6 +16,7 @@ const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     
+    const [errors, setErrors] = useState({}); // Trạng thái lưu lỗi
     const [isRegister, setIsRegister] = useState(false);
     const [isForgotPassword, setIsForgotPassword] = useState(false); // Thêm trạng thái quên mật khẩu
     const [payload, setPayload] = useState({
@@ -72,47 +73,36 @@ const Login = () => {
         }
     };
 
-    const handleSubmit = async () => {
-        if (isRegister) {
-            const { email, password, confirmPassword, username, fullname, phone, address } = payload;
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
-            const phonePattern = /^[0-9]{10,15}$/; 
-            const passwordComplexityPattern = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/; // Ít nhất 8 ký tự, 1 chữ hoa, 1 số, 1 ký tự đặc biệt
+    const validateInputs = () => {
+        const newErrors = {};
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+        const phonePattern = /^[0-9]{10,15}$/; 
+        const passwordComplexityPattern = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/; 
 
-            if (!email || !password || !username || !fullname || !phone || !address || !confirmPassword) {
-                toast.error('Vui lòng nhập đầy đủ các trường');
-                return;
-            }
-        
-            if (!email || !emailPattern.test(email)) {
-                toast.error('Vui lòng nhập địa chỉ email hợp lệ.');
-                return;
-            }
-            if (!password || !passwordComplexityPattern.test(password)) {
-                toast.error('Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, số và ký tự đặc biệt.');
-                return;
-            }
-            if (password !== confirmPassword) {
-                toast.error('Mật khẩu và xác nhận mật khẩu không khớp.');
-                return;
-            }
-            if (!username) {
-                toast.error('Vui lòng nhập tên đăng nhập.');
-                return;
-            }
-            if (!fullname) {
-                toast.error('Vui lòng nhập họ tên.');
-                return;
-            }
-            if (!phone || !phonePattern.test(phone)) {
-                toast.error('Số điện thoại không hợp lệ.');
-                return;
-            }
-            if (!address) {
-                toast.error('Vui lòng nhập địa chỉ.');
-                return;
-            }
-            
+        if (!payload.email) newErrors.email = 'Vui lòng nhập địa chỉ email.';
+        else if (!emailPattern.test(payload.email)) newErrors.email = 'Vui lòng nhập địa chỉ email hợp lệ.';
+
+        if (!payload.password) newErrors.password = 'Vui lòng nhập mật khẩu.';
+        else if (!passwordComplexityPattern.test(payload.password)) newErrors.password = 'Mật khẩu không hợp lệ';
+
+        if (isRegister && payload.password !== payload.confirmPassword) {
+            newErrors.confirmPassword = 'Xác nhận mật khẩu không khớp.';
+        }
+
+        if (!payload.username) newErrors.username = 'Vui lòng nhập tên đăng nhập.';
+        if (!payload.fullname) newErrors.fullname = 'Vui lòng nhập họ tên.';
+        if (!payload.phone || !phonePattern.test(payload.phone)) newErrors.phone = 'Số điện thoại không hợp lệ.';
+        if (!payload.address) newErrors.address = 'Vui lòng nhập địa chỉ.';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0; // Trả về true nếu không có lỗi
+    };
+
+    const handleSubmit = async () => {
+         
+        if (isRegister) {
+            if (!validateInputs()) return; // Kiểm tra lỗi
+            const { email, password, confirmPassword, username, fullname, phone, address } = payload;           
 
             setLoading(true);
             loadingBarRef.current.continuousStart();
@@ -188,55 +178,95 @@ const Login = () => {
                 className="w-full h-full object-cover"
             />
             <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center gap-5">
-                <div className="p-8 bg-white rounded-md w-[360px]">
+                <div className="p-8 bg-white rounded-md">
                     <h1 className="text-[28px] font-semibold text-main">{isRegister ? 'Đăng Ký' : 'Đăng Nhập'}</h1>
                     {!isRegister && (
                         <GoogleLoginButton />
                     )}
-                    <InputField
+                    {!isRegister && (
+                       <>
+                            <InputField
                                 value={payload.username}
                                 setValue={setPayload}
                                 nameKey='username'
                             />
-                    {isRegister && (
-                        <>
                             <InputField
-                                value={payload.fullname}
+                                value={payload.password}
                                 setValue={setPayload}
-                                nameKey='fullname'
-                            />
-                            <InputField
-                                value={payload.phone}
-                                setValue={setPayload}
-                                nameKey='phone'
-                            />
-                            <InputField
-                                value={payload.address}
-                                setValue={setPayload}
-                                nameKey='address'
-                            />
-                            <InputField
-                                value={payload.email}
-                                setValue={setPayload}
-                                nameKey='email'
-                            />
-                        </>
-                    )}
-                    <InputField
-                        value={payload.password}
-                        setValue={setPayload}
-                        nameKey='password'
-                        type='password'
-                    />
-                    {isRegister && (
-                        <>
-                            <InputField
-                                value={payload.confirmPassword}
-                                setValue={setPayload}
-                                nameKey='confirmPassword'
+                                nameKey='password'
                                 type='password'
-                                placeholder="Xác nhận mật khẩu"
                             />
+                       </>
+                     )}
+                    {isRegister && (
+                        <>
+                            <div className="flex gap-4">
+                                <div>
+                                    <InputField
+                                        value={payload.fullname}
+                                        setValue={setPayload}
+                                        nameKey='fullname'
+                                    />
+                                    {errors.fullname && <p className="text-red-500 text-sm">{errors.fullname}</p>}
+                                </div>
+                                <div>
+                                    <InputField
+                                        value={payload.phone}
+                                        setValue={setPayload}
+                                        nameKey='phone'
+                                    />
+                                    {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+                                </div>
+                            </div>
+                            <div className="flex gap-4">                               
+                                <div>
+                                    <InputField
+                                        value={payload.email}
+                                        setValue={setPayload}
+                                        nameKey='email'
+                                    />
+                                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                                </div>
+                                <div>
+                                    <InputField
+                                        value={payload.password}
+                                        setValue={setPayload}
+                                        nameKey='password'
+                                        type='password'
+                                    />
+                                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <div>
+                                    <InputField
+                                            value={payload.username}
+                                            setValue={setPayload}
+                                            nameKey='username'
+                                    />
+                                    {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+                                </div>
+                                <div>
+                                <InputField
+                                    value={payload.confirmPassword}
+                                    setValue={setPayload}
+                                    nameKey='confirmPassword'
+                                    type='password'
+                                    placeholder="Xác nhận mật khẩu"
+                                />
+                                {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
+                                </div>
+                            </div>
+                            <div>
+                                    <InputField
+                                            value={payload.address}
+                                            setValue={setPayload}
+                                            nameKey='address'
+                                    />
+                                    {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
+                            </div>
+                            <span className="text-[10px] text-[#595656]">Note: Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, số và ký tự đặc biệt.</span>
+                            {/* <span  className="text-sm text-[#595656]">bao gồm chữ hoa, số và ký tự đặc biệt.</span> */}
                         </>
                     )}
                     {isRegister && (
@@ -260,18 +290,6 @@ const Login = () => {
                             <ClipLoader color="#36d7b7" loading={loading} size={30} />
                         </div>
                     )} */}
-                    {/* <div className="flex items-center justify-between my-2 w-full text-sm">
-                        <span onClick={() => setIsRegister(!isRegister)} className="hover:underline cursor-pointer">
-                            {isRegister ? 'Đăng Nhập' : 'Đăng Ký'}
-                        </span>
-                        <span 
-                            onClick={() => setIsForgotPassword(true)} 
-                            className="hover:underline cursor-pointer"
-                        >
-                            Quên mật khẩu?
-                        </span>
-                    </div>
-                    <Link className='flex justify-center text-sm hover:underline cursor-pointer' to={`/${path.HOME}`}>Về trang chủ?</Link> */}
                     {!isRegister && (
                         <span 
                          onClick={() => setIsForgotPassword(true)} 
