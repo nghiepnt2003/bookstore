@@ -240,7 +240,7 @@ const UpdateProduct = ({ editProduct, onClose, onRefresh }) => {
                                     name='soldCount'
                                     value={formData.soldCount}
                                     readOnly
-                                    className="p-2 border border-gray-300 rounded-md text-lg"
+                                    className="p-2 border border-gray-300 rounded-md bg-slate-100 text-lg"
                                 />
                             </div>
                         </div>

@@ -215,7 +215,7 @@ const CreateProduct = ({ onClose, onRefresh }) => {
                                     name='soldCount'
                                     value={formData.soldCount || 0}
                                     readOnly
-                                    className="p-2 border border-gray-300 rounded-md text-lg"
+                                    className="p-2 border border-gray-300 bg-slate-100 rounded-md text-lg"
                                 />
                             </div>
                         </div>
