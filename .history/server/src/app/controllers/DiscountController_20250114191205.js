@@ -116,7 +116,7 @@ class DiscountController {
   // Áp dụng giảm giá cho một sản phẩm
   async applyDiscountToProduct(req, res) {
     try {
-      const { productId, discountId } = req.params;
+      const { productId, discountId } = req.body;
 
       const updatedProduct = await discountService.applyDiscountToProduct(
         productId,

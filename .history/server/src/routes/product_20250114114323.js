@@ -12,7 +12,10 @@ router.get(
   verifyAccessToken,
   productController.suggestPopularProducts
 );
-router.get("/discount", productController.getProductsWithDiscount);
+router.get(
+  "/discount",
+  productController.getProductsWithDiscount
+);
 router.get("/:id", productController.getById);
 router.get("/", productController.getProducts);
 

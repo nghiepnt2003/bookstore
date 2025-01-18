@@ -17,10 +17,11 @@ router.put(
   discountController.applyDiscountToAllProducts
 );
 // [PUT] /discount/apply/:productId/:discountId
+
 router.put(
-  "/apply/:productId/:discountId",
+  "/apply-to-all/:discountId",
   [verifyAccessToken, isAdmin],
-  discountController.applyDiscountToProduct
+  discountController.applyDiscountToAllProducts
 );
 
 // Cập nhật discount

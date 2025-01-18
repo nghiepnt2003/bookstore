@@ -16,12 +16,6 @@ router.put(
   [verifyAccessToken, isAdmin],
   discountController.applyDiscountToAllProducts
 );
-// [PUT] /discount/apply/:productId/:discountId
-router.put(
-  "/apply/:productId/:discountId",
-  [verifyAccessToken, isAdmin],
-  discountController.applyDiscountToProduct
-);
 
 // Cập nhật discount
 router.put(
