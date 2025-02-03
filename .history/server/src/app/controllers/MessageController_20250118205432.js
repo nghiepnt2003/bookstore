@@ -2,7 +2,7 @@ const Message = require("../models/Message");
 const User = require("../models/User");
 
 class MessageController {
-  // Lấy tất cả tin nhắn giữa hai người (hiện tại và đối phương).
+  //   Lấy tất cả tin nhắn giữa hai người (hiện tại và đối phương).
   // Sắp xếp theo thứ tự mới nhất và giới hạn số lượng tin nhắn (ở đây là 20).
   // [GET] /message/recent/:userId
   async getRecentMessages(req, res) {
@@ -30,9 +30,6 @@ class MessageController {
     }
   }
 
-  // Tìm tất cả các cuộc hội thoại mà người dùng hiện tại tham gia.
-  // Sử dụng aggregate để nhóm các tin nhắn theo cặp người gửi và người nhận.
-  // Lấy tin nhắn gần nhất trong mỗi nhóm làm đại diện cho cuộc hội thoại.
   // [GET] /message/inbox
   async getInBox(req, res) {
     try {

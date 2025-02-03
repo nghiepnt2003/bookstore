@@ -3,13 +3,6 @@ const messageController = require("../app/controllers/MessageController");
 const { verifyAccessToken } = require("../app/middlewares/jwt");
 const router = express.Router();
 
-router.get(
-  "/recent/:userId",
-  verifyAccessToken,
-  messageController.getRecentMessages
-);
-router.get("/inbox", verifyAccessToken, messageController.getInBox);
-
 router.post("/send", verifyAccessToken, messageController.sendMessage);
 router.put("/:id", verifyAccessToken, messageController.updateMessage);
 router.put(

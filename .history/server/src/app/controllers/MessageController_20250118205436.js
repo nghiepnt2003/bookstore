@@ -30,9 +30,6 @@ class MessageController {
     }
   }
 
-  // Tìm tất cả các cuộc hội thoại mà người dùng hiện tại tham gia.
-  // Sử dụng aggregate để nhóm các tin nhắn theo cặp người gửi và người nhận.
-  // Lấy tin nhắn gần nhất trong mỗi nhóm làm đại diện cho cuộc hội thoại.
   // [GET] /message/inbox
   async getInBox(req, res) {
     try {

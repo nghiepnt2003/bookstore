@@ -8,7 +8,11 @@ router.get(
   verifyAccessToken,
   messageController.getRecentMessages
 );
-router.get("/inbox", verifyAccessToken, messageController.getInBox);
+router.get(
+  "/recent/:userId",
+  verifyAccessToken,
+  messageController.getRecentMessages
+);
 
 router.post("/send", verifyAccessToken, messageController.sendMessage);
 router.put("/:id", verifyAccessToken, messageController.updateMessage);
