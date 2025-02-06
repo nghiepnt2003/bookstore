@@ -7,7 +7,6 @@ const LineItem = require("../models/LineItem");
 const cloudinary = require("cloudinary").v2;
 const Cloud = require("../../config/cloud/cloudinary.config");
 const User = require("../models/User");
-const { collaborativeFiltering } = require("./recommendationService");
 class ProductService {
   async getById(productId) {
     try {

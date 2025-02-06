@@ -7,7 +7,6 @@ const LineItem = require("../models/LineItem");
 const cloudinary = require("cloudinary").v2;
 const Cloud = require("../../config/cloud/cloudinary.config");
 const User = require("../models/User");
-const { collaborativeFiltering } = require("./recommendationService");
 class ProductService {
   async getById(productId) {
     try {
@@ -173,79 +172,83 @@ class ProductService {
     return { products: productsWithFinalPrice, counts };
   }
 
+
+
   async suggestProducts(userId, queries) {
     try {
-      // Lấy thông tin người dùng và wishlist
+      // Lấy thông tin user và wishlist
       const user = await User.findById(userId).populate("wishList");
       const wishListProductIds = user.wishList.map((product) => product._id);
 
-      // Lấy danh sách sản phẩm đề xuất từ Collaborative Filtering
+      // Collaborative Filtering: Lấy các sản phẩm đề xuất từ hệ thống Collaborative Filtering
       const recommendedProductIds = await collaborativeFiltering(
         userId,
         wishListProductIds
       );
 
-      // Xây dựng bộ lọc theo query
+      // Tạo query để lọc sản phẩm theo các điều kiện
       const queryCopy = { ...queries };
       const excludeFields = ["limit", "sort", "page", "fields"];
       excludeFields.forEach((el) => delete queryCopy[el]);
 
+      // Format lại các operators cho đúng cú pháp mongoose
       let queryString = JSON.stringify(queryCopy);
-      // Định dạng các operator: gte, gt, lt, lte
       queryString = queryString.replace(
         /\b(gte|gt|lt|lte)\b/g,
-        (matched) => `$${matched}`
+        (matchedEl) => `$${matchedEl}`
       );
-      const formattedQueries = JSON.parse(queryString);
+      const formatedQueries = JSON.parse(queryString);
 
-      // Filtering theo tên sản phẩm nếu có
+      // Filtering theo tên sản phẩm
       if (queries?.name) {
-        formattedQueries.name = { $regex: queries.name, $options: "i" };
+        formatedQueries.name = { $regex: queries.name, $options: "i" };
       }
 
-      // Lọc thêm theo các trường khác nếu cần (ví dụ tác giả, ...)
+      // Các điều kiện lọc khác (theo tác giả, thể loại, v.v.)
 
-      // Thêm điều kiện lọc theo danh mục của các sản phẩm trong wishlist (nếu cần)
-      formattedQueries.categories = {
+      // Thêm điều kiện lọc theo danh mục sản phẩm trong wishlist
+      formatedQueries.categories = {
         $in: user.wishList.flatMap((product) => product.categories),
       };
 
-      // Loại bỏ các sản phẩm đã có trong wishlist
-      formattedQueries._id = { $nin: wishListProductIds };
+      // Loại bỏ sản phẩm đã có trong wishlist
+      formatedQueries._id = { $nin: wishListProductIds };
 
-      // Tạo câu lệnh truy vấn
-      let queryCommand = Product.find(formattedQueries)
+      // Tạo query command
+      let queryCommand = Product.find(formatedQueries)
         .populate("categories")
         .populate("author")
         .populate("publisher");
 
-      // Kết hợp kết quả từ Collaborative Filtering và các bộ lọc khác
+      // Lấy các sản phẩm gợi ý từ Collaborative Filtering và thêm vào query
       queryCommand = queryCommand.or([
         { _id: { $in: recommendedProductIds } },
-        formattedQueries,
+        formatedQueries,
       ]);
 
-      // Sắp xếp nếu có chỉ định
+      // Sorting
       if (queries.sort) {
         const sortBy = queries.sort.split(",").join(" ");
         queryCommand = queryCommand.sort(sortBy);
       }
 
-      // Giới hạn các trường trả về nếu có
+      // fields limiting
       if (queries.fields) {
         const fields = queries.fields.split(",").join(" ");
         queryCommand = queryCommand.select(fields);
       }
 
-      // Phân trang
+      // Pagination
       const page = +queries.page || 1;
       const limit = +queries.limit || process.env.LIMIT_PRODUCTS;
       const skip = (page - 1) * limit;
       queryCommand.skip(skip).limit(limit);
 
-      // Thực thi truy vấn
+      // Lấy danh sách sản phẩm gợi ý
       const suggestedProducts = await queryCommand.exec();
-      const counts = await Product.find(formattedQueries).countDocuments();
+
+      // Lấy số lượng sản phẩm gợi ý
+      const counts = await Product.find(formatedQueries).countDocuments();
 
       return {
         success: suggestedProducts.length > 0,
@@ -257,94 +260,6 @@ class ProductService {
       throw error;
     }
   }
-
-  //Collective Filtering
-  // async suggestProducts(userId, queries) {
-  //   try {
-  //     // Lấy thông tin user và wishlist
-  //     const user = await User.findById(userId).populate("wishList");
-  //     const wishListProductIds = user.wishList.map((product) => product._id);
-
-  //     // Collaborative Filtering: Lấy các sản phẩm đề xuất từ hệ thống Collaborative Filtering
-  //     const recommendedProductIds = await collaborativeFiltering(
-  //       userId,
-  //       wishListProductIds
-  //     );
-
-  //     // Tạo query để lọc sản phẩm theo các điều kiện
-  //     const queryCopy = { ...queries };
-  //     const excludeFields = ["limit", "sort", "page", "fields"];
-  //     excludeFields.forEach((el) => delete queryCopy[el]);
-
-  //     // Format lại các operators cho đúng cú pháp mongoose
-  //     let queryString = JSON.stringify(queryCopy);
-  //     queryString = queryString.replace(
-  //       /\b(gte|gt|lt|lte)\b/g,
-  //       (matchedEl) => `$${matchedEl}`
-  //     );
-  //     const formatedQueries = JSON.parse(queryString);
-
-  //     // Filtering theo tên sản phẩm
-  //     if (queries?.name) {
-  //       formatedQueries.name = { $regex: queries.name, $options: "i" };
-  //     }
-
-  //     // Các điều kiện lọc khác (theo tác giả, thể loại, v.v.)
-
-  //     // Thêm điều kiện lọc theo danh mục sản phẩm trong wishlist
-  //     formatedQueries.categories = {
-  //       $in: user.wishList.flatMap((product) => product.categories),
-  //     };
-
-  //     // Loại bỏ sản phẩm đã có trong wishlist
-  //     formatedQueries._id = { $nin: wishListProductIds };
-
-  //     // Tạo query command
-  //     let queryCommand = Product.find(formatedQueries)
-  //       .populate("categories")
-  //       .populate("author")
-  //       .populate("publisher");
-
-  //     // Lấy các sản phẩm gợi ý từ Collaborative Filtering và thêm vào query
-  //     queryCommand = queryCommand.or([
-  //       { _id: { $in: recommendedProductIds } },
-  //       formatedQueries,
-  //     ]);
-
-  //     // Sorting
-  //     if (queries.sort) {
-  //       const sortBy = queries.sort.split(",").join(" ");
-  //       queryCommand = queryCommand.sort(sortBy);
-  //     }
-
-  //     // fields limiting
-  //     if (queries.fields) {
-  //       const fields = queries.fields.split(",").join(" ");
-  //       queryCommand = queryCommand.select(fields);
-  //     }
-
-  //     // Pagination
-  //     const page = +queries.page || 1;
-  //     const limit = +queries.limit || process.env.LIMIT_PRODUCTS;
-  //     const skip = (page - 1) * limit;
-  //     queryCommand.skip(skip).limit(limit);
-
-  //     // Lấy danh sách sản phẩm gợi ý
-  //     const suggestedProducts = await queryCommand.exec();
-
-  //     // Lấy số lượng sản phẩm gợi ý
-  //     const counts = await Product.find(formatedQueries).countDocuments();
-
-  //     return {
-  //       success: suggestedProducts.length > 0,
-  //       counts,
-  //       suggestedProducts:
-  //         suggestedProducts.length > 0 ? suggestedProducts : [],
-  //     };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
 
   // async suggestProducts(userId, queries) {
   //   try {
@@ -707,77 +622,80 @@ class ProductService {
   }
 }
 
-// async function calculateSimilarity(productA, productB) {
-//   let similarityScore = 0;
+async calculateSimilarity(productA, productB) {
+  let similarityScore = 0;
 
-//   // So sánh tác giả
-//   if (productA.author.toString() === productB.author.toString()) {
-//     similarityScore += 1; // Tăng điểm tương đồng nếu cùng tác giả
-//   }
+  // So sánh tác giả
+  if (productA.author.toString() === productB.author.toString()) {
+    similarityScore += 1; // Tăng điểm tương đồng nếu cùng tác giả
+  }
 
-//   // So sánh thể loại (categories)
-//   const categoryIntersection = productA.categories.filter((categoryA) =>
-//     productB.categories.some(
-//       (categoryB) => categoryB._id.toString() === categoryA._id.toString()
-//     )
-//   ).length;
+  // So sánh thể loại (categories)
+  const categoryIntersection = productA.categories.filter((categoryA) =>
+    productB.categories.some(
+      (categoryB) => categoryB._id.toString() === categoryA._id.toString()
+    )
+  ).length;
 
-//   const categoryUnion = new Set([
-//     ...productA.categories.map((category) => category._id.toString()),
-//     ...productB.categories.map((category) => category._id.toString()),
-//   ]).size;
+  const categoryUnion = new Set([
+    ...productA.categories.map((category) => category._id.toString()),
+    ...productB.categories.map((category) => category._id.toString()),
+  ]).size;
 
-//   const categorySimilarity = categoryIntersection / categoryUnion;
-//   similarityScore += categorySimilarity; // Cộng vào điểm tương đồng
+  const categorySimilarity = categoryIntersection / categoryUnion;
+  similarityScore += categorySimilarity; // Cộng vào điểm tương đồng
 
-//   // So sánh giá bán (price) - tính Cosine Similarity
-//   const priceSimilarity = cosineSimilarity([productA.price], [productB.price]);
-//   similarityScore += priceSimilarity; // Cộng vào điểm tương đồng
+  // So sánh giá bán (price) - tính Cosine Similarity
+  const priceSimilarity = cosineSimilarity(
+    [productA.price],
+    [productB.price]
+  );
+  similarityScore += priceSimilarity; // Cộng vào điểm tương đồng
 
-//   return similarityScore;
-// }
-// async function collaborativeFiltering(userId, wishListProductIds) {
-//   try {
-//     // Lấy thông tin tất cả các sản phẩm trong cơ sở dữ liệu
-//     const allProducts = await Product.find()
-//       .populate("categories")
-//       .populate("author")
-//       .populate("publisher");
+  return similarityScore;
+}
+async function  collaborativeFiltering(userId, wishListProductIds) {
+  try {
+    // Lấy thông tin tất cả các sản phẩm trong cơ sở dữ liệu
+    const allProducts = await Product.find()
+      .populate("categories")
+      .populate("author")
+      .populate("publisher");
 
-//     // Xây dựng một đối tượng chứa sự tương đồng giữa các sản phẩm
-//     const productSimilarityScores = {};
+    // Xây dựng một đối tượng chứa sự tương đồng giữa các sản phẩm
+    const productSimilarityScores = {};
 
-//     // Lặp qua tất cả sản phẩm trong wishlist của người dùng
-//     for (const productId of wishListProductIds) {
-//       const product = await Product.findById(productId)
-//         .populate("categories")
-//         .populate("author")
-//         .populate("publisher");
+    // Lặp qua tất cả sản phẩm trong wishlist của người dùng
+    for (const productId of wishListProductIds) {
+      const product = await Product.findById(productId)
+        .populate("categories")
+        .populate("author")
+        .populate("publisher");
 
-//       // Lặp qua tất cả các sản phẩm khác trong cơ sở dữ liệu để tính toán sự tương đồng
-//       for (const otherProduct of allProducts) {
-//         if (productId !== otherProduct._id.toString()) {
-//           const similarityScore = calculateSimilarity(product, otherProduct);
-//           if (!productSimilarityScores[otherProduct._id]) {
-//             productSimilarityScores[otherProduct._id] = 0;
-//           }
-//           productSimilarityScores[otherProduct._id] += similarityScore;
-//         }
-//       }
-//     }
+      // Lặp qua tất cả các sản phẩm khác trong cơ sở dữ liệu để tính toán sự tương đồng
+      for (const otherProduct of allProducts) {
+        if (productId !== otherProduct._id.toString()) {
+          const similarityScore = calculateSimilarity(product, otherProduct);
+          if (!productSimilarityScores[otherProduct._id]) {
+            productSimilarityScores[otherProduct._id] = 0;
+          }
+          productSimilarityScores[otherProduct._id] += similarityScore;
+        }
+      }
+    }
 
-//     // Sắp xếp các sản phẩm theo điểm tương đồng giảm dần
-//     const sortedProductIds = Object.keys(productSimilarityScores).sort(
-//       (a, b) => productSimilarityScores[b] - productSimilarityScores[a]
-//     );
+    // Sắp xếp các sản phẩm theo điểm tương đồng giảm dần
+    const sortedProductIds = Object.keys(productSimilarityScores).sort(
+      (a, b) => productSimilarityScores[b] - productSimilarityScores[a]
+    );
 
-//     // Lấy các sản phẩm đề xuất
-//     const recommendedProductIds = sortedProductIds.slice(0, 10); // Lấy 10 sản phẩm có điểm tương đồng cao nhất
+    // Lấy các sản phẩm đề xuất
+    const recommendedProductIds = sortedProductIds.slice(0, 10); // Lấy 10 sản phẩm có điểm tương đồng cao nhất
 
-//     return recommendedProductIds;
-//   } catch (error) {
-//     throw error;
-//   }
-// }
+    return recommendedProductIds;
+  } catch (error) {
+    throw error;
+  }
+}
 
 module.exports = new ProductService();
