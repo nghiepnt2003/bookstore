@@ -39,3 +39,34 @@ jobs:
       - name: Run tests
         working-directory: server
         run: npm test --if-present
+
+  frontend:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json # ✅ Đường dẫn đúng của package-lock.json
+
+      - name: Install dependencies
+        working-directory: client # ✅ Chạy lệnh trong thư mục client
+        run: npm ci --legacy-peer-deps
+
+      - name: Build frontend
+        working-directory: client
+        run: npm run build --if-present
+
+      - name: Run frontend tests
+        working-directory: client
+        run: npm test --if-present
