@@ -457,9 +457,10 @@ class ProductService {
     try {
       // Lấy thông tin user và wishlist
       const user = await User.findById(userId).populate("wishList");
-      const wishListCategoryIds = user.wishList.flatMap(
-        (product) => product.categories
-      );
+      const wishListCategoryIds =
+        user?.wishList?.length > 0
+          ? user.wishList.flatMap((product) => product.categories)
+          : [];
       const queryCopy = { ...queries };
       // Tách các trường đặc biệt ra khỏi query
       const excludeFields = ["limit", "sort", "page", "fields"];
@@ -514,7 +515,9 @@ class ProductService {
       }
 
       // Thêm điều kiện lọc theo danh mục sản phẩm trong wishlist
-      formatedQueries.categories = { $in: wishListCategoryIds };
+      if (wishListCategoryIds.length > 0) {
+        formatedQueries.categories = { $in: wishListCategoryIds };
+      }
 
       // Tạo query command
       let queryCommand = Product.find(formatedQueries)

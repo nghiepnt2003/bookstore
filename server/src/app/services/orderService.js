@@ -924,6 +924,7 @@ const config = {
   endpoint:
     "https://sb-openapi.zalopay.vn/v2/create" || process.env.ZALO_ENDPOINT,
 };
+
 async function createZaloPayOrder(user, totalPrice, orderId) {
   const zalopayOrder = {
     app_id: config.app_id,
@@ -938,7 +939,7 @@ async function createZaloPayOrder(user, totalPrice, orderId) {
     // embed_data: JSON.stringify({
     //   redirecturl: "https://your-redirect-url.com",
     // }),
-    callback_url: `https://7c16-116-102-198-219.ngrok-free.app/order/callbackZaloPay/${orderId}`,
+    callback_url: `${process.env.BASE_URL_DEV}/order/callbackZaloPay/${orderId}`,
     description: `Payment for order #${orderId}`,
   };
 
@@ -972,7 +973,7 @@ async function createMoMoOrder(user, totalPrice, orderId) {
   const partnerCode = "MOMO";
   const redirectUrl =
     "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
-  const ipnUrl = `https://7c16-116-102-198-219.ngrok-free.app/order/callbackMomo/${orderId}`;
+  const ipnUrl = `${process.env.BASE_URL_DEV}/order/callbackMomo/${orderId}`;
   const requestType = "payWithMethod";
   const amount = totalPrice.toString();
   const orderInfo = "Payment for Order #" + orderId;

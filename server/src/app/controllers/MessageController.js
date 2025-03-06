@@ -3,7 +3,7 @@ const User = require("../models/User");
 
 class MessageController {
   // Lấy tất cả tin nhắn giữa hai người (hiện tại và đối phương).
-  // Sắp xếp theo thứ tự mới nhất và giới hạn số lượng tin nhắn (ở đây là 20).
+  // Sắp xếp theo thứ tự mới nhất và giới hạn số lượng tin nhắn (ở đây là 50).
   // [GET] /message/recent/:userId
   async getRecentMessages(req, res) {
     try {
@@ -18,7 +18,8 @@ class MessageController {
         ],
       })
         .sort({ createdAt: -1 }) // Tin nhắn mới nhất trước
-        .limit(20); // Giới hạn số lượng tin nhắn trả về
+        .limit(50) // Giới hạn số lượng tin nhắn trả về
+        .select("-__v"); // Loại bỏ trường không cần thiết
 
       res.status(200).json({
         success: true,
