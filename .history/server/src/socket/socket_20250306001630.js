@@ -47,7 +47,6 @@ module.exports = (server, app) => {
     //     socket.emit("error", { message: "Failed to send message" });
     //   }
     // });
-
     socket.on("sendMessage", async ({ sender, receiver, content }) => {
       try {
         const roomId = `room_${Math.min(sender, receiver)}_${Math.max(

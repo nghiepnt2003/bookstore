@@ -9,9 +9,9 @@ router.get(
   messageController.getRecentMessages
 );
 router.get(
-  "/admin/conversations",
-  [verifyAccessToken, isAdmin],
-  messageController.getAdminConversations
+  "/recent/:userId",
+  verifyAccessToken,isAdmin
+  messageController.getRecentMessages
 );
 router.get("/inbox", verifyAccessToken, messageController.getInBox);
 

@@ -15,7 +15,7 @@ class MessageController {
             $or: [{ sender: adminId }, { receiver: adminId }],
           },
         },
-        { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian giảm dần (tin nhắn mới nhất trước)
+        { $sort: { createdAt: -1 } },
         {
           $group: {
             _id: {
@@ -23,13 +23,14 @@ class MessageController {
                 $cond: [{ $eq: ["$sender", adminId] }, "$receiver", "$sender"],
               },
             },
-            lastMessage: { $first: "$$ROOT" }, // Lấy tin nhắn mới nhất giữa admin và user
+            lastMessage: { $first: "$$ROOT" },
           },
         },
         {
           $replaceRoot: { newRoot: "$lastMessage" },
         },
       ]);
+
       res.status(200).json({
         success: true,
         message: "Latest messages with users retrieved successfully",

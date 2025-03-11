@@ -56,7 +56,6 @@ app.use(express.static(path.join(__dirname, "/public")));
 // method overide
 app.use(methodOverride("_method"));
 // CORS
-// Cho phép local:3001 được truy cập vào resource và sử dụng thông qua các method
 const corsOptions = {
   origin: ["http://localhost:3001"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Phương thức HTTP cho phép

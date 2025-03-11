@@ -8,6 +8,15 @@ class MessageController {
     try {
       const adminId = req.user._id; // ID của admin từ req.user
 
+      // Kiểm tra xem user có phải admin không
+      const adminUser = await User.findById(adminId);
+      if (!adminUser || adminUser.role !== 1) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied. Only admin can access this API.",
+        });
+      }
+
       // Lấy tin nhắn mới nhất giữa admin và từng user
       const latestMessages = await Message.aggregate([
         {
@@ -15,7 +24,7 @@ class MessageController {
             $or: [{ sender: adminId }, { receiver: adminId }],
           },
         },
-        { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian giảm dần (tin nhắn mới nhất trước)
+        { $sort: { createdAt: -1 } },
         {
           $group: {
             _id: {
@@ -23,13 +32,14 @@ class MessageController {
                 $cond: [{ $eq: ["$sender", adminId] }, "$receiver", "$sender"],
               },
             },
-            lastMessage: { $first: "$$ROOT" }, // Lấy tin nhắn mới nhất giữa admin và user
+            lastMessage: { $first: "$$ROOT" },
           },
         },
         {
           $replaceRoot: { newRoot: "$lastMessage" },
         },
       ]);
+
       res.status(200).json({
         success: true,
         message: "Latest messages with users retrieved successfully",
