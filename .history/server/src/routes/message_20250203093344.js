@@ -1,17 +1,12 @@
 const express = require("express");
 const messageController = require("../app/controllers/MessageController");
-const { verifyAccessToken, isAdmin } = require("../app/middlewares/jwt");
+const { verifyAccessToken } = require("../app/middlewares/jwt");
 const router = express.Router();
 
 router.get(
   "/recent/:userId",
   verifyAccessToken,
   messageController.getRecentMessages
-);
-router.get(
-  "/admin/conversations",
-  [verifyAccessToken, isAdmin],
-  messageController.getAdminConversations
 );
 router.get("/inbox", verifyAccessToken, messageController.getInBox);
 
@@ -24,6 +19,5 @@ router.put(
 );
 
 router.delete("/:id", verifyAccessToken, messageController.deleteMessage);
-router.get("/admin/conversations", verifyAccessToken, messageController.getAdminConversations);
 
 module.exports = router;

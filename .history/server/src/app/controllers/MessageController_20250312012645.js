@@ -120,7 +120,6 @@ class MessageController {
   async sendMessage(req, res) {
     try {
       const { receiver, content, image } = req.body;
-      console.log(receiver + "   " +  content+"   "+image)
       const sender = req.user._id; // Lấy ID người gửi từ req.user
       if (!receiver || (!content && !image)) {
         return res
@@ -193,7 +192,6 @@ class MessageController {
   // [PUT] /message/seen/:receiver
   async seenMessages(req, res) {
     try {
-  
       const { receiver } = req.params; // ID của người nhận
       const sender = req.user._id; // Lấy ID người gửi từ req.user
 
@@ -256,55 +254,6 @@ class MessageController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
-
-  // Lấy tất cả các cuộc trò chuyện giữa admin và từng user
-// [GET] /message/admin/conversations
-async getAdminConversations(req, res) {
-  try {
-    const adminId = req.user._id; // ID của admin từ req.user
-
-    // Lấy danh sách cuộc hội thoại giữa admin và từng user
-    const adminConversations = await Message.aggregate([
-      {
-        $match: {
-          $or: [
-            { sender: adminId }, // Tin nhắn admin gửi
-            { receiver: adminId } // Tin nhắn admin nhận
-          ],
-        },
-      },
-      {
-        $sort: { createdAt: -1 }, // Tin nhắn mới nhất trước
-      },
-      {
-        $group: {
-          _id: {
-            participants: {
-              $cond: [
-                { $lt: ["$sender", "$receiver"] },
-                { sender: "$sender", receiver: "$receiver" },
-                { sender: "$receiver", receiver: "$sender" },
-              ],
-            },
-          },
-          lastMessage: { $first: "$$ROOT" }, // Lấy tin nhắn mới nhất
-        },
-      },
-      {
-        $replaceRoot: { newRoot: "$lastMessage" }, // Thay thế root bằng lastMessage
-      },
-    ]);
-
-    res.status(200).json({
-      success: true,
-      message: "Admin conversations retrieved successfully",
-      data: adminConversations,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
 }
-}
-
 
 module.exports = new MessageController();

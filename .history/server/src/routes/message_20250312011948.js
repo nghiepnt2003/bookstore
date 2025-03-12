@@ -24,6 +24,5 @@ router.put(
 );
 
 router.delete("/:id", verifyAccessToken, messageController.deleteMessage);
-router.get("/admin/conversations", verifyAccessToken, messageController.getAdminConversations);
 
 module.exports = router;

@@ -9,9 +9,9 @@ router.get(
   messageController.getRecentMessages
 );
 router.get(
-  "/admin/conversations",
+  "/recent/:userId",
   [verifyAccessToken, isAdmin],
-  messageController.getAdminConversations
+  messageController.getRecentMessages
 );
 router.get("/inbox", verifyAccessToken, messageController.getInBox);
 
@@ -24,6 +24,5 @@ router.put(
 );
 
 router.delete("/:id", verifyAccessToken, messageController.deleteMessage);
-router.get("/admin/conversations", verifyAccessToken, messageController.getAdminConversations);
 
 module.exports = router;
