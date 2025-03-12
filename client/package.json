@@ -37,6 +37,7 @@
     "recharts": "^2.13.3",
     "redux-persist": "^6.0.0",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1",
     "sweetalert2": "^11.14.0",
     "use-debounce": "^10.0.4",
     "use-react-router-breadcrumbs": "^4.0.1",

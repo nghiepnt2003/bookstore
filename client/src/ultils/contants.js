@@ -152,12 +152,12 @@ export const adminSidebar = [
         path: `/${path.ADMIN}/${path.MANAGE_ORDER}`,
         icon: <RiBillLine />
     },
-    // {
-    //     id: 7,
-    //     text: 'Thông tin quản lý',
-    //     path: `/${path.ADMIN}/${path.ADMINPERSONAL}`,
-    //     icon: <ImProfile />
-    // }
+    {
+        id: 9,
+        text: 'Thắc mắc của khách hàng',
+        path: `/${path.ADMIN}/${path.MESSENGER}`,
+        icon: <ImProfile />
+    }
 ]
 
 export const memberSidebar = [
