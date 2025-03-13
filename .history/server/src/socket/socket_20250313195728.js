@@ -1,6 +1,5 @@
 const socketIo = require("socket.io");
 const Message = require("../app/models/Message");
-const cloudinary = require("cloudinary").v2;
 
 module.exports = (server, app) => {
   // Khởi tạo Socket.io với server

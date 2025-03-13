@@ -67,7 +67,7 @@ class MessageController {
         {
           $lookup: {
             from: "users", // Bảng chứa thông tin user
-            localField: "_id.user",
+            localField: "_id.user", // sender hoặc receiver sẽ là user cần lấy thông tin
             foreignField: "_id",
             as: "userInfo",
           },

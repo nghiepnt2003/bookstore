@@ -1,6 +1,5 @@
 const socketIo = require("socket.io");
 const Message = require("../app/models/Message");
-const cloudinary = require("cloudinary").v2;
 
 module.exports = (server, app) => {
   // Khởi tạo Socket.io với server
@@ -27,14 +26,8 @@ module.exports = (server, app) => {
     });
 
     // Lắng nghe sự kiện sendMessage từ client
-
     // socket.on("sendMessage", async ({ sender, receiver, content }) => {
     //   try {
-    //     const roomId = `room_${Math.min(sender, receiver)}_${Math.max(
-    //       sender,
-    //       receiver
-    //     )}`;
-
     //     // Lưu tin nhắn vào MongoDB
     //     const newMessage = new Message({
     //       sender,
@@ -44,14 +37,41 @@ module.exports = (server, app) => {
     //     });
     //     await newMessage.save();
 
-    //     // Gửi tin nhắn đến cả hai người trong room
-    //     io.to(roomId).emit("receiveMessage", newMessage);
+    //     // Gửi tin nhắn cho người nhận thông qua socket, vào phòng của người gửi và người nhận
+    //     io.to(sender.toString()).emit("receiveMessage", newMessage);
+    //     io.to(receiver.toString()).emit("receiveMessage", newMessage);
+
     //     console.log("Message sent:", newMessage);
     //   } catch (error) {
     //     console.error("Error sending message:", error);
     //     socket.emit("error", { message: "Failed to send message" });
     //   }
     // });
+
+    socket.on("sendMessage", async ({ sender, receiver, content }) => {
+      try {
+        const roomId = `room_${Math.min(sender, receiver)}_${Math.max(
+          sender,
+          receiver
+        )}`;
+
+        // Lưu tin nhắn vào MongoDB
+        const newMessage = new Message({
+          sender,
+          receiver,
+          content,
+          isRead: false,
+        });
+        await newMessage.save();
+
+        // Gửi tin nhắn đến cả hai người trong room
+        io.to(roomId).emit("receiveMessage", newMessage);
+        console.log("Message sent:", newMessage);
+      } catch (error) {
+        console.error("Error sending message:", error);
+        socket.emit("error", { message: "Failed to send message" });
+      }
+    });
     socket.on(
       "sendMessage",
       async ({ sender, receiver, content, image }, callback) => {
