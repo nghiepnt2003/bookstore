@@ -72,80 +72,18 @@ class MessageController {
   //     res.status(500).json({ success: false, message: error.message });
   //   }
   // }
-  /////////////////////////
-  // async getAdminConversations(req, res) {
-  //   try {
-  //     const adminId = req.user._id; // ID của admin từ req.user
-
-  //     // Lấy tin nhắn mới nhất giữa admin và từng user
-  //     const latestMessages = await Message.aggregate([
-  //       {
-  //         $match: {
-  //           $or: [{ sender: adminId }, { receiver: adminId }],
-  //         },
-  //       },
-  //       { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian giảm dần (tin nhắn mới nhất trước)
-  //       {
-  //         $group: {
-  //           _id: {
-  //             user: {
-  //               $cond: [{ $eq: ["$sender", adminId] }, "$receiver", "$sender"],
-  //             },
-  //           },
-  //           lastMessage: { $first: "$$ROOT" }, // Lấy tin nhắn mới nhất giữa admin và user
-  //         },
-  //       },
-  //       {
-  //         $replaceRoot: { newRoot: "$lastMessage" },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "users", // Bảng chứa thông tin user
-  //           localField: "sender",
-  //           foreignField: "_id",
-  //           as: "userInfo",
-  //         },
-  //       },
-  //       {
-  //         $unwind: "$userInfo", // Chuyển mảng userInfo thành object
-  //       },
-  //       {
-  //         $project: {
-  //           sender: 1,
-  //           receiver: 1,
-  //           content: 1,
-  //           createdAt: 1,
-  //           userInfo: {
-  //             _id: 1,
-  //             username: 1,
-  //             fullname: 1,
-  //             email: 1,
-  //             phone: 1,
-  //           },
-  //         },
-  //       },
-  //     ]);
-
-  //     res.status(200).json({
-  //       success: true,
-  //       message: "Latest messages with users retrieved successfully",
-  //       data: latestMessages,
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({ success: false, message: error.message });
-  //   }
-  // }
   async getAdminConversations(req, res) {
     try {
-      const adminId = req.user._id;
+      const adminId = req.user._id; // ID của admin từ req.user
 
+      // Lấy tin nhắn mới nhất giữa admin và từng user
       const latestMessages = await Message.aggregate([
         {
           $match: {
             $or: [{ sender: adminId }, { receiver: adminId }],
           },
         },
-        { $sort: { createdAt: -1 } },
+        { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian giảm dần (tin nhắn mới nhất trước)
         {
           $group: {
             _id: {
@@ -153,7 +91,7 @@ class MessageController {
                 $cond: [{ $eq: ["$sender", adminId] }, "$receiver", "$sender"],
               },
             },
-            lastMessage: { $first: "$$ROOT" },
+            lastMessage: { $first: "$$ROOT" }, // Lấy tin nhắn mới nhất giữa admin và user
           },
         },
         {
@@ -161,35 +99,28 @@ class MessageController {
         },
         {
           $lookup: {
-            from: "users",
-            let: { userId: "$_id.user" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: { $eq: ["$_id", { $toObjectId: "$$userId" }] },
-                },
-              },
-              {
-                $project: {
-                  _id: 1,
-                  username: 1,
-                  fullname: 1,
-                  email: 1,
-                  phone: 1,
-                },
-              },
-            ],
+            from: "users", // Bảng chứa thông tin user
+            localField: "sender",
+            foreignField: "_id",
             as: "userInfo",
           },
         },
-        { $unwind: { path: "$userInfo", preserveNullAndEmptyArrays: true } },
+        {
+          $unwind: "$userInfo", // Chuyển mảng userInfo thành object
+        },
         {
           $project: {
             sender: 1,
             receiver: 1,
             content: 1,
             createdAt: 1,
-            userInfo: 1,
+            userInfo: {
+              _id: 1,
+              username: 1,
+              fullname: 1,
+              email: 1,
+              phone: 1,
+            },
           },
         },
       ]);

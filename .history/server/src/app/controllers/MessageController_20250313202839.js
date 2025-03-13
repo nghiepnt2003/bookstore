@@ -72,7 +72,6 @@ class MessageController {
   //     res.status(500).json({ success: false, message: error.message });
   //   }
   // }
-  /////////////////////////
   // async getAdminConversations(req, res) {
   //   try {
   //     const adminId = req.user._id; // ID của admin từ req.user
