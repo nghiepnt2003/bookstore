@@ -13,7 +13,7 @@ const messageSchema = new Schema(
     sender: { type: Number, ref: "User", required: true }, // Người gửi tin nhắn
     receiver: { type: Number, ref: "User", required: true }, // Người nhận tin nhắn
     content: { type: String, maxLength: 1000 }, // Nội dung tin nhắn (text)
-    images: [{ type: String }],
+    images: [{ type: String, maxLength: 255 }],
     isRead: { type: Boolean, default: false }, // Trạng thái đã đọc
   },
   // Tự động thêm createdAt và updatedAt
