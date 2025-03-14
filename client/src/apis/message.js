@@ -14,3 +14,4 @@ export const apiSeenMessages = (receiverId) => axios.put(`/message/seen/all/${re
 
 export const apiGetInbox = (userId) => axios.get(`/message/inbox`);
 export const apiGetAllChatSessions = () => axios.get(`/message/admin/conversations`);
+export const apiGetSendRecent = (userId) => axios.get(`/message/admin/send/recent/${userId}`);

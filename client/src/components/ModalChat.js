@@ -2,15 +2,15 @@ import { Badge, Input, Image } from 'antd';
 import { IoMdClose, IoIosSend } from "react-icons/io";
 import { useEffect, useRef, useState } from 'react';
 import { RiUserFollowFill } from "react-icons/ri";
-import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
-import { io } from "socket.io-client";
 import { FileImageTwoTone } from '@ant-design/icons';
+import { toast } from 'react-toastify';
+import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3000");
 
 const ModalChat = ({ props }) => {
-    const { open, setOpen, messages, setMessages,  fetchRecentMessages} = props;
+    const { open, setOpen, messages, setMessages, fetchRecentMessages } = props;
     const { current: currentUser } = useSelector(state => state.user);
     const [message, setMessage] = useState("");
     const fileInputRef = useRef(null);
@@ -20,6 +20,7 @@ const ModalChat = ({ props }) => {
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
         setSelectedFiles(files);
+        console.log("Selected files:", files); // Log các tệp đã chọn
     };
 
     const handleInputFileClick = () => {
@@ -27,19 +28,30 @@ const ModalChat = ({ props }) => {
     };
 
     const handleSendMessage = () => {
-        if (!message && selectedFiles.length < 1) return;
+        if (!message && selectedFiles.length < 1) {
+            console.log("No content to send"); // Log nếu không có nội dung
+            return;
+        }
 
         const messageData = {
             sender: currentUser._id,
             receiver: 1,
             content: message,
-            image: selectedFiles,
+            images: selectedFiles, // Đổi tên từ 'image' thành 'images'
         };
+
+        console.log("Sending message data:", messageData); // Log dữ liệu tin nhắn
 
         // Gửi tin nhắn qua socket
         socket.emit("sendMessage", messageData, (response) => {
+            console.log("Response from server:", response); // Log phản hồi từ server
             if (response.success) {
                 setMessages(prevMessages => [...prevMessages, messageData]);
+                console.log("Message sent successfully"); // Log thông báo thành công
+
+                fetchRecentMessages(); // Gọi lại hàm để lấy tin nhắn gần đây
+            } else {
+                console.log("Message sending failed"); // Log nếu gửi không thành công
             }
         });
 
@@ -68,7 +80,9 @@ const ModalChat = ({ props }) => {
                                     <RiUserFollowFill color='#ff007f' size={24} />
                                     <div className='flex flex-col gap-2 justify-center'>
                                         <div className='flex flex-wrap max-w-[180px] gap-1'>
-                                            {e.image?.length > 0 && e.image.map(img => <Image key={img} width={80} src={img} />)}
+                                            {e.images?.length > 0 && e.images.map((img, index) => (
+                                                <Image key={index} width={80} src={img} />
+                                            ))}
                                         </div>
                                         {e.content && <p className='text-sm font-medium break-words max-w-[180px] bg-red-200 py-2 px-4 rounded-lg'>{e.content}</p>}
                                     </div>
@@ -76,7 +90,9 @@ const ModalChat = ({ props }) => {
                             ) : (
                                 <div key={i} className='flex flex-col gap-2 items-end justify-center'>
                                     <div className='flex flex-wrap justify-end max-w-[180px] gap-1'>
-                                        {e.image?.length > 0 && e.image.map(img => <Image key={img} width={80} src={img} />)}
+                                        {e.images?.length > 0 && e.images.map((img, index) => (
+                                            <Image key={index} width={80} src={img} />
+                                        ))}
                                     </div>
                                     {e.content && <p className='text-sm font-medium break-words max-w-[180px] bg-red-300 py-2 px-4 rounded-lg'>{e.content}</p>}
                                 </div>
