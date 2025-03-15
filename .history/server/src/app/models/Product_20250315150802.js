@@ -17,7 +17,7 @@ const productSchema = new Schema(
     description: { type: String },
     price: { type: Number, required: true }, // giá bán
     costPrice: { type: Number, default: 0 }, // Giá nhập
-    // finalPrice: { type: Number }, // Giá cuối cùng sau khi giảm giá
+
     stockQuantity: { type: Number, default: 0 }, // Số lượng tồn kho
     lastRestocked: { type: Date, default: Date.now }, // Thời gian nhập hàng gần nhất
     datePublic: { type: Date },

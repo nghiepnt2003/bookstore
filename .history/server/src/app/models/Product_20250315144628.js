@@ -17,7 +17,7 @@ const productSchema = new Schema(
     description: { type: String },
     price: { type: Number, required: true }, // giá bán
     costPrice: { type: Number, default: 0 }, // Giá nhập
-    // finalPrice: { type: Number }, // Giá cuối cùng sau khi giảm giá
+    // costPrice: { type: Number, required: true }, // Giá nhập
     stockQuantity: { type: Number, default: 0 }, // Số lượng tồn kho
     lastRestocked: { type: Date, default: Date.now }, // Thời gian nhập hàng gần nhất
     datePublic: { type: Date },
@@ -45,6 +45,11 @@ const productSchema = new Schema(
 
   { timestamps: true }
 );
+productSchema.virtual("finalPrice").get(async function () {
+  return await this.getFinalPrice();
+});
+
+// Đảm bảo virtual fields hiển thị khi chuyển sang JSON
 
 productSchema.methods.getFinalPrice = async function () {
   const currentDate = new Date();
@@ -78,5 +83,6 @@ productSchema.plugin(mongooseDelete, {
   overrideMethods: "all",
 });
 productSchema.plugin(AutoIncrement, { id: "product_seq", inc_field: "_id" });
-
+productSchema.set("toJSON", { virtuals: true });
+productSchema.set("toObject", { virtuals: true });
 module.exports = mongoose.model("Product", productSchema);

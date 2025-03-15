@@ -14,20 +14,22 @@ class ProductService {
       const product = await Product.findOne({ _id: productId })
         .populate("categories") // Populate thông tin của các category
         .populate("author") // Populate thông tin của author nếu cần
-        .populate("publisher"); // Populate thông tin của publisher nếu cần
-      if (!product) {
-        return { success: false, message: "Product not found" };
-      }
-      const finalPrice = await product.getFinalPrice();
-      return {
-        success: !!product,
-        ...product.toObject(),
-        finalPrice: parseFloat(finalPrice.toFixed(2)),
-      };
+        .populate("publisher")
+        .populate({
+          path: "discount",
+          match: {
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() },
+          },
+          select: "discountPercentage startDate endDate",
+        }); // Populate thông tin của publisher nếu cần
+
+      return { success: !!product, product };
     } catch (error) {
       throw error;
     }
   }
+
   async getProducts({ filterQueries, limit, sort, page, fields }) {
     try {
       // Format lại các operators cho đúng cú pháp mongoose
@@ -79,15 +81,7 @@ class ProductService {
       let queryCommand = Product.find(formatedQueries)
         .populate("categories")
         .populate("author")
-        .populate("publisher")
-        .populate({
-          path: "discount",
-          match: {
-            startDate: { $lte: new Date() },
-            endDate: { $gte: new Date() },
-          },
-          select: "discountPercentage startDate endDate",
-        });
+        .populate("publisher");
 
       // Sắp xếp
       if (sort) {
@@ -108,19 +102,7 @@ class ProductService {
       queryCommand.skip(skip).limit(perPage);
 
       // Lấy danh sách sản phẩm
-      const products = await queryCommand.exec();
-
-      // Tính finalPrice cho từng sản phẩm
-      const response = await Promise.all(
-        products.map(async (product) => {
-          if (!product) return null;
-          const finalPrice = await product.getFinalPrice();
-          return {
-            ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)),
-          };
-        })
-      );
+      const response = await queryCommand.exec();
 
       // Lấy số lượng sản phẩm
       const counts = await Product.find(formatedQueries).countDocuments();
@@ -180,28 +162,18 @@ class ProductService {
     const products = await queryCommand.exec();
 
     // Tính finalPrice cho từng sản phẩm
-    // const productsWithFinalPrice = products.map((product) => {
-    //   let finalPrice = product.price;
-    //   if (product.discount) {
-    //     finalPrice =
-    //       product.price * (1 - product.discount.discountPercentage / 100);
-    //   }
-    //   return {
-    //     ...product.toObject(),
-    //     finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm finalPrice vào kết quả trả về
-    //   };
-    // });
-    const productsWithFinalPrice = await Promise.all(
-      products
-        .filter((product) => product !== null) // Lọc bỏ các product null
-        .map(async (product) => {
-          const finalPrice = await product.getFinalPrice();
-          return {
-            ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm finalPrice vào kết quả trả về
-          };
-        })
-    );
+    const productsWithFinalPrice = products.map((product) => {
+      let finalPrice = product.price;
+      if (product.discount) {
+        finalPrice =
+          product.price * (1 - product.discount.discountPercentage / 100);
+      }
+      return {
+        ...product.toObject(),
+        finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm finalPrice vào kết quả trả về
+      };
+    });
+
     const counts = await Product.find({
       ...formatedQueries,
       discount: { $ne: null },
@@ -284,21 +256,11 @@ class ProductService {
       const suggestedProducts = await queryCommand.exec();
       const counts = await Product.find(formattedQueries).countDocuments();
 
-      // Tính finalPrice cho từng sản phẩm
-      const productsWithFinalPrice = await Promise.all(
-        suggestedProducts.map(async (product) => {
-          const finalPrice = await product.getFinalPrice();
-          return {
-            ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm finalPrice vào kết quả trả về
-          };
-        })
-      );
       return {
-        success: productsWithFinalPrice.length > 0,
+        success: suggestedProducts.length > 0,
         counts,
         suggestedProducts:
-          suggestedProducts.length > 0 ? productsWithFinalPrice : [],
+          suggestedProducts.length > 0 ? suggestedProducts : [],
       };
     } catch (error) {
       throw error;
@@ -400,22 +362,10 @@ class ProductService {
       // Lấy tổng số lượng sản phẩm
       const counts = await Product.find(formatedQueries).countDocuments();
 
-      // Tính finalPrice cho từng sản phẩm
-      const productsWithFinalPrice = await Promise.all(
-        popularProducts.map(async (product) => {
-          const finalPrice = await product.getFinalPrice();
-          return {
-            ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)),
-          };
-        })
-      );
-
       return {
-        success: productsWithFinalPrice.length > 0,
+        success: popularProducts.length > 0,
         counts,
-        popularProducts:
-          productsWithFinalPrice.length > 0 ? productsWithFinalPrice : [],
+        popularProducts: popularProducts.length > 0 ? popularProducts : [],
       };
     } catch (error) {
       throw error;

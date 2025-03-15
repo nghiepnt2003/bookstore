@@ -400,22 +400,10 @@ class ProductService {
       // Lấy tổng số lượng sản phẩm
       const counts = await Product.find(formatedQueries).countDocuments();
 
-      // Tính finalPrice cho từng sản phẩm
-      const productsWithFinalPrice = await Promise.all(
-        popularProducts.map(async (product) => {
-          const finalPrice = await product.getFinalPrice();
-          return {
-            ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)),
-          };
-        })
-      );
-
       return {
-        success: productsWithFinalPrice.length > 0,
+        success: popularProducts.length > 0,
         counts,
-        popularProducts:
-          productsWithFinalPrice.length > 0 ? productsWithFinalPrice : [],
+        popularProducts: popularProducts.length > 0 ? popularProducts : [],
       };
     } catch (error) {
       throw error;

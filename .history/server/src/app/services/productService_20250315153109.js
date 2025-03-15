@@ -412,10 +412,9 @@ class ProductService {
       );
 
       return {
-        success: productsWithFinalPrice.length > 0,
+        success: popularProducts.length > 0,
         counts,
-        popularProducts:
-          productsWithFinalPrice.length > 0 ? productsWithFinalPrice : [],
+        popularProducts: popularProducts.length > 0 ? popularProducts : [],
       };
     } catch (error) {
       throw error;

@@ -17,7 +17,8 @@ const productSchema = new Schema(
     description: { type: String },
     price: { type: Number, required: true }, // giá bán
     costPrice: { type: Number, default: 0 }, // Giá nhập
-    // finalPrice: { type: Number }, // Giá cuối cùng sau khi giảm giá
+    finalPrice: { type: Number }, // Giá cuối cùng sau khi giảm giá
+    // costPrice: { type: Number, required: true }, // Giá nhập
     stockQuantity: { type: Number, default: 0 }, // Số lượng tồn kho
     lastRestocked: { type: Date, default: Date.now }, // Thời gian nhập hàng gần nhất
     datePublic: { type: Date },
@@ -45,7 +46,45 @@ const productSchema = new Schema(
 
   { timestamps: true }
 );
+// Hàm cập nhật finalPrice
+async function updateFinalPrice(doc) {
+  if (!doc) return;
 
+  const currentDate = new Date();
+  if (doc.discount) {
+    const discount = await mongoose.model("Discount").findById(doc.discount);
+    if (
+      discount &&
+      currentDate >= discount.startDate &&
+      currentDate <= discount.endDate
+    ) {
+      doc.finalPrice = parseFloat(
+        doc.price * (1 - discount.discountPercentage / 100)
+      );
+    } else {
+      doc.finalPrice = doc.price;
+    }
+  } else {
+    doc.finalPrice = doc.price;
+  }
+}
+
+// Middleware cập nhật finalPrice trước khi lưu
+productSchema.pre("save", async function (next) {
+  await updateFinalPrice(this);
+  next();
+});
+
+// Middleware cập nhật finalPrice khi update
+productSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+  if (update.price || update.discount) {
+    const docToUpdate = await this.model.findOne(this.getQuery());
+    await updateFinalPrice(docToUpdate);
+    this.set("finalPrice", docToUpdate.finalPrice);
+  }
+  next();
+});
 productSchema.methods.getFinalPrice = async function () {
   const currentDate = new Date();
 
