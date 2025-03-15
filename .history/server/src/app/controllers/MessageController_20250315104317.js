@@ -3,7 +3,6 @@ const User = require("../models/User");
 
 class MessageController {
   // [GET] /message/admin/recent/:userId
-
   async getAdminRecentMessage(req, res) {
     try {
       const adminId = req.user._id; // ID của admin từ req.user
@@ -26,34 +25,119 @@ class MessageController {
         });
       }
 
-      // Lấy thông tin người dùng từ sender hoặc receiver
-      const userInfoId =
-        recentMessage.sender === adminId
-          ? recentMessage.receiver
-          : recentMessage.sender;
-      const userInfo = await User.findById(userInfoId).select(
-        "username fullname email phone image"
-      );
-
       res.status(200).json({
         success: true,
         message: "Latest message retrieved successfully",
-        data: {
-          ...recentMessage.toObject(), // Chuyển đổi tin nhắn thành đối tượng
-          userInfo, // Thêm thông tin người dùng vào kết quả
-        },
+        data: recentMessage,
       });
     } catch (error) {
-      console.error("Error retrieving recent message:", error); // Ghi log lỗi
       res.status(500).json({ success: false, message: error.message });
     }
   }
-  // Lấy tin nhắn mới nhất giữa admin và từng user
 
+  // Lấy tin nhắn mới nhất giữa admin và từng user
+  // [GET] /message/admin/conversations
+  // async getAdminConversations(req, res) {
+  //   try {
+  //     const adminId = req.user._id; // ID của admin từ req.user
+
+  //     // Lấy tin nhắn mới nhất giữa admin và từng user
+  //     const latestMessages = await Message.aggregate([
+  //       {
+  //         $match: {
+  //           $or: [{ sender: adminId }, { receiver: adminId }],
+  //         },
+  //       },
+  //       { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian giảm dần (tin nhắn mới nhất trước)
+  //       {
+  //         $group: {
+  //           _id: {
+  //             user: {
+  //               $cond: [{ $eq: ["$sender", adminId] }, "$receiver", "$sender"],
+  //             },
+  //           },
+  //           lastMessage: { $first: "$$ROOT" }, // Lấy tin nhắn mới nhất giữa admin và user
+  //         },
+  //       },
+  //       {
+  //         $replaceRoot: { newRoot: "$lastMessage" },
+  //       },
+  //     ]);
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "Latest messages with users retrieved successfully",
+  //       data: latestMessages,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ success: false, message: error.message });
+  //   }
+  // }
+  /////////////////////////
+  // async getAdminConversations(req, res) {
+  //   try {
+  //     const adminId = req.user._id; // ID của admin từ req.user
+
+  //     // Lấy tin nhắn mới nhất giữa admin và từng user
+  //     const latestMessages = await Message.aggregate([
+  //       {
+  //         $match: {
+  //           $or: [{ sender: adminId }, { receiver: adminId }],
+  //         },
+  //       },
+  //       { $sort: { createdAt: -1 } }, // Sắp xếp theo thời gian giảm dần (tin nhắn mới nhất trước)
+  //       {
+  //         $group: {
+  //           _id: {
+  //             user: {
+  //               $cond: [{ $eq: ["$sender", adminId] }, "$receiver", "$sender"],
+  //             },
+  //           },
+  //           lastMessage: { $first: "$$ROOT" }, // Lấy tin nhắn mới nhất giữa admin và user
+  //         },
+  //       },
+  //       {
+  //         $replaceRoot: { newRoot: "$lastMessage" },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "users", // Bảng chứa thông tin user
+  //           localField: "sender",
+  //           foreignField: "_id",
+  //           as: "userInfo",
+  //         },
+  //       },
+  //       {
+  //         $unwind: "$userInfo", // Chuyển mảng userInfo thành object
+  //       },
+  //       {
+  //         $project: {
+  //           sender: 1,
+  //           receiver: 1,
+  //           content: 1,
+  //           createdAt: 1,
+  //           userInfo: {
+  //             _id: 1,
+  //             username: 1,
+  //             fullname: 1,
+  //             email: 1,
+  //             phone: 1,
+  //           },
+  //         },
+  //       },
+  //     ]);
+
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "Latest messages with users retrieved successfully",
+  //       data: latestMessages,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ success: false, message: error.message });
+  //   }
+  // }
   async getAdminConversations(req, res) {
     try {
       const adminId = req.user._id;
-      console.log("Admin ID:", adminId); // Ghi log ID của quản trị viên
 
       const latestMessages = await Message.aggregate([
         {
@@ -78,15 +162,11 @@ class MessageController {
         {
           $lookup: {
             from: "users",
-            let: {
-              userId: {
-                $cond: [{ $eq: ["$sender", adminId] }, "$receiver", "$sender"],
-              },
-            }, // Lấy userId từ sender hoặc receiver
+            let: { userId: "$_id.user" },
             pipeline: [
               {
                 $match: {
-                  $expr: { $eq: ["$_id", "$$userId"] }, // So sánh với ID người dùng
+                  $expr: { $eq: ["$_id", { $toObjectId: "$$userId" }] },
                 },
               },
               {
@@ -96,7 +176,6 @@ class MessageController {
                   fullname: 1,
                   email: 1,
                   phone: 1,
-                  image: 1, // Lấy trường image
                 },
               },
             ],
@@ -110,25 +189,10 @@ class MessageController {
             receiver: 1,
             content: 1,
             createdAt: 1,
-            userInfo: 1, // Đảm bảo trường userInfo được đưa vào
+            userInfo: 1,
           },
         },
       ]);
-
-      console.log("Latest Messages:", latestMessages); // Ghi log các tin nhắn mới nhất
-
-      // Ghi log cấu trúc của latestMessages để kiểm tra
-      console.log(
-        "Structure of Latest Messages:",
-        JSON.stringify(latestMessages, null, 2)
-      );
-
-      // Kiểm tra userId
-      latestMessages.forEach((msg) => {
-        const userId = msg.sender === adminId ? msg.receiver : msg.sender; // Lấy ID người dùng từ sender hoặc receiver
-        console.log("Comparing User ID:", userId); // Ghi log userId
-        console.log("User Info for message:", msg.userInfo); // Ghi log thông tin người dùng
-      });
 
       res.status(200).json({
         success: true,
@@ -136,7 +200,6 @@ class MessageController {
         data: latestMessages,
       });
     } catch (error) {
-      console.error("Error retrieving messages:", error); // Ghi log lỗi
       res.status(500).json({ success: false, message: error.message });
     }
   }
