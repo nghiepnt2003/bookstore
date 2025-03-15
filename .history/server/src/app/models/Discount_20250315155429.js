@@ -9,7 +9,7 @@ mongoose.plugin(mongooseSlugUpdater);
 const discountSchema = new Schema(
   {
     _id: { type: Number },
-    name: { type: String, required: true }, // Tên chương trình giảm giá
+    name: { type: String }, // Tên chương trình giảm giá
     discountPercentage: { type: Number, required: true }, // Phần trăm giảm giá
     startDate: { type: Date, required: true }, // Ngày bắt đầu giảm giá
     endDate: { type: Date, required: true }, // Ngày kết thúc giảm giá

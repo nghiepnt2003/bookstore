@@ -25,7 +25,6 @@ class DiscountService {
     }
 
     const newDiscount = new Discount({
-      name,
       discountPercentage,
       startDate,
       endDate,

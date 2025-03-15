@@ -20,12 +20,11 @@ class DiscountService {
   async createDiscount(discountData) {
     const { name, discountPercentage, startDate, endDate } = discountData;
 
-    if ((!name, !discountPercentage || !startDate || !endDate)) {
+    if (!discountPercentage || !startDate || !endDate) {
       throw new Error("Missing required fields");
     }
 
     const newDiscount = new Discount({
-      name,
       discountPercentage,
       startDate,
       endDate,

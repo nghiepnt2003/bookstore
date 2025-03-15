@@ -18,14 +18,13 @@ class DiscountService {
 
   // Tạo mới một chương trình giảm giá
   async createDiscount(discountData) {
-    const { name, discountPercentage, startDate, endDate } = discountData;
+    const { discountPercentage, startDate, endDate } = discountData;
 
-    if ((!name, !discountPercentage || !startDate || !endDate)) {
+    if (!discountPercentage || !startDate || !endDate) {
       throw new Error("Missing required fields");
     }
 
     const newDiscount = new Discount({
-      name,
       discountPercentage,
       startDate,
       endDate,
