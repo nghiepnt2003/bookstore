@@ -14,53 +14,49 @@ class DiscountService {
   // Lấy tất cả các chương trình giảm giá
   async getAllDiscounts(queries) {
     try {
-      // Tách các trường đặc biệt ra khỏi query
-      const queryCopy = { ...queries };
-      const excludeFields = ["limit", "sort", "page", "fields"];
-      excludeFields.forEach((el) => delete queryCopy[el]);
+        // Tách các trường đặc biệt ra khỏi query
+        const queryCopy = { ...queries };
+        const excludeFields = ["limit", "sort", "page", "fields"];
+        excludeFields.forEach((el) => delete queryCopy[el]);
 
-      // Format lại các operators cho đúng cú pháp mongoose
-      let queryString = JSON.stringify(queryCopy);
-      queryString = queryString.replace(
-        /\b(gte|gt|lt|lte)\b/g,
-        (matchedEl) => `$${matchedEl}`
-      );
-      const formattedQueries = JSON.parse(queryString);
+        // Format lại các operators cho đúng cú pháp mongoose
+        let queryString = JSON.stringify(queryCopy);
+        queryString = queryString.replace(/\b(gte|gt|lt|lte)\b/g, (matchedEl) => `$${matchedEl}`);
+        const formattedQueries = JSON.parse(queryString);
 
-      // Filtering (Tìm kiếm theo name nếu có)
-      if (queries?.name) {
-        formattedQueries.name = { $regex: queries.name, $options: "i" };
-      }
+        // Filtering (Tìm kiếm theo name nếu có)
+        if (queries?.name) {
+            formattedQueries.name = { $regex: queries.name, $options: "i" };
+        }
 
-      // Khởi tạo query
-      let queryCommand = Discount.find(formattedQueries);
+        // Khởi tạo query
+        let queryCommand = Discount.find(formattedQueries);
 
-      // Sorting
-      if (queries.sort) {
-        const sortBy = queries.sort.split(",").join(" ");
-        queryCommand = queryCommand.sort(sortBy);
-      }
+        // Sorting
+        if (queries.sort) {
+            const sortBy = queries.sort.split(",").join(" ");
+            queryCommand = queryCommand.sort(sortBy);
+        }
 
-      // Fields limiting
-      if (queries.fields) {
-        const fields = queries.fields.split(",").join(" ");
-        queryCommand = queryCommand.select(fields);
-      }
+        // Fields limiting
+        if (queries.fields) {
+            const fields = queries.fields.split(",").join(" ");
+            queryCommand = queryCommand.select(fields);
+        }
 
-      // Pagination
-      const page = +queries.page || 1;
-      const limit = +queries.limit || process.env.LIMIT_DISCOUNTS || 100;
-      const skip = (page - 1) * limit;
-      queryCommand = queryCommand.skip(skip).limit(limit);
+        // Pagination
+        const page = +queries.page || 1;
+        const limit = +queries.limit || process.env.LIMIT_DISCOUNTS || 10;
+        const skip = (page - 1) * limit;
+        queryCommand = queryCommand.skip(skip).limit(limit);
 
-      const response = await queryCommand.exec();
-      const counts = await Discount.countDocuments(formattedQueries);
+        const response = await queryCommand.exec();
+        const counts = await Discount.countDocuments(formattedQueries);
 
-      return { response, counts };
+        return { response, counts };
     } catch (error) {
-      throw error;
+        throw error;
     }
-  }
 
   // Tạo mới một chương trình giảm giá
   async createDiscount(discountData) {

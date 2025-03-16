@@ -49,7 +49,7 @@ class DiscountService {
 
       // Pagination
       const page = +queries.page || 1;
-      const limit = +queries.limit || process.env.LIMIT_DISCOUNTS || 100;
+      const limit = +queries.limit || process.env.LIMIT_DISCOUNTS || 10;
       const skip = (page - 1) * limit;
       queryCommand = queryCommand.skip(skip).limit(limit);
 

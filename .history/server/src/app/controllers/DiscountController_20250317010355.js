@@ -41,7 +41,7 @@ class DiscountController {
     try {
       const { name, discountPercentage, startDate, endDate } = req.body; // Thêm name vào đây
       const newDiscount = await discountService.createDiscount({
-        name,
+        name, // Đảm bảo name được truyền
         discountPercentage,
         startDate,
         endDate,

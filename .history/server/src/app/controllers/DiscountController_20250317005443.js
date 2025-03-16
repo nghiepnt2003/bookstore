@@ -20,15 +20,11 @@ class DiscountController {
   // Lấy tất cả các chương trình giảm giá
   async getAllDiscounts(req, res) {
     try {
-      const queries = { ...req.query };
-      const { response, counts } = await discountService.getAllDiscounts(
-        queries
-      );
-
+      const discounts = await discountService.getAllDiscounts();
       res.status(200).json({
-        success: response.length > 0,
-        counts,
-        discounts: response.length > 0 ? response : "Cannot get discounts",
+        success: discounts.length > 0,
+        counts: discounts.length,
+        discounts: discounts.length > 0 ? discounts : "Cannot get discounts",
       });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
@@ -41,7 +37,7 @@ class DiscountController {
     try {
       const { name, discountPercentage, startDate, endDate } = req.body; // Thêm name vào đây
       const newDiscount = await discountService.createDiscount({
-        name,
+        name, // Đảm bảo name được truyền
         discountPercentage,
         startDate,
         endDate,
