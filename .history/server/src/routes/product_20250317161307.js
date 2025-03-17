@@ -13,10 +13,7 @@ router.get(
   productController.suggestPopularProducts
 );
 router.get("/discount", productController.getProductsWithDiscount);
-router.get(
-  "/discount/:discountId",
-  productController.getProductsWithDiscountId
-);
+router.get("/discount/:discountId", productController.getProductsWithDiscount);
 
 router.get("/:id", productController.getById);
 router.get("/", productController.getProducts);

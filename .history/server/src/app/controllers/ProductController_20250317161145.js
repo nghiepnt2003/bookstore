@@ -209,7 +209,7 @@ class ProductController {
     }
   }
 
-  // [GET] /products/discount/:discountId
+  // [GET] /products/top-sellers?month=&year=
   async getProductsWithDiscountId(req, res) {
     try {
       const { discountId } = req.params;

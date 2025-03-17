@@ -212,70 +212,28 @@ class ProductService {
     return { products: productsWithFinalPrice, counts };
   }
 
-  async getProductsWithDiscountId(discountId, queries) {
-    const queryCopy = { ...queries };
-    const excludeFields = ["limit", "sort", "page", "fields"];
-    excludeFields.forEach((el) => delete queryCopy[el]);
+  async getProductsWithDiscountId(req, res) {
+    try {
+      const { discountId } = req.params;
+      if (!discountId) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing discount ID" });
+      }
 
-    let queryString = JSON.stringify(queryCopy);
-    queryString = queryString.replace(
-      /\b(gte|gt|lt|lte)\b/g,
-      (matchedEl) => `$${matchedEl}`
-    );
-    const formatedQueries = JSON.parse(queryString);
+      const queries = { ...req.query };
+      const { products, counts } =
+        await productService.getProductsWithDiscountId(discountId, queries);
 
-    // Lọc theo discountId từ req.params
-    formatedQueries.discount = discountId;
-
-    let queryCommand = Product.find(formatedQueries)
-      .populate({
-        path: "discount",
-        match: {
-          startDate: { $lte: new Date() },
-          endDate: { $gte: new Date() },
-        },
-        select: "discountPercentage startDate endDate",
-      })
-      .populate({
-        path: "author",
-        select: "name",
-      })
-      .populate({
-        path: "publisher",
-        select: "name",
+      res.status(200).json({
+        success: products.length > 0,
+        counts,
+        products:
+          products.length > 0 ? products : "No discounted products found",
       });
-
-    if (queries.sort) {
-      const sortBy = queries.sort.split(",").join(" ");
-      queryCommand = queryCommand.sort(sortBy);
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
     }
-
-    if (queries.fields) {
-      const fields = queries.fields.split(",").join(" ");
-      queryCommand = queryCommand.select(fields);
-    }
-
-    const page = +queries.page || 1;
-    const limit = +queries.limit || process.env.LIMIT_PRODUCTS || 10;
-    const skip = (page - 1) * limit;
-    queryCommand.skip(skip).limit(limit);
-
-    const products = await queryCommand.exec();
-
-    // Tính finalPrice cho từng sản phẩm
-    const productsWithFinalPrice = await Promise.all(
-      products.map(async (product) => {
-        const finalPrice = await product.getFinalPrice();
-        return {
-          ...product.toObject(),
-          finalPrice: parseFloat(finalPrice.toFixed(2)),
-        };
-      })
-    );
-
-    const counts = await Product.countDocuments(formatedQueries);
-
-    return { products: productsWithFinalPrice, counts };
   }
 
   async suggestProducts(userId, queries) {

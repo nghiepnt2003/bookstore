@@ -212,7 +212,7 @@ class ProductService {
     return { products: productsWithFinalPrice, counts };
   }
 
-  async getProductsWithDiscountId(discountId, queries) {
+  async getProductWithDiscount(discountId, queries) {
     const queryCopy = { ...queries };
     const excludeFields = ["limit", "sort", "page", "fields"];
     excludeFields.forEach((el) => delete queryCopy[el]);
