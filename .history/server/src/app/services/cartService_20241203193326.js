@@ -18,16 +18,7 @@ class CartService {
         ],
       },
     });
-    if (!cart) return null;
-    // Tính finalPrice cho từng sản phẩm
-    const itemsWithFinalPrice = await Promise.all(
-      cart.items.map(async (item) => {
-        const finalPrice = await item.product.getFinalPrice();
-        return { ...item._doc, finalPrice };
-      })
-    );
-
-    return { ...cart._doc, items: itemsWithFinalPrice };
+    return cart;
   }
 
   async getCartSummary(userId) {
