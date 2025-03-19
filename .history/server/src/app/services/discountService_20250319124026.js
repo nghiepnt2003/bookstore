@@ -71,38 +71,11 @@ class DiscountService {
   }
 
   // Tạo mới một chương trình giảm giá
-  // async createDiscount(discountData) {
-  //   const { name, discountPercentage, startDate, endDate } = discountData;
-
-  //   if ((!name, !discountPercentage || !startDate || !endDate)) {
-  //     throw new Error("Missing required fields");
-  //   }
-
-  //   const newDiscount = new Discount({
-  //     name,
-  //     discountPercentage,
-  //     startDate,
-  //     endDate,
-  //   });
-
-  //   return await newDiscount.save();
-  // }
   async createDiscount(discountData) {
-    let { name, discountPercentage, startDate, endDate } = discountData;
+    const { name, discountPercentage, startDate, endDate } = discountData;
 
-    if (!name || !discountPercentage || !startDate || !endDate) {
+    if ((!name, !discountPercentage || !startDate || !endDate)) {
       throw new Error("Missing required fields");
-    }
-
-    startDate = new Date(startDate);
-    endDate = new Date(endDate);
-
-    // Nếu startDate bằng endDate, đặt startDate là đầu ngày, endDate là cuối ngày
-    if (startDate.toDateString() === endDate.toDateString()) {
-      startDate.setHours(0, 0, 0, 0); // Đầu ngày
-      endDate.setHours(23, 59, 59, 999); // Cuối ngày
-    } else if (startDate > endDate) {
-      throw new Error("Start date cannot be later than end date");
     }
 
     const newDiscount = new Discount({
@@ -116,39 +89,10 @@ class DiscountService {
   }
 
   // Cập nhật chương trình giảm giá
-  // async updateDiscount(discountId, updateData) {
-  //   const updatedDiscount = await Discount.findByIdAndUpdate(
-  //     discountId,
-  //     updateData,
-  //     { new: true }
-  //   );
-
-  //   if (!updatedDiscount) {
-  //     throw new Error("Discount not found");
-  //   }
-
-  //   return updatedDiscount;
-  // }
   async updateDiscount(discountId, updateData) {
-    let { name, discountPercentage, startDate, endDate } = updateData;
-
-    if (startDate) startDate = new Date(startDate);
-    if (endDate) endDate = new Date(endDate);
-
-    // Kiểm tra nếu có cả startDate và endDate
-    if (startDate && endDate) {
-      // Nếu startDate và endDate bằng nhau, đặt startDate là đầu ngày và endDate là cuối ngày
-      if (startDate.toDateString() === endDate.toDateString()) {
-        startDate.setHours(0, 0, 0, 0); // Đầu ngày
-        endDate.setHours(23, 59, 59, 999); // Cuối ngày
-      } else if (startDate > endDate) {
-        throw new Error("Start date cannot be later than end date");
-      }
-    }
-
     const updatedDiscount = await Discount.findByIdAndUpdate(
       discountId,
-      { name, discountPercentage, startDate, endDate },
+      updateData,
       { new: true }
     );
 
