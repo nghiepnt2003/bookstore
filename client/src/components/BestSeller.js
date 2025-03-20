@@ -26,7 +26,7 @@ const BestSeller = () => {
     },[])
 
     return (
-       <div className="mt-2">
+       <div className="mt-5">
             <Slider {...settings}>
                 {
                     bestSellers?.map(el => (

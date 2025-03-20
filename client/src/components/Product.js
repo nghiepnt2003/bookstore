@@ -1,14 +1,17 @@
-import React from "react";
-import { formatMoney } from '../ultils/helpers'
-import label from '../assets/label.webp'
-import { renderStarFromNumber } from "../ultils/helpers";
-import { Link } from 'react-router-dom'
-import path from '../ultils/path'
+import React, { memo, useState } from 'react';
+import { formatMoney } from '../ultils/helpers';
+import label from '../assets/label.webp';
+import { renderStarFromNumber } from '../ultils/helpers';
+import { Link } from 'react-router-dom';
+import path from '../ultils/path';
+import { Statistic } from 'antd';
+
+const { Countdown } = Statistic;
 
 const Product = ({ productData }) => {
     return (
-        <Link className="h-[378px] border no-underline block bg-[#fff] mt-2 ml-4 mr-4 mb-5 rounded-sm shadow transition-transform duration-100 ease-in will-change-transform
-                        hover:translate-y-[-1px] hover:shadow-[0_1px_20px_0_rgba(0,0,0,0.05)]"
+        <Link 
+            className="h-[415px] border no-underline block bg-[#fff] mt-2 ml-4 mr-4 mb-5 rounded-sm shadow transition-transform duration-100 ease-in will-change-transform hover:translate-y-[-1px] hover:shadow-[0_1px_20px_0_rgba(0,0,0,0.05)]"
             to={`/${path.DETAIL_PRODUCT}/${productData?._id}/${productData.name}`}
         >
             <div className="relative h-[300px]">
@@ -17,10 +20,13 @@ const Product = ({ productData }) => {
                     alt={'Product Image'} 
                     className="w-full h-[290px] object-contain mt-2" 
                 />
-                {/* <img src={label} alt="" className="absolute top-0 left-[-28px] w-[100px] h-[36px] object-cover"/> */}
-                {/* <span className="font-bold top-0 left-[3px] absolute text-white">HOT</span> */}
-            </div>            
-            <div class="text-[1rem] font-normal leading-[1.8rem] mt-1 mx-2 line-clamp-1">
+                {productData?.discount && (
+                    <div className="absolute top-0 left-0 bg-red-600 text-white p-1 text-sm">
+                        Flash Sale
+                    </div>
+                )}
+            </div>
+            <div className="text-[1rem] font-normal leading-[1.8rem] mt-1 mx-2 line-clamp-1">
                 {productData?.name}
             </div>
             <span className="flex ml-2 text-[0.8rem]">
@@ -28,10 +34,24 @@ const Product = ({ productData }) => {
                     ? renderStarFromNumber(productData.averageRating) 
                     : ''}
             </span>
-            <span className="ml-2 text-red-600 text-base fw-400">{`${formatMoney(productData?.price)} VNĐ`}</span>
+            <div className="flex ml-2">
+                {productData?.discount ? (
+                    <>
+                        <span className="text-sm text-gray-700 line-through">{`${formatMoney(productData?.price)} VNĐ`}</span>
+                        <span className="text-red-600 text-base font-semibold">{`${formatMoney(productData?.finalPrice)} VNĐ`}</span>
+                    </>
+                ) : (
+                    <span className="text-red-600 text-base font-normal">{`${formatMoney(productData?.price)} VNĐ`}</span>
+                 )}
+            </div>
+            {productData?.discount && (
+                <div className="flex items-center text-white bg-red-600 mt-1 p-1">
+                    <span className="font-semibold">Flash Sale Ends In: </span>
+                    <Countdown valueStyle={{ color: 'white', fontSize: 16 }} value={Date.now() + productData?.timeRemaining} />
+                </div>
+            )}
         </Link>
     );
-}
+};
 
-export default Product;
-
+export default memo(Product);

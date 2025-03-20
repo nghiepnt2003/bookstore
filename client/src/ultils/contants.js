@@ -157,6 +157,12 @@ export const adminSidebar = [
         text: 'Thắc mắc của khách hàng',
         path: `/${path.ADMIN}/${path.MESSENGER}`,
         icon: <ImProfile />
+    },
+    {
+        id: 10,
+        text: 'Flashsale',
+        path: `/${path.ADMIN}/${path.FLASHSALE}`,
+        icon: <ImProfile />
     }
 ]
 

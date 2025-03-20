@@ -8,6 +8,7 @@ import path from '../../ultils/path';
 import withBaseComponent from '../../hocs/withBaseComponent';
 import { Link, useNavigate } from 'react-router-dom';
 import { updateCart, removeFromCart } from '../../store/cart/cartSlice';
+import { formatMoney, renderStarFromNumber } from "../../ultils/helpers";
 
 const MyCart = () => {
     const navigate = useNavigate();
@@ -204,10 +205,14 @@ const MyCart = () => {
                                         </div>
                                         <div className="flex items-center space-x-4">
                                             <p className="text-sm">
-                                                {cartItem.product.price.toLocaleString('vi-VN', {
+                                                {`${formatMoney(cartItem.product.price)}`.toLocaleString('vi-VN', {
                                                     style: 'currency',
                                                     currency: 'VND',
                                                 })} 
+                                                {/* {cartItem.product.price.toLocaleString('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND',
+                                                })}  */}
                                             </p>
                                             <Popconfirm
                                                 title="Xác nhận xóa"
@@ -233,7 +238,7 @@ const MyCart = () => {
                         <p className="text-lg font-bold">Tổng cộng</p>
                         <div className="">
                             <p className="mb-1 text-lg font-bold">
-                                {total?.toLocaleString('vi-VN', {
+                                {`${formatMoney(total)}`?.toLocaleString('vi-VN', {
                                     style: 'currency',
                                     currency: 'VND',
                                 })}

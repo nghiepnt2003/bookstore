@@ -10,11 +10,10 @@ export const createSlug = string =>
           .join('-');
 
 export const formatMoney = number =>
-    Number(number.toFixed(1)).toLocaleString()
+    Number(number?.toFixed(1)).toLocaleString()
 
 export const renderStarFromNumber = (number) => {
 
-    console.log("SỐ SAO " + number)
     const integerPart = Math.floor(number);
     const du = number - integerPart;
     const roundedNumber = Math.ceil(number);
@@ -39,4 +38,5 @@ export const renderStarFromNumber = (number) => {
     return stars
 }
 
-export const formatPrice = number => Math.round(number/1000)*1000
+// export const formatPrice = number => Math.round(number/1000)*1000
+//Math.round(number/1000)*1000

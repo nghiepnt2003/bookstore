@@ -5,10 +5,30 @@ import * as apis from '../../apis';
 export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { rejectWithValue }) => {
     try {
         const response = await apis.apiGetUserCart();
+        console.log("CART NE " + JSON.stringify(response))
         if (!response.success) {
             return rejectWithValue(response);
         }
-        return response.cart; // Trả về cart
+        else {
+            console.log("AAA")
+            const newcart = {
+                ...response.cart,
+                items: response.cart.items.map(item => {
+                  if (item.product.discount !== null) {
+                    console.log("IIIII");
+                    return { 
+                      ...item, 
+                      product: { 
+                        ...item.product, 
+                        price: item.finalPrice 
+                      }
+                    };
+                  }
+                  return item;
+                })
+              };
+              return newcart;
+        }
     } catch (error) {
         return rejectWithValue({ success: false, message: error.message });
     }

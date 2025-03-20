@@ -24,6 +24,7 @@ const path = {
     MANAGE_INFO_PUBLISHER: 'manage-info-publisher',
     MANAGE_STORE:'manage-store',
     MESSENGER: 'messenger',
+    FLASHSALE: 'flashsale',
 
     // member
     MEMBER: 'member',

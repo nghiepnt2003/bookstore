@@ -12,6 +12,7 @@ import { updateCart } from '../../store/cart/cartSlice'
 import { useDebounce } from 'use-debounce';
 import {Congrat, PayPal} from '../../components'
 import { getCurrent } from '../../store/user/asyncActions'
+import { formatMoney, renderStarFromNumber } from "../../ultils/helpers";
 
 const { Option } = Select;
 
@@ -272,7 +273,7 @@ const Checkout = () => {
                                         <div class="flex w-[350px] flex-col px-4 py-4">
                                             <span class="font-semibold">{item.product.productName}</span>
                                             <p class="text-lg font-bold">
-                                                {item.product.price.toLocaleString('vi-VN', {
+                                                {`${formatMoney(item.product.price)}`.toLocaleString('vi-VN', {
                                                     style: 'currency',
                                                     currency: 'VND',
                                                 })}
