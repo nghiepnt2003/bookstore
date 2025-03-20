@@ -3,16 +3,11 @@ const userController = require("../app/controllers/UserController");
 const { verifyAccessToken, isAdmin } = require("../app/middlewares/jwt");
 const checkOTP = require("../app/middlewares/checkOTP");
 const verifyGoogleToken = require("../app/middlewares/verifyGoogleToken");
-const validateUserInfo = require("../app/middlewares/validateUserInfo");
 const router = express.Router();
 
 router.get("/logout", verifyAccessToken, userController.logout);
 router.get("/forgotPassword", userController.forgotPassword);
-router.get(
-  "/sendOTPCreateAccount",
-  validateUserInfo,
-  userController.sendOTPCreateAccount
-);
+router.get("/sendOTPCreateAccount", userController.sendOTPCreateAccount);
 router.get("/wishlist", [verifyAccessToken], userController.getWishlist);
 router.get("/bookmark", [verifyAccessToken], userController.getBookmarks);
 // router.get("/addresses", verifyAccessToken, userController.getAddresses);

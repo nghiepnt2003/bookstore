@@ -2,6 +2,7 @@ const { verifyOTP } = require("../models/OTP");
 
 const checkOTP = async (req, res, next) => {
   const { email, otp } = req.body; // Lấy email và OTP từ yêu cầu
+  console.log(req.body);
   if (!email || !otp) {
     return res
       .status(400)
