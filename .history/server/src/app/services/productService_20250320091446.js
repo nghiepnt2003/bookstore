@@ -416,25 +416,9 @@ class ProductService {
 
       // Tạo câu lệnh truy vấn
       let queryCommand = Product.find(formattedQueries)
-        .populate({
-          path: "categories",
-        })
-        .populate({
-          path: "author",
-          select: "name",
-        })
-        .populate({
-          path: "publisher",
-          select: "name",
-        })
-        .populate({
-          path: "discount",
-          match: {
-            startDate: { $lte: new Date() },
-            endDate: { $gte: new Date() },
-          },
-          select: "discountPercentage startDate endDate",
-        });
+        .populate("categories")
+        .populate("author")
+        .populate("publisher");
 
       // Kết hợp kết quả từ Collaborative Filtering và các bộ lọc khác
       queryCommand = queryCommand.or([
@@ -468,18 +452,9 @@ class ProductService {
       const productsWithFinalPrice = await Promise.all(
         suggestedProducts.map(async (product) => {
           const finalPrice = await product.getFinalPrice();
-          let timeRemaining = null;
-
-          // Kiểm tra nếu product có discount hợp lệ
-          if (product.discount && product.discount.endDate) {
-            timeRemaining =
-              product.discount.endDate.getTime() - new Date().getTime();
-            if (timeRemaining <= 0) timeRemaining = 0;
-          }
           return {
             ...product.toObject(),
             finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm finalPrice vào kết quả trả về
-            timeRemaining,
           };
         })
       );
@@ -563,25 +538,7 @@ class ProductService {
       // Tạo query command
       let queryCommand = Product.find(formatedQueries)
         .sort({ soldCount: -1, averageRating: -1 }) // Sắp xếp theo số lượng bán và điểm đánh giá
-        .populate({
-          path: "categories",
-        })
-        .populate({
-          path: "author",
-          select: "name",
-        })
-        .populate({
-          path: "publisher",
-          select: "name",
-        })
-        .populate({
-          path: "discount",
-          match: {
-            startDate: { $lte: new Date() },
-            endDate: { $gte: new Date() },
-          },
-          select: "discountPercentage startDate endDate",
-        });
+        .populate("author categories publisher");
 
       // Sắp xếp theo trường khác nếu có
       if (queries.sort) {
@@ -611,18 +568,9 @@ class ProductService {
       const productsWithFinalPrice = await Promise.all(
         popularProducts.map(async (product) => {
           const finalPrice = await product.getFinalPrice();
-          let timeRemaining = null;
-
-          // Kiểm tra nếu product có discount hợp lệ
-          if (product.discount && product.discount.endDate) {
-            timeRemaining =
-              product.discount.endDate.getTime() - new Date().getTime();
-            if (timeRemaining <= 0) timeRemaining = 0;
-          }
           return {
             ...product.toObject(),
             finalPrice: parseFloat(finalPrice.toFixed(2)),
-            timeRemaining,
           };
         })
       );

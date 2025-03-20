@@ -611,18 +611,9 @@ class ProductService {
       const productsWithFinalPrice = await Promise.all(
         popularProducts.map(async (product) => {
           const finalPrice = await product.getFinalPrice();
-          let timeRemaining = null;
-
-          // Kiểm tra nếu product có discount hợp lệ
-          if (product.discount && product.discount.endDate) {
-            timeRemaining =
-              product.discount.endDate.getTime() - new Date().getTime();
-            if (timeRemaining <= 0) timeRemaining = 0;
-          }
           return {
             ...product.toObject(),
             finalPrice: parseFloat(finalPrice.toFixed(2)),
-            timeRemaining,
           };
         })
       );

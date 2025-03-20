@@ -622,7 +622,6 @@ class ProductService {
           return {
             ...product.toObject(),
             finalPrice: parseFloat(finalPrice.toFixed(2)),
-            timeRemaining,
           };
         })
       );
