@@ -132,6 +132,9 @@ class DiscountService {
     if (startDate) startDate = new Date(startDate);
     if (endDate) endDate = new Date(endDate);
 
+    // Kiểm tra nếu có cả startDate và endDate
+    // Nếu startDate và endDate bằng nhau, đặt startDate là đầu ngày và endDate là cuối ngày
+
     startDate.setHours(0, 0, 0, 0); // Đầu ngày
     endDate.setHours(23, 59, 59, 999); // Cuối ngày
     if (startDate > endDate) {

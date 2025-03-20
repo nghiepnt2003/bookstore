@@ -132,10 +132,15 @@ class DiscountService {
     if (startDate) startDate = new Date(startDate);
     if (endDate) endDate = new Date(endDate);
 
-    startDate.setHours(0, 0, 0, 0); // Đầu ngày
-    endDate.setHours(23, 59, 59, 999); // Cuối ngày
-    if (startDate > endDate) {
-      throw new Error("Start date cannot be later than end date");
+    // Kiểm tra nếu có cả startDate và endDate
+    if (startDate && endDate) {
+      // Nếu startDate và endDate bằng nhau, đặt startDate là đầu ngày và endDate là cuối ngày
+      if (startDate.toDateString() === endDate.toDateString()) {
+        startDate.setHours(0, 0, 0, 0); // Đầu ngày
+        endDate.setHours(23, 59, 59, 999); // Cuối ngày
+      } else if (startDate > endDate) {
+        throw new Error("Start date cannot be later than end date");
+      }
     }
 
     const updatedDiscount = await Discount.findByIdAndUpdate(
