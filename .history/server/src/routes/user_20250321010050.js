@@ -8,18 +8,17 @@ const router = express.Router();
 
 router.get("/logout", verifyAccessToken, userController.logout);
 router.get("/forgotPassword", userController.forgotPassword);
-
+router.post(
+  "/sendOTPCreateAccount",
+  validateUserInfo,
+  userController.sendOTPCreateAccount
+);
 router.get("/wishlist", [verifyAccessToken], userController.getWishlist);
 router.get("/bookmark", [verifyAccessToken], userController.getBookmarks);
 // router.get("/addresses", verifyAccessToken, userController.getAddresses);
 router.get("/:id", userController.getById);
 router.get("/", [verifyAccessToken, isAdmin], userController.getAll);
 
-router.post(
-  "/sendOTPCreateAccount",
-  validateUserInfo,
-  userController.sendOTPCreateAccount
-);
 router.post("/current", verifyAccessToken, userController.current);
 router.post("/register", checkOTP, userController.register);
 router.post("/login", userController.login);

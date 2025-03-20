@@ -157,83 +157,6 @@ class ProductService {
     }
   }
 
-  // async getProductsWithDiscount(queries) {
-  //   const queryCopy = { ...queries };
-  //   const excludeFields = ["limit", "sort", "page", "fields"];
-  //   excludeFields.forEach((el) => delete queryCopy[el]);
-
-  //   let queryString = JSON.stringify(queryCopy);
-  //   queryString = queryString.replace(
-  //     /\b(gte|gt|lt|lte)\b/g,
-  //     (matchedEl) => `$${matchedEl}`
-  //   );
-  //   const formattedQueries = JSON.parse(queryString);
-
-  //   formattedQueries.discount = { $ne: null };
-
-  //   let queryCommand = Product.find(formattedQueries)
-  //     .populate({
-  //       path: "discount",
-  //       match: {
-  //         startDate: { $lte: new Date() },
-  //         endDate: { $gte: new Date() },
-  //       },
-  //       select: "discountPercentage startDate endDate",
-  //     })
-  //     .populate({
-  //       path: "author",
-  //       select: "name",
-  //     })
-  //     .populate({
-  //       path: "publisher",
-  //       select: "name",
-  //     });
-
-  //   if (queries.sort) {
-  //     const sortBy = queries.sort.split(",").join(" ");
-  //     queryCommand = queryCommand.sort(sortBy);
-  //   }
-
-  //   if (queries.fields) {
-  //     const fields = queries.fields.split(",").join(" ");
-  //     queryCommand = queryCommand.select(fields);
-  //   }
-
-  //   const page = +queries.page || 1;
-  //   const limit = +queries.limit || process.env.LIMIT_PRODUCTS || 10;
-  //   const skip = (page - 1) * limit;
-  //   queryCommand.skip(skip).limit(limit);
-
-  //   const products = await queryCommand.exec();
-  //   const now = new Date();
-
-  //   // Tính `finalPrice` và `timeRemaining`
-  //   const productsWithFinalPrice = await Promise.all(
-  //     products
-  //       .filter((product) => product !== null) // Lọc bỏ các product null
-  //       .map(async (product) => {
-  //         const finalPrice = await product.getFinalPrice();
-  //         let timeRemaining = null;
-
-  //         if (product.discount && product.discount.endDate) {
-  //           timeRemaining = product.discount.endDate.getTime() - now.getTime();
-  //         }
-
-  //         return {
-  //           ...product.toObject(),
-  //           finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm `finalPrice` vào kết quả trả về
-  //           timeRemaining: timeRemaining > 0 ? timeRemaining : 0, // Thời gian còn lại (nếu hết hạn thì là 0)
-  //         };
-  //       })
-  //   );
-
-  //   const counts = await Product.find({
-  //     ...formattedQueries,
-  //     discount: { $ne: null },
-  //   }).countDocuments();
-
-  //   return { products: productsWithFinalPrice, counts };
-  // }
   async getProductsWithDiscount(queries) {
     const queryCopy = { ...queries };
     const excludeFields = ["limit", "sort", "page", "fields"];
@@ -246,15 +169,14 @@ class ProductService {
     );
     const formattedQueries = JSON.parse(queryString);
 
-    // Chỉ lấy sản phẩm có discount (không null)
     formattedQueries.discount = { $ne: null };
 
     let queryCommand = Product.find(formattedQueries)
       .populate({
         path: "discount",
         match: {
-          startDate: { $lte: new Date() }, // Giảm giá đã bắt đầu
-          endDate: { $gte: new Date() }, // Giảm giá chưa hết hạn
+          startDate: { $lte: new Date() },
+          endDate: { $gte: new Date() },
         },
         select: "discountPercentage startDate endDate",
       })
@@ -267,46 +189,44 @@ class ProductService {
         select: "name",
       });
 
-    // Sắp xếp
     if (queries.sort) {
       const sortBy = queries.sort.split(",").join(" ");
       queryCommand = queryCommand.sort(sortBy);
     }
 
-    // Chỉ lấy các trường cần thiết
     if (queries.fields) {
       const fields = queries.fields.split(",").join(" ");
       queryCommand = queryCommand.select(fields);
     }
 
-    // Pagination
     const page = +queries.page || 1;
     const limit = +queries.limit || process.env.LIMIT_PRODUCTS || 10;
     const skip = (page - 1) * limit;
     queryCommand.skip(skip).limit(limit);
 
-    // Lấy danh sách sản phẩm
     const products = await queryCommand.exec();
     const now = new Date();
 
-    // Lọc bỏ sản phẩm có discount hết hạn + Tính giá cuối cùng + thời gian còn lại
+    // Tính `finalPrice` và `timeRemaining`
     const productsWithFinalPrice = await Promise.all(
       products
-        .filter((product) => product !== null && product.discount) // Loại bỏ sản phẩm không có discount
+        .filter((product) => product !== null) // Lọc bỏ các product null
         .map(async (product) => {
           const finalPrice = await product.getFinalPrice();
-          const timeRemaining =
-            product.discount.endDate.getTime() - now.getTime();
+          let timeRemaining = null;
+
+          if (product.discount && product.discount.endDate) {
+            timeRemaining = product.discount.endDate.getTime() - now.getTime();
+          }
 
           return {
             ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)),
-            timeRemaining: timeRemaining > 0 ? timeRemaining : 0, // Nếu hết hạn thì = 0
+            finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm `finalPrice` vào kết quả trả về
+            timeRemaining: timeRemaining > 0 ? timeRemaining : 0, // Thời gian còn lại (nếu hết hạn thì là 0)
           };
         })
     );
 
-    // Đếm số lượng sản phẩm có giảm giá hợp lệ
     const counts = await Product.find({
       ...formattedQueries,
       discount: { $ne: null },

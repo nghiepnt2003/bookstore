@@ -544,7 +544,7 @@ class UserController {
       next(error); // Truyền lỗi cho middleware xử lý lỗi
     }
   }
-  //[POST] /sendOTPCreateAccount/
+  //[GET] /sendOTPCreateAccount/
   async sendOTPCreateAccount(req, res, next) {
     try {
       const { email } = req.query;

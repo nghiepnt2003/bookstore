@@ -46,17 +46,16 @@ const validateUserInfo = async (req, res, next) => {
     // Kiểm tra số điện thoại đã tồn tại chưa
     const existingPhone = await User.findOne({ phone });
     if (existingPhone) {
-      return res.status(400).json({
-        success: false,
-        message: "Số điện thoại đã được sử dụng.",
-      });
+      return res
+        .status(400)
+        .json({ message: "Số điện thoại đã được sử dụng." });
     }
 
     next(); // Nếu tất cả hợp lệ, tiếp tục gửi OTP
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, message: "Lỗi server", error: error.message });
+      .json({ message: "Lỗi server", error: error.message });
   }
 };
 
