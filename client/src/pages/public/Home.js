@@ -58,7 +58,7 @@ const Home = () => {
                 <img src={chuFeaturedProducts} alt="Sản phẩm nổi bật" className="h-11" />
                 <FeaturedProducts />
             </div>
-            <ToastContainer />
+            {/* <ToastContainer /> */}
         </div>
     );
 };
