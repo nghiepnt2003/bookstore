@@ -1,28 +1,27 @@
-import React, { useState, useCallback, useRef } from "react";
-import { InputField, Button , GoogleLoginButton, GoogleAuth} from '../../components';
+import React, { useState } from "react";
+import { InputField, Button, GoogleLoginButton } from '../../components';
 import { apiSendOTPCreateAccount, apiRegister, apiLogin, apiForgotPassword } from "../../apis/user"; 
 import { ToastContainer, toast } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
 import { Link, useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners"; 
-import LoadingBar from 'react-top-loading-bar'; 
 import path from "../../ultils/path";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { register } from "../../store/user/userSlice";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 const Login = () => {
-    const loadingBarRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     
-    const [errors, setErrors] = useState({}); // Trạng thái lưu lỗi
+    const [errors, setErrors] = useState({});
     const [isRegister, setIsRegister] = useState(false);
-    const [isForgotPassword, setIsForgotPassword] = useState(false); // Thêm trạng thái quên mật khẩu
+    const [isForgotPassword, setIsForgotPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [payload, setPayload] = useState({
         email: '',
         password: '',
-        confirmPassword: '', // Trường mới cho xác nhận mật khẩu
         username: '',
         fullname: '',
         phone: '',
@@ -31,6 +30,9 @@ const Login = () => {
     });
     const [loading, setLoading] = useState(false);
     const [isSendOTP, setIsSendOTP] = useState(false);
+    const [isModalLoading, setIsModalLoading] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false); // Trạng thái loading cho OTP
+    const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false); // Trạng thái loading cho quên mật khẩu
 
     const resetPayload = () => {
         setPayload({
@@ -51,24 +53,21 @@ const Login = () => {
             return;
         }
     
-        setLoading(true);
-        loadingBarRef.current.continuousStart();
-    
+        setForgotPasswordLoading(true); // Bắt đầu loading cho quên mật khẩu
+
         try {
-            const response = await apiForgotPassword(email); // Gọi API quên mật khẩu
-            setLoading(false);
-            loadingBarRef.current.complete();
-    
+            const response = await apiForgotPassword(email);
+            setForgotPasswordLoading(false); // Kết thúc loading cho quên mật khẩu
+
             if (response?.success) {
                 toast.success('Hãy kiểm tra email của bạn!');
-                setIsForgotPassword(false); // Đóng modal quên mật khẩu
+                setIsForgotPassword(false);
             } else {
                 toast.error(response?.message);
             }
         } catch (error) {
-            console.error("LOI " + error)
-            setLoading(false);
-            loadingBarRef.current.complete();
+            console.error("LOI " + error);
+            setForgotPasswordLoading(false); // Kết thúc loading cho quên mật khẩu
             toast.error('Đã xảy ra lỗi, vui lòng thử lại sau.');
         }
     };
@@ -85,10 +84,6 @@ const Login = () => {
         if (!payload.password) newErrors.password = 'Vui lòng nhập mật khẩu.';
         else if (!passwordComplexityPattern.test(payload.password)) newErrors.password = 'Mật khẩu không hợp lệ';
 
-        if (isRegister && payload.password !== payload.confirmPassword) {
-            newErrors.confirmPassword = 'Xác nhận mật khẩu không khớp.';
-        }
-
         if (!payload.username) newErrors.username = 'Vui lòng nhập tên đăng nhập.';
         if (!payload.fullname) newErrors.fullname = 'Vui lòng nhập họ tên.';
         if (!payload.phone || !phonePattern.test(payload.phone)) newErrors.phone = 'Số điện thoại không hợp lệ.';
@@ -99,66 +94,61 @@ const Login = () => {
     };
 
     const handleSubmit = async () => {
-         
         if (isRegister) {
-            if (!validateInputs()) return; // Kiểm tra lỗi
-            const { email, password, confirmPassword, username, fullname, phone, address } = payload;           
+            if (!validateInputs()) return; 
+            const { email, password, username, fullname, phone, address } = payload;   
 
             setLoading(true);
-            loadingBarRef.current.continuousStart();
-            const response = await apiSendOTPCreateAccount({ email });
+            setIsModalLoading(true); // Hiện modal loading
+
+            const response = await apiSendOTPCreateAccount(payload);
             setLoading(false);
-            loadingBarRef.current.complete();
+            setIsModalLoading(false); // Ẩn modal loading
 
             if (response.success) {
                 toast.success('Hãy kiểm tra email của bạn!');
                 setIsSendOTP(true);
             } else {
-                toast.error('Email đăng ký đã tồn tại. Vui lòng thử lại.');
+                toast.error(response.message);
             }
         } else {
             const { username, password } = payload;
+            setLoading(true);
             const response = await apiLogin({ username, password });
+            setLoading(false);
+
             if (response.success) {
                 dispatch(register({ isLoggedIn: true, token: response.accessToken, userData: response.userData }));
-                // if(+response.userData.role === 2)
-                //     navigate(`/${path.HOME}`);
-                // else
-                //     navigate(`/${path.ADMIN}/${path.DASHBOARD}`)
-                // Đặt timeout ngắn để đảm bảo Redux đã cập nhật
                 setTimeout(() => {
                     if (+response.userData.role === 2) {
                         navigate(`/${path.HOME}`);
-                        // window.location.reload()
                     } else {
                         navigate(`/${path.ADMIN}/${path.DASHBOARD}`);
-                        // window.location.reload()
                     }
-                }, 100); // Thay đổi thời gian nếu cần
+                }, 100);
             } else {
                 Swal.fire('Opps!', response.message, 'error');
             }
         }
     };
 
-    const handleOtpSubmit = async (e) => {
+    const handleOtpSubmit = async () => {
         const { otp } = payload;
         if (!otp) {
             toast.error('Vui lòng nhập OTP.');
             return;
         }
 
-        setLoading(true);
-        loadingBarRef.current.continuousStart();
+        setOtpLoading(true); // Bắt đầu loading cho nút xác nhận OTP
+
         const response = await apiRegister({ ...payload, otp });
-        setLoading(false);
-        loadingBarRef.current.complete();
+        setOtpLoading(false); // Kết thúc loading cho nút xác nhận OTP
 
         if (response.success) {
             toast.success('Đăng ký thành công!');
             resetPayload();
             setIsSendOTP(false);
-            setIsRegister(false)
+            setIsRegister(false);
         } else {
             toast.error('OTP không hợp lệ. Vui lòng thử lại.');
         }
@@ -171,7 +161,6 @@ const Login = () => {
 
     return (
         <div className="w-screen h-screen relative">
-            <LoadingBar color="#36d7b7" ref={loadingBarRef} />
             <img
                 src="https://png.pngtree.com/thumb_back/fw800/background/20230721/pngtree-low-poly-gaming-city-underwater-cartoon-style-3d-rendered-night-view-image_3719053.jpg"
                 alt=""
@@ -180,26 +169,77 @@ const Login = () => {
             <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center gap-5">
                 <div className="p-8 bg-white rounded-md">
                     <h1 className="text-[28px] font-semibold text-main">{isRegister ? 'Đăng Ký' : 'Đăng Nhập'}</h1>
+                    {!isRegister && <GoogleLoginButton />}
                     {!isRegister && (
-                        <GoogleLoginButton />
-                    )}
-                    {!isRegister && (
-                       <>
+                        <>
                             <InputField
                                 value={payload.username}
                                 setValue={setPayload}
                                 nameKey='username'
                             />
-                            <InputField
-                                value={payload.password}
-                                setValue={setPayload}
-                                nameKey='password'
-                                type='password'
-                            />
-                       </>
-                     )}
+                            <div className="relative">
+                                <InputField
+                                    value={payload.password}
+                                    setValue={setPayload}
+                                    nameKey='password'
+                                    type={showPassword ? 'text' : 'password'}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-7"
+                                >
+                                    {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                                </button>
+                            </div>
+                        </>
+                    )}
                     {isRegister && (
                         <>
+                            <div className="flex gap-4">
+                                <div>
+                                    <InputField
+                                        value={payload.username}
+                                        setValue={setPayload}
+                                        nameKey='username'
+                                    />
+                                    {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+                                </div>
+                                <div className="relative">
+                                    <InputField
+                                        value={payload.password}
+                                        setValue={setPayload}
+                                        nameKey='password'
+                                        type={showPassword ? 'text' : 'password'}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-7"
+                                    >
+                                        {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                                    </button>
+                                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <div>
+                                    <InputField
+                                        value={payload.email}
+                                        setValue={setPayload}
+                                        nameKey='email'
+                                    />
+                                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                                </div>
+                                <div>
+                                    <InputField
+                                        value={payload.phone}
+                                        setValue={setPayload}
+                                        nameKey='phone'
+                                    />
+                                    {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+                                </div>
+                            </div>
                             <div className="flex gap-4">
                                 <div>
                                     <InputField
@@ -211,73 +251,24 @@ const Login = () => {
                                 </div>
                                 <div>
                                     <InputField
-                                        value={payload.phone}
+                                        value={payload.address}
                                         setValue={setPayload}
-                                        nameKey='phone'
-                                    />
-                                    {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-                                </div>
-                            </div>
-                            <div className="flex gap-4">                               
-                                <div>
-                                    <InputField
-                                        value={payload.email}
-                                        setValue={setPayload}
-                                        nameKey='email'
-                                    />
-                                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-                                </div>
-                                <div>
-                                    <InputField
-                                        value={payload.password}
-                                        setValue={setPayload}
-                                        nameKey='password'
-                                        type='password'
-                                    />
-                                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <div>
-                                    <InputField
-                                            value={payload.username}
-                                            setValue={setPayload}
-                                            nameKey='username'
-                                    />
-                                    {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
-                                </div>
-                                <div>
-                                <InputField
-                                    value={payload.confirmPassword}
-                                    setValue={setPayload}
-                                    nameKey='confirmPassword'
-                                    type='password'
-                                    placeholder="Xác nhận mật khẩu"
-                                />
-                                {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
-                                </div>
-                            </div>
-                            <div>
-                                    <InputField
-                                            value={payload.address}
-                                            setValue={setPayload}
-                                            nameKey='address'
+                                        nameKey='address'
                                     />
                                     {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
+                                </div>
                             </div>
-                            <span className="text-[10px] text-[#595656]">Note: Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, số và ký tự đặc biệt.</span>
-                            {/* <span  className="text-sm text-[#595656]">bao gồm chữ hoa, số và ký tự đặc biệt.</span> */}
+                            <span className="text-[10px] text-[#595656]">Lưu ý: Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, số và ký tự đặc biệt.</span>
                         </>
                     )}
-                    {isRegister && (
+                    {isRegister ? (
                         <Button
                             name="Đăng ký"
                             handleOnClick={handleSubmit}
                             style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 mt-3 w-full hover:bg-opacity-80 transition'
                             disabled={loading}
                         />
-                    )}
-                    {!isRegister && (
+                    ) : (
                         <Button
                             name="Đăng Nhập"
                             handleOnClick={handleSubmit}
@@ -285,20 +276,14 @@ const Login = () => {
                             disabled={loading}
                         />
                     )}
-                    {/* {loading && (
-                        <div className="flex justify-center mt-2">
-                            <ClipLoader color="#36d7b7" loading={loading} size={30} />
-                        </div>
-                    )} */}
                     {!isRegister && (
                         <span 
-                         onClick={() => setIsForgotPassword(true)} 
-                         className="flex justify-center text-sm hover:underline cursor-pointer"
+                            onClick={() => setIsForgotPassword(true)} 
+                            className="flex justify-center text-sm hover:underline cursor-pointer"
                         >
                             Quên mật khẩu?
                         </span>
-                        )
-                    }
+                    )}
                     
                     <div className="flex items-center justify-between my-2 w-full text-sm">
                         <span onClick={() => setIsRegister(!isRegister)} className="hover:underline cursor-pointer">
@@ -323,31 +308,25 @@ const Login = () => {
                             />
                             <div className="flex justify-between">
                                 <Button
-                                    name="Xác Nhận OTP"
+                                    name={otpLoading ? <ClipLoader size={20} color={"#ffffff"} /> : "Xác Nhận OTP"}
                                     handleOnClick={handleOtpSubmit}
                                     style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 hover:bg-opacity-80 transition'
-                                    disabled={loading}
+                                    disabled={otpLoading || loading}
                                 />
-                                 <button
+                                <button
                                     onClick={handleCloseModal}
                                     className="px-4 py-2 rounded-md bg-gray-200 text-semibold my-2 hover:bg-opacity-80 transition"
                                 >
                                     Hủy
                                 </button>
                             </div>
-                            
-                            {/* {loading && (
-                                <div className="flex justify-center mt-2">
-                                    <ClipLoader color="#36d7b7" loading={loading} size={30} />
-                                </div>
-                            )} */}
                         </form>
                     </div>
                 </div>
             )}
 
-             {/* Modal quên mật khẩu */}
-             {isForgotPassword && (
+            {/* Modal quên mật khẩu */}
+            {isForgotPassword && (
                 <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="p-4 bg-white rounded-md w-[350px]">
                         <h2 className="text-lg font-semibold">Quên mật khẩu</h2>
@@ -360,10 +339,10 @@ const Login = () => {
                             />
                             <div className="flex justify-between">
                                 <Button
-                                    name="Đặt lại mật khẩu"
+                                    name={forgotPasswordLoading ? <ClipLoader size={20} color={"#ffffff"} /> : "Đặt lại mật khẩu"}
                                     handleOnClick={handleForgotPasswordSubmit}
                                     style='px-4 py-2 rounded-md text-white bg-main text-semibold my-2 hover:bg-opacity-80 transition'
-                                    disabled={loading}
+                                    disabled={forgotPasswordLoading || loading}
                                 />
                                 <button
                                     onClick={() => setIsForgotPassword(false)}
@@ -372,14 +351,15 @@ const Login = () => {
                                     Hủy
                                 </button>
                             </div>
-                           
-                            {/* {loading && (
-                                <div className="flex justify-center mt-2">
-                                    <ClipLoader color="#36d7b7" loading={loading} size={30} />
-                                </div>
-                            )} */}
                         </form>
                     </div>
+                </div>
+            )}
+
+            {/* Modal loading */}
+            {isModalLoading && (
+                <div className="absolute inset-0 z-60 bg-black bg-opacity-50 flex items-center justify-center">
+                    <ClipLoader loading={true} size={50} color={"#ffffff"} />
                 </div>
             )}
         </div>

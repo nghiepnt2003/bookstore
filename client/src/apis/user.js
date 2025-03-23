@@ -1,10 +1,17 @@
 import axios from '../axios'
 
 export const apiSendOTPCreateAccount = (data) => axios({
-    url: `/user/SendOTPCreateAccount?email=${encodeURIComponent(data.email)}`,
-    method: 'get',
+    url: `/user/SendOTPCreateAccount`,
+    method: 'post',
     data
 })
+// ?email=${encodeURIComponent(data.email)}
+
+// export const apiSendOTPCreateAccount = (username,email,phone,password) => axios({
+//     url: `/user/SendOTPCreateAccount`,
+//     method: 'get',
+//     username,email,phone,password
+// })
 
 export const apiRegister = (data) => axios({
     url: '/user/register',
