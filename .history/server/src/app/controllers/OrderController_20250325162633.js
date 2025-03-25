@@ -206,7 +206,7 @@ class OrderController {
     }
   }
 
-  // [GET] /order/payment-url/:id
+  // [GET] /order/:orderId/payment-url
   async getMoMoPaymentUrl(req, res) {
     try {
       const { id } = req.params;

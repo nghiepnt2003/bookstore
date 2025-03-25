@@ -206,13 +206,13 @@ class OrderController {
     }
   }
 
-  // [GET] /order/payment-url/:id
+  // [GET] /order/:orderId/payment-url
   async getMoMoPaymentUrl(req, res) {
     try {
       const { id } = req.params;
       const user = req.user;
 
-      const momoResponse = await orderService.getMoMoPaymentUrl(id, user);
+      const momoResponse = await getMoMoPaymentUrl(id, user);
 
       if (!momoResponse.success) {
         return res.status(400).json({

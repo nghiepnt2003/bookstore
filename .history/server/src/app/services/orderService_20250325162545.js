@@ -312,7 +312,7 @@ class OrderService {
       throw new Error(error.message);
     }
   }
-
+  // Hàm wrapper để gọi createMoMoOrder từ Controller
   async getMoMoPaymentUrl(orderId, user) {
     try {
       // 1. Lấy order từ DB

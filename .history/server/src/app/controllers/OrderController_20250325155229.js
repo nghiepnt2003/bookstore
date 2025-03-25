@@ -14,6 +14,27 @@ const axios = require("axios");
 const crypto = require("crypto");
 const orderService = require("../services/orderService");
 
+async function generateMoMoQR(phone, price) {
+  const text = `2|99|${phone}|||||${price}`;
+
+  try {
+    const url = await QRCode.toDataURL(text, {
+      color: {
+        dark: "#000", // Màu của mã QR (đen)
+        light: "#FFF", // Màu nền (trắng)
+      },
+    });
+    QRCode.toString(text, { type: "terminal" }, function (err, string) {
+      if (err) throw err;
+      console.log("QR code ASCII:");
+      console.log(string);
+    });
+    return url;
+  } catch (err) {
+    throw err;
+  }
+}
+
 class OrderController {
   // [GET] /order/:id
   async getById(req, res) {
@@ -206,35 +227,32 @@ class OrderController {
     }
   }
 
-  // [GET] /order/payment-url/:id
+
+  // [GET] /order/:orderId/payment-url
   async getMoMoPaymentUrl(req, res) {
     try {
-      const { id } = req.params;
-      const user = req.user;
+      const { orderId } = req.params;
+      const { success, paymentUrl, error } = await orderService.getMoMoPaymentUrl(orderId);
 
-      const momoResponse = await orderService.getMoMoPaymentUrl(id, user);
-
-      if (!momoResponse.success) {
-        return res.status(400).json({
+      if (!success) {
+        return res.status(500).json({
           success: false,
-          message: momoResponse.message,
-          error: momoResponse.error,
+          message: "Failed to generate MoMo URL",
+          error,
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: "MoMo payment URL retrieved successfully",
-        paymentUrl: momoResponse.data.payUrl,
-      });
+      res.json({ success: true, paymentUrl });
     } catch (error) {
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
-        message: "Failed to retrieve MoMo payment URL",
+        message: "Error fetching payment URL",
         error: error.message,
       });
     }
-  }
+  },
+};
+
   // [POST] /order/checkout
   async checkout(req, res) {
     try {

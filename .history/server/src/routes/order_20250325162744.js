@@ -33,11 +33,7 @@ router.get(
   [verifyAccessToken],
   orderController.checkPaymentStatusMomo
 );
-router.get(
-  "/payment-url/:id",
-  [verifyAccessToken],
-  orderController.getMoMoPaymentUrl
-);
+router.get("/payment-url/:id", [verifyAccessToken], orderController.getById);
 
 router.get("/:id", [verifyAccessToken], orderController.getById);
 

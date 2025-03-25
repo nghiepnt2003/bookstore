@@ -313,40 +313,6 @@ class OrderService {
     }
   }
 
-  async getMoMoPaymentUrl(orderId, user) {
-    try {
-      // 1. Lấy order từ DB
-      const order = await Order.findById(orderId);
-      if (!order) {
-        return { success: false, message: "Order not found" };
-      }
-
-      // 2. Kiểm tra phương thức thanh toán có phải MoMo không
-      if (order.payment !== "MOMO") {
-        return { success: false, message: "Payment method is not MoMo" };
-      }
-
-      // 3. Tạo ID đơn hàng duy nhất
-      const uniqueOrderId = `${order._id}-${Date.now()}`;
-
-      // 4. Gọi hàm createMoMoOrder
-      const momoResponse = await createMoMoOrder(
-        user,
-        order.totalPrice,
-        uniqueOrderId
-      );
-
-      return momoResponse;
-    } catch (error) {
-      console.error("Error in getMoMoPaymentUrl:", error.message);
-      return {
-        success: false,
-        message: "Failed to retrieve MoMo payment URL",
-        error: error.message,
-      };
-    }
-  }
-
   async checkPaymentStatusZaloPay(appTransId) {
     try {
       // Kiểm tra nếu không có appTransId

@@ -206,22 +206,45 @@ class OrderController {
     }
   }
 
-  // [GET] /order/payment-url/:id
+  // [GET] /order/:orderId/payment-url
   async getMoMoPaymentUrl(req, res) {
     try {
       const { id } = req.params;
       const user = req.user;
 
-      const momoResponse = await orderService.getMoMoPaymentUrl(id, user);
+      // 1. Lấy order từ DB
+      const order = await Order.findById(id);
+      if (!order) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Order not found" });
+      }
 
+      // 2. Kiểm tra phương thức thanh toán có phải MoMo không
+      if (order.payment !== "MOMO") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Payment method is not MoMo" });
+      }
+
+      // 3. Tạo đơn hàng MoMo
+      const uniqueOrderId = `${order._id}-${Date.now()}`;
+      const momoResponse = await createMoMoOrder(
+        user,
+        order.totalPrice,
+        uniqueOrderId
+      );
+
+      // 4. Kiểm tra kết quả từ MoMo
       if (!momoResponse.success) {
-        return res.status(400).json({
+        return res.status(500).json({
           success: false,
-          message: momoResponse.message,
+          message: "MoMo payment initialization failed",
           error: momoResponse.error,
         });
       }
 
+      // 5. Trả về URL thanh toán MoMo
       return res.status(200).json({
         success: true,
         message: "MoMo payment URL retrieved successfully",
@@ -235,6 +258,7 @@ class OrderController {
       });
     }
   }
+
   // [POST] /order/checkout
   async checkout(req, res) {
     try {

@@ -313,40 +313,6 @@ class OrderService {
     }
   }
 
-  async getMoMoPaymentUrl(orderId, user) {
-    try {
-      // 1. Lấy order từ DB
-      const order = await Order.findById(orderId);
-      if (!order) {
-        return { success: false, message: "Order not found" };
-      }
-
-      // 2. Kiểm tra phương thức thanh toán có phải MoMo không
-      if (order.payment !== "MOMO") {
-        return { success: false, message: "Payment method is not MoMo" };
-      }
-
-      // 3. Tạo ID đơn hàng duy nhất
-      const uniqueOrderId = `${order._id}-${Date.now()}`;
-
-      // 4. Gọi hàm createMoMoOrder
-      const momoResponse = await createMoMoOrder(
-        user,
-        order.totalPrice,
-        uniqueOrderId
-      );
-
-      return momoResponse;
-    } catch (error) {
-      console.error("Error in getMoMoPaymentUrl:", error.message);
-      return {
-        success: false,
-        message: "Failed to retrieve MoMo payment URL",
-        error: error.message,
-      };
-    }
-  }
-
   async checkPaymentStatusZaloPay(appTransId) {
     try {
       // Kiểm tra nếu không có appTransId
@@ -871,7 +837,8 @@ async function createMoMoOrder(user, totalPrice, orderId) {
   const accessKey = "F8BBA842ECF85";
   const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
   const partnerCode = "MOMO";
-  const redirectUrl = "http://localhost:3001/momo";
+  const redirectUrl =
+    "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
   const ipnUrl = `${process.env.BASE_URL_DEV}/order/callbackMomo/${orderId}`;
   const requestType = "payWithMethod";
   const amount = totalPrice.toString();
