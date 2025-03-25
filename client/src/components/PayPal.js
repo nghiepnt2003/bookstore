@@ -29,7 +29,6 @@ const ButtonWrapper = ({ currency, showSpinner, amount, payload, setIsSuccess })
     }, [currency, showSpinner, payload])
 
     const handleSaveOrder = async () => {
-        console.log("PAYLOA " + JSON.stringify(payload))
         const response = await apiOrder({ ...payload, payment: 'PAYPAL', status: 'Delivering' })
 
         if (response.success) {
@@ -61,7 +60,6 @@ const ButtonWrapper = ({ currency, showSpinner, amount, payload, setIsSuccess })
                     ]
                 }).then(orderId => orderId)}
                 onApprove={(data, actions) => actions.order.capture().then(async (response) => {
-                    // console.log("RP PP " + JSON.stringify(response))
                     console.log("PL " + JSON.stringify(payload))
                     if (response.status === 'COMPLETED') {
                         await handleSaveOrder()

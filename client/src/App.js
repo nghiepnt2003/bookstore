@@ -4,11 +4,12 @@ import { Login, Home, Public, FAQ, Blog, Products, DetailProduct, ResetPassword 
 import path from './ultils/path';
 import { getCategories} from './store/app/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
-import { Modal, CallbackComponent } from './components';
+import { Modal, CallbackComponent, MoMoPayment } from './components';
 import { AdminLayout, ManageProduct, ManageOrder, ManageUser, Dashboard, ManageCategory, ManageAuthor, AdminPersonal, ManagePublisher, ManageStore, Messenger, Flashsale } from './pages/admin';
 import { MemberLayout, Personal, History, MyCart, Checkout } from './pages/member';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import MoMotSuccessPage from './pages/public/MoMoSuccessPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -52,6 +53,7 @@ function App() {
           <Route path={path.HISTORY} element={<History />} />
         </Route>
         <Route path={path.LOGIN} element={<Login />}></Route>
+        <Route path={path.MOMO} element={<MoMotSuccessPage />}></Route>
       </Routes>
       <ToastContainer
         limit={1}

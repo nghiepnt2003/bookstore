@@ -3,6 +3,7 @@ import React from 'react'
 import { toast } from 'react-toastify';
 import { apiCancelOrder, apiConfirmOrder } from '../apis';
 import Swal from 'sweetalert2';
+import CountdownTimer from './CountdownTimer';
 
 function HistoryOrderItem({ setFetch, listOrder }) {
     console.log("listOrder " + JSON.stringify(listOrder) )
@@ -53,6 +54,18 @@ function HistoryOrderItem({ setFetch, listOrder }) {
         }
     }
 
+    const openPaymentWindow = (orderId) => {
+        const width = 600;
+        const height = 600;
+        const left = (window.screen.width / 2) - (width / 2);
+        const top = (window.screen.height / 2) - (height / 2);
+        // Cấu hình cho cửa sổ mới
+        const windowFeatures = `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`;
+
+        // Mở cửa sổ mới với URL tới trang thanh toán
+        window.open(`/member/payment/${orderId}`, '_blank', windowFeatures);
+    }
+
     return (
         <>
             {
@@ -77,6 +90,7 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                     <p className="text-[14px] uppercase text-[#999] font-[500]">
                                         {formatDate(order.createdAt)}
                                     </p>
+                                    {order.status === "Not Yet Paid" && <CountdownTimer createdAt={order.createdAt} />}
                                 </div>
 
                                 <div>
@@ -95,7 +109,7 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                         Phương thức thanh toán
                                     </p>
                                     <p className="text-[14px] uppercase text-[#999] font-[500]">
-                                        {(order?.payment && order.payment==="OFFLINE" )? "Tiền mặt":"PayPal" }
+                                        {(order?.payment && order.payment==="OFFLINE" )? "Tiền mặt": order.payment}
                                     </p>
                                 </div>
                             </div>
@@ -117,16 +131,6 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                 ))
                             }
                             <div className='mt-[20px] flex items-center gap-[40px]'>
-                                {/* <Button className='cursor-default '>
-                                    {
-                                        order.status === "Pending" ? "Chờ xác nhận"
-                                            : order.status === "Successed" ? "Hoàn thành"
-                                                : order.status === "Delivering" ? "Đang giao"
-                                                    : order.status === "Transported" ? "Đã giao đến"
-                                                        : order.status === "Cancelled" ? "Đã hủy"
-                                                            : ""
-                                    }
-                                </Button> */}
                                 <div className='text-[16px] text-blue-500 font-[600] mb-[10px]'>
                                             {
                                                 order.status === "Pending" ? "Chờ xác nhận"
@@ -135,11 +139,12 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                                             : order.status === "Delivering" ? "Đang giao"
                                                                 : order.status === "Transported" ? "Đã giao đến"
                                                                     : order.status === "Cancelled" ? "Đã hủy"
-                                                                        : ""
+                                                                        : order.status === "Not Yet Paid" ? "Đang chờ thanh toán"
+                                                                            : ""
                                             }
                                 </div>
                                 {
-                                    order.status === "Pending" ?
+                                    (order.status === "Pending" || order.status==="Not Yet Paid") ?
                                         <Button onClick={() => handleCancel(order._id)} danger type='primary'>
                                             Hủy đơn hàng
                                         </Button>
@@ -152,7 +157,11 @@ function HistoryOrderItem({ setFetch, listOrder }) {
                                         </Button>
                                         : ""
                                 }
-
+                                {(order.status === "Not Yet Paid") && (
+                                    <Button onClick={() => openPaymentWindow(order._id)}>
+                                        Thanh toán
+                                    </Button>
+                                )}
 
                             </div>
                         </div>

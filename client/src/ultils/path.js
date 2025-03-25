@@ -34,7 +34,7 @@ const path = {
 
 
     LOGIN_GG: 'callback',
-
+    MOMO: 'momo'
 }
 
 export default path
