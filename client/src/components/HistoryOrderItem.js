@@ -63,7 +63,7 @@ function HistoryOrderItem({ setFetch, listOrder }) {
         const windowFeatures = `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`;
 
         // Mở cửa sổ mới với URL tới trang thanh toán
-        window.open(`/member/payment/${orderId}`, '_blank', windowFeatures);
+        window.open(`payment/${orderId}`, '_blank', windowFeatures);
     }
 
     return (

@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import { Route, Routes } from 'react-router-dom'
-import { Login, Home, Public, FAQ, Blog, Products, DetailProduct, ResetPassword } from './pages/public'
+import { Login, Home, Public, FAQ, Blog, Products, DetailProduct, ResetPassword , Payment} from './pages/public'
 import path from './ultils/path';
 import { getCategories} from './store/app/asyncActions'
 import { useDispatch, useSelector } from 'react-redux'
@@ -54,6 +54,7 @@ function App() {
         </Route>
         <Route path={path.LOGIN} element={<Login />}></Route>
         <Route path={path.MOMO} element={<MoMotSuccessPage />}></Route>
+        <Route path={path.PAYMENT} element={<Payment />} />
       </Routes>
       <ToastContainer
         limit={1}

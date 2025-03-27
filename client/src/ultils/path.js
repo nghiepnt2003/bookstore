@@ -31,6 +31,7 @@ const path = {
     PERSONAL: 'personal',
     MY_CART: 'my-cart',
     HISTORY: 'buy-history',
+    PAYMENT: '/member/payment/:oid',
 
 
     LOGIN_GG: 'callback',

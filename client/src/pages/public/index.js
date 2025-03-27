@@ -7,5 +7,5 @@ export { default as Products} from './Products'
 export { default as  FAQ} from './FAQ'  
 export { default as  ResetPassword} from './ResetPassword'  
 export { default as  MoMoSuccessPage} from './MoMoSuccessPage'  
-
+export { default as Payment } from './Payment'
  

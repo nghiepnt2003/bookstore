@@ -133,3 +133,14 @@ export const apiConfirmOrder = (id) => axios({
     method: 'put',
 })
 
+export const apiGetOrderById = (oid) => axios({
+    url: "/order/" + oid,
+    method: "get"
+})
+
+export const apiCreateMomoUrl = (id) => axios({
+    url: '/order/payment-url/'+id,
+    method: "get",
+    withCredentials: true,
+})
+

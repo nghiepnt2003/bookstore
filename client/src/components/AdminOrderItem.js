@@ -8,8 +8,9 @@ import icons from '../ultils/icons';
 import DetailOrder from './DetailOrder'
 import { useDispatch } from 'react-redux';
 import { showModal } from '../store/app/appSlice';
+import {CountdownTimer} from '../components'
 
-const {FaTruckFast} = icons
+const {FaTruckFast, FaRegClock} = icons
 
 function AdminOrderItem({ setKey, setReload, listOrder }) {
     const dispatch = useDispatch();
@@ -120,6 +121,7 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                     <p className="text-[14px] text-[#999] font-[500]">
                                         {formatDate(order.createdAt)}
                                     </p>
+                                    {order.status === "Not Yet Paid" && <CountdownTimer createdAt={order.createdAt} />}
                                 </div>
 
                                 <div>
@@ -138,14 +140,14 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                             <div className='mt-[20px] flex justify-between items-center'>
                                 <div>
                                     <Button
-                                        disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Transported"}
+                                        disabled={order.status === "Successed" || order.status === "Cancelled" || order.status === "Transported" || order.status === "Not Yet Paid"}
                                         className={`cursor-pointer`}
                                         type='primary'
                                         ghost
                                         icon={
                                             order.status === "Successed" ? <CheckCircleOutlined className="text-green-500" />
                                                 : order.status === "Cancelled" ? <CloseCircleOutlined className="text-red-500" />
-                                                    // : order.status === "Delivering" ? <FaTruckFast className="text-blue-400" />
+                                                    : order.status === "Not Yet Paid" ? <FaRegClock className="text-blue-400" />
                                                         : ""
                                         }
                                         onClick={() => handleUpdateOrder(order.status, order._id)}
@@ -157,7 +159,8 @@ function AdminOrderItem({ setKey, setReload, listOrder }) {
                                                         : order.status === "Transported" ? "Đã giao đến"
                                                             : order.status === "Successed" ? "Hoàn thành"
                                                                 : order.status === "Cancelled" ? "Đã hủy"
-                                                                    : ""
+                                                                    : order.status === "Not Yet Paid" ? "Chờ thanh toán"
+                                                                        : ""
                                         }
                                     </Button>
                                     {

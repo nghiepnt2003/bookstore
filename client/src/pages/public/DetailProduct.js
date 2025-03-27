@@ -472,7 +472,7 @@ const DetailProduct = () => {
         const productPromises = categoryIds.map(cateId => apiGetProducts({ categories: cateId }));
         const responses = await Promise.all(productPromises);
         const allProducts = responses.reduce((acc, response) => {
-            if (response.success) {
+            if (response?.success) {
                 return acc.concat(response.products.filter(product => !acc.some(existingProduct => existingProduct._id === product._id)));
             }
             return acc;
@@ -706,7 +706,7 @@ const DetailProduct = () => {
                 <h3 className="text-[20px] font-semibold py-[15px] border-b-2 border-main">Người dùng khác cũng mua:</h3>
                 <div>
                     <Slider {...settings}>
-                        {relatedProducts.map(el => (
+                        {relatedProducts?.map(el => (
                             <Product 
                                 key={el._id}
                                 productData={el}
