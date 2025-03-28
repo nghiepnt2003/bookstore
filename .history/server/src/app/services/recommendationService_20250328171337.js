@@ -21,7 +21,7 @@ async function collaborativeFiltering(userId, listProductIds) {
     const productSimilarityScores = {};
 
     // Lặp qua từng sản phẩm trong wishlist của người dùng
-    for (const productId of listProductIds) {
+    for (const productId of wishListProductIds) {
       // Lấy thông tin sản phẩm với các trường liên quan
       const product = await Product.findById(productId)
         .populate("categories")

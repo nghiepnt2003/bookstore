@@ -3,44 +3,14 @@ const User = require("../models/User");
 
 class WishlistService {
   // Lấy danh sách wishlist của người dùng
-  // async getWishlist(userId) {
-  //   try {
-  //     // Lấy thông tin người dùng và danh sách wishList
-  //     const user = await User.findById(userId).populate({
-  //       path: "wishList",
-  //       populate: [
-  //         { path: "author", select: "name" }, // Populate thông tin author
-  //         { path: "publisher", select: "name" }, // Populate thông tin publisher
-  //         { path: "categories", select: "name" },
-  //         {
-  //           path: "discount",
-  //           match: {
-  //             startDate: { $lte: new Date() }, // Giảm giá đã bắt đầu
-  //             endDate: { $gte: new Date() }, // Giảm giá chưa hết hạn
-  //           },
-  //           select: "discountPercentage startDate endDate",
-  //         }, // Populate thông tin category
-  //       ],
-  //     });
-
-  //     // Nếu người dùng không tồn tại
-  //     if (!user) {
-  //       throw new Error("User not found");
-  //     }
-
-  //     return user.wishList; // Trả về danh sách wishList
-  //   } catch (error) {
-  //     throw new Error("An error occurred: " + error.message);
-  //   }
-  // }
   async getWishlist(userId) {
     try {
       // Lấy thông tin người dùng và danh sách wishList
       const user = await User.findById(userId).populate({
         path: "wishList",
         populate: [
-          { path: "author", select: "name" },
-          { path: "publisher", select: "name" },
+          { path: "author", select: "name" }, // Populate thông tin author
+          { path: "publisher", select: "name" }, // Populate thông tin publisher
           { path: "categories", select: "name" },
           {
             path: "discount",
@@ -49,7 +19,7 @@ class WishlistService {
               endDate: { $gte: new Date() }, // Giảm giá chưa hết hạn
             },
             select: "discountPercentage startDate endDate",
-          },
+          }, // Populate thông tin category
         ],
       });
 
@@ -58,26 +28,7 @@ class WishlistService {
         throw new Error("User not found");
       }
 
-      // Tính finalPrice và timeRemaining
-      const wishlistWithFinalPrice = await Promise.all(
-        user.wishList.map(async (product) => {
-          if (!product) return null;
-          const finalPrice = await product.getFinalPrice();
-          let timeRemaining = null;
-          if (product.discount && product.discount?.endDate) {
-            timeRemaining =
-              product.discount.endDate.getTime() - new Date().getTime();
-            if (timeRemaining <= 0) timeRemaining = 0;
-          }
-          return {
-            ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)),
-            timeRemaining,
-          };
-        })
-      );
-
-      return wishlistWithFinalPrice;
+      return user.wishList; // Trả về danh sách wishList
     } catch (error) {
       throw new Error("An error occurred: " + error.message);
     }

@@ -519,7 +519,6 @@ class ProductService {
       // 🔹 Lấy danh sách sản phẩm user đã mua từ Order
       const orders =
         (await Order.find({ user: userId }).populate("details").exec()) || [];
-      if (!orders.length) return [];
       const purchasedProductIds = new Set();
 
       if (orders.length > 0) {
@@ -567,7 +566,7 @@ class ProductService {
       }
 
       // Loại bỏ các sản phẩm đã có trong wishlist
-      formattedQueries._id = { $nin: recommendedProductIds };
+      formattedQueries._id = { $nin: wishListProductIds };
 
       // Tạo câu lệnh truy vấn
       let queryCommand = Product.find(formattedQueries)

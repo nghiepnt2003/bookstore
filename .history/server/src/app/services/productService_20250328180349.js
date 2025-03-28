@@ -567,7 +567,7 @@ class ProductService {
       }
 
       // Loại bỏ các sản phẩm đã có trong wishlist
-      formattedQueries._id = { $nin: recommendedProductIds };
+      formattedQueries._id = { $nin: wishListProductIds };
 
       // Tạo câu lệnh truy vấn
       let queryCommand = Product.find(formattedQueries)

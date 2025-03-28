@@ -7,10 +7,10 @@ const Product = require("../models/Product");
  * Sau đó, sắp xếp và trả về top 10 sản phẩm có điểm tương đồng cao nhất.
  *
  * @param {String} userId - ID của người dùng
- * @param {Array} listProductIds - Mảng chứa các ID sản phẩm trong wishlist của người dùng
+ * @param {Array} wishListProductIds - Mảng chứa các ID sản phẩm trong wishlist của người dùng
  * @returns {Array} Mảng chứa các ID sản phẩm đề xuất (top 10)
  */
-async function collaborativeFiltering(userId, listProductIds) {
+async function collaborativeFiltering(userId, wishListProductIds) {
   try {
     // Lấy tất cả sản phẩm với populate các trường cần thiết
     const allProducts = await Product.find()
@@ -21,7 +21,7 @@ async function collaborativeFiltering(userId, listProductIds) {
     const productSimilarityScores = {};
 
     // Lặp qua từng sản phẩm trong wishlist của người dùng
-    for (const productId of listProductIds) {
+    for (const productId of wishListProductIds) {
       // Lấy thông tin sản phẩm với các trường liên quan
       const product = await Product.findById(productId)
         .populate("categories")

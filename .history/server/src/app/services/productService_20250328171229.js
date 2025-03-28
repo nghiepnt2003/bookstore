@@ -512,14 +512,13 @@ class ProductService {
     try {
       // 🔹 Lấy thông tin người dùng và wishlist
       const user = await User.findById(userId).populate("wishList");
-      if (!user) throw new Error("User not found");
       const wishListProductIds =
         user.wishList?.map((product) => product._id) || [];
 
       // 🔹 Lấy danh sách sản phẩm user đã mua từ Order
-      const orders =
-        (await Order.find({ user: userId }).populate("details").exec()) || [];
-      if (!orders.length) return [];
+      const orders = await Order.find({ user: userId })
+        .populate("details")
+        .exec();
       const purchasedProductIds = new Set();
 
       if (orders.length > 0) {
@@ -559,15 +558,15 @@ class ProductService {
         formattedQueries.name = { $regex: queries.name, $options: "i" };
       }
 
+      // Lọc thêm theo các trường khác nếu cần (ví dụ tác giả, ...)
+
       // Thêm điều kiện lọc theo danh mục của các sản phẩm trong wishlist (nếu cần)
-      if (user.wishList.length > 0) {
-        formattedQueries.categories = {
-          $in: user.wishList.flatMap((product) => product.categories),
-        };
-      }
+      formattedQueries.categories = {
+        $in: user.wishList.flatMap((product) => product.categories),
+      };
 
       // Loại bỏ các sản phẩm đã có trong wishlist
-      formattedQueries._id = { $nin: recommendedProductIds };
+      formattedQueries._id = { $nin: wishListProductIds };
 
       // Tạo câu lệnh truy vấn
       let queryCommand = Product.find(formattedQueries)
@@ -617,7 +616,7 @@ class ProductService {
 
       // Thực thi truy vấn
       const suggestedProducts = await queryCommand.exec();
-      // const counts = await Product.find(formattedQueries).countDocuments();
+      const counts = await Product.find(formattedQueries).countDocuments();
 
       // Tính finalPrice cho từng sản phẩm
       const productsWithFinalPrice = await Promise.all(
@@ -640,7 +639,7 @@ class ProductService {
       );
       return {
         success: productsWithFinalPrice.length > 0,
-        // counts,
+        counts,
         suggestedProducts:
           suggestedProducts.length > 0 ? productsWithFinalPrice : [],
       };
