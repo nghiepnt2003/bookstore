@@ -13,7 +13,7 @@ const TopHeader = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const {isLoggedIn, current, isLoading, mes} = useSelector(state => state.user)
-  console.log("CURRENT " + JSON.stringify(current))
+  
   useEffect(() => {
     if(isLoggedIn && isLoading==true)
     {

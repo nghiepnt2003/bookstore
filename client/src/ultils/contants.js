@@ -25,7 +25,7 @@ export const navigation = [
 
 ]
 
-const {FaShieldHalved , FaGift, FaTruckFast, FaTty,FaReplyAll} = icons
+const {FaShieldHalved , FaGift, FaTruckFast, FaTty,FaReplyAll, IoFlashSharp, FaFacebookMessenger} = icons
 export const productExtraInfomation = [
     {
         id: 1,
@@ -156,13 +156,13 @@ export const adminSidebar = [
         id: 9,
         text: 'Thắc mắc của khách hàng',
         path: `/${path.ADMIN}/${path.MESSENGER}`,
-        icon: <ImProfile />
+        icon: <FaFacebookMessenger />
     },
     {
         id: 10,
         text: 'Flashsale',
         path: `/${path.ADMIN}/${path.FLASHSALE}`,
-        icon: <ImProfile />
+        icon: <IoFlashSharp />
     }
 ]
 
@@ -186,6 +186,13 @@ export const memberSidebar = [
         type: 'single',
         text: 'Lịch sử mua hàng',
         path: `/${path.MEMBER}/${path.HISTORY}`,
+        icon: <RiBillLine />
+    },
+    {
+        id: 4,
+        type: 'single',
+        text: 'Danh sách yêu thích',
+        path: `/${path.MEMBER}/${path.WISHLIST}`,
         icon: <RiBillLine />
     }
 ]

@@ -133,3 +133,31 @@ export const apiConfirmOrder = (id) => axios({
     method: 'put',
 })
 
+export const apiGetOrderById = (oid) => axios({
+    url: "/order/" + oid,
+    method: "get"
+})
+
+export const apiCreateMomoUrl = (id) => axios({
+    url: '/order/payment-url/'+id,
+    method: "get",
+    withCredentials: true,
+})
+
+export const apiUpdateWishlist = (pid) => axios({
+    url: `/user/${pid}/add-to-wishlist`,
+    method: "post",
+    withCredentials: true,
+})
+
+export const  apiRemoveProductInWishList = (pid) => axios({
+    url: `/user/wishlist/${pid}`,
+    method: "delete",
+    withCredentials: true,
+})
+
+export const  apiGetWishList = () => axios({
+    url: `/user/wishlist`,
+    method: "get",
+})
+
