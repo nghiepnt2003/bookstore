@@ -144,3 +144,20 @@ export const apiCreateMomoUrl = (id) => axios({
     withCredentials: true,
 })
 
+export const apiUpdateWishlist = (pid) => axios({
+    url: `/user/${pid}/add-to-wishlist`,
+    method: "post",
+    withCredentials: true,
+})
+
+export const  apiRemoveProductInWishList = (pid) => axios({
+    url: `/user/wishlist/${pid}`,
+    method: "delete",
+    withCredentials: true,
+})
+
+export const  apiGetWishList = () => axios({
+    url: `/user/wishlist`,
+    method: "get",
+})
+

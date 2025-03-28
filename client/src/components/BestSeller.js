@@ -14,7 +14,7 @@ const settings = {
 const BestSeller = () => {
     const [bestSellers, setBestSellers] = useState(null)
     const fetchProducts = async () => {
-        const response = await apiGetProducts({sort: '-soldCount'}) // thay lại bằng getAllProduct với số lượng đã bán max
+        const response = await apiGetProducts({sort: '-soldCount'}) 
         if(response.success)
         {
             setBestSellers(response.products)

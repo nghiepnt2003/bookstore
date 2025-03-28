@@ -187,6 +187,13 @@ export const memberSidebar = [
         text: 'Lịch sử mua hàng',
         path: `/${path.MEMBER}/${path.HISTORY}`,
         icon: <RiBillLine />
+    },
+    {
+        id: 4,
+        type: 'single',
+        text: 'Danh sách yêu thích',
+        path: `/${path.MEMBER}/${path.WISHLIST}`,
+        icon: <RiBillLine />
     }
 ]
 

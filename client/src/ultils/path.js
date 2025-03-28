@@ -13,6 +13,7 @@ const path = {
     SENDOTP: 'send-otp',
     CHECKOUT: 'checkout',
 
+
     //Admin
     ADMIN: 'admin',
     DASHBOARD: 'dashboard',
@@ -32,6 +33,7 @@ const path = {
     MY_CART: 'my-cart',
     HISTORY: 'buy-history',
     PAYMENT: '/member/payment/:oid',
+    WISHLIST: 'wishlist',
 
 
     LOGIN_GG: 'callback',
