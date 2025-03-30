@@ -1,3 +1,4 @@
+// recommendationService.js
 const { calculateSimilarity } = require("../../util/similarityUtils");
 const Product = require("../models/Product");
 
@@ -50,34 +51,57 @@ const Product = require("../models/Product");
 //     throw error;
 //   }
 // }
-async function collaborativeFiltering(userId, listProductIds) {
+
+async function collaborativeFiltering(
+  userId,
+  userProductIds,
+  purchasedProductIds,
+  wishListProductIds
+) {
   try {
-    // Lấy tất cả sản phẩm cùng một lúc để tránh truy vấn nhiều lần
-    const [allProducts, wishlistProducts] = await Promise.all([
-      Product.find().populate("categories author publisher"),
-      Product.find({ _id: { $in: listProductIds } }).populate(
-        "categories author publisher"
-      ),
-    ]);
+    // Lấy tất cả sản phẩm chưa mua và chưa trong wishlist
+    const allProducts = await Product.find({ _id: { $nin: userProductIds } })
+      .populate("categories")
+      .populate("author")
+      .populate("publisher")
+      .lean();
+
+    if (!allProducts.length) return [];
+
+    // Lấy sản phẩm đã mua và trong wishlist để so sánh
+    const userProducts = await Product.find({ _id: { $in: userProductIds } })
+      .populate("categories")
+      .populate("author")
+      .populate("publisher")
+      .lean();
 
     const productSimilarityScores = {};
 
-    for (const product of wishlistProducts) {
+    // Trọng số: purchased (2), wishlist (1)
+    const PURCHASED_WEIGHT = 2;
+    const WISHLIST_WEIGHT = 1;
+
+    // Tính điểm tương đồng
+    for (const product of userProducts) {
+      const weight = purchasedProductIds.has(product._id.toString())
+        ? PURCHASED_WEIGHT
+        : WISHLIST_WEIGHT;
+
       for (const otherProduct of allProducts) {
-        if (!listProductIds.includes(otherProduct._id.toString())) {
-          const simScore = calculateSimilarity(product, otherProduct);
-          productSimilarityScores[otherProduct._id] =
-            (productSimilarityScores[otherProduct._id] || 0) + simScore;
-        }
+        const simScore = await calculateSimilarity(product, otherProduct);
+        productSimilarityScores[otherProduct._id] =
+          (productSimilarityScores[otherProduct._id] || 0) + simScore * weight;
       }
     }
 
-    // Sắp xếp theo điểm số và lấy top 10
-    return Object.keys(productSimilarityScores)
+    // Sắp xếp và lấy top 10
+    const sortedProductIds = Object.keys(productSimilarityScores)
       .sort((a, b) => productSimilarityScores[b] - productSimilarityScores[a])
       .slice(0, 10);
+
+    return sortedProductIds;
   } catch (error) {
-    throw error;
+    throw new Error(`Error in collaborativeFiltering: ${error.message}`);
   }
 }
 

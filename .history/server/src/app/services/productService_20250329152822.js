@@ -391,12 +391,13 @@ class ProductService {
 
   async suggestProducts(userId, queries) {
     try {
+      // 🔹 Lấy thông tin người dùng và wishlist
       const user = await User.findById(userId).populate("wishList");
       if (!user) throw new Error("User not found");
-
       const wishListProductIds =
         user.wishList?.map((product) => product._id.toString()) || [];
 
+      // 🔹 Lấy danh sách sản phẩm user đã mua từ Order
       const orders = await Order.find({ user: userId }).populate("details");
       const purchasedProductIds = new Set();
       orders.forEach((order) => {
@@ -407,18 +408,16 @@ class ProductService {
         });
       });
 
+      // 🔹 Kết hợp danh sách sản phẩm user đã tương tác
       const userProductIds = Array.from(
         new Set([...wishListProductIds, ...purchasedProductIds])
       );
 
-      let recommendedProductIds = await collaborativeFiltering(
-        userId,
-        userProductIds
-      );
-      recommendedProductIds = recommendedProductIds.filter(
-        (id) => !userProductIds.includes(id.toString())
-      );
+      // 🔹 Lấy danh sách đề xuất từ Collaborative Filtering
+      const recommendedProductIds =
+        (await collaborativeFiltering(userId, userProductIds)) || [];
 
+      // Xây dựng bộ lọc theo query
       const queryCopy = { ...queries };
       const excludeFields = ["limit", "sort", "page", "fields"];
       excludeFields.forEach((el) => delete queryCopy[el]);
@@ -439,7 +438,7 @@ class ProductService {
         };
       }
 
-      formattedQueries._id = { $nin: userProductIds }; // Loại bỏ wishlist & đã mua
+      formattedQueries._id = { $nin: recommendedProductIds };
 
       let queryCommand = Product.find(formattedQueries)
         .populate("categories")
@@ -453,6 +452,11 @@ class ProductService {
           },
           select: "discountPercentage startDate endDate",
         });
+
+      queryCommand = queryCommand.or([
+        { _id: { $in: recommendedProductIds } },
+        formattedQueries,
+      ]);
 
       if (queries.sort) {
         queryCommand = queryCommand.sort(queries.sort.split(",").join(" "));

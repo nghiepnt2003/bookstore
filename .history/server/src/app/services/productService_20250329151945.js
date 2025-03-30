@@ -389,62 +389,200 @@ class ProductService {
     return { products: productsWithFinalPrice, counts };
   }
 
+  // async suggestProducts(userId, queries) {
+  //   try {
+  //     // Lấy thông tin người dùng và wishlist
+  //     const user = await User.findById(userId).populate("wishList");
+  //     const wishListProductIds = user.wishList.map((product) => product._id);
+
+  //     // Lấy danh sách sản phẩm đề xuất từ Collaborative Filtering
+  //     const recommendedProductIds = await collaborativeFiltering(
+  //       userId,
+  //       wishListProductIds
+  //     );
+  //     console.log(recommendedProductIds);
+  //     // Xây dựng bộ lọc theo query
+  //     const queryCopy = { ...queries };
+  //     const excludeFields = ["limit", "sort", "page", "fields"];
+  //     excludeFields.forEach((el) => delete queryCopy[el]);
+
+  //     let queryString = JSON.stringify(queryCopy);
+  //     // Định dạng các operator: gte, gt, lt, lte
+  //     queryString = queryString.replace(
+  //       /\b(gte|gt|lt|lte)\b/g,
+  //       (matched) => `$${matched}`
+  //     );
+  //     const formattedQueries = JSON.parse(queryString);
+
+  //     // Filtering theo tên sản phẩm nếu có
+  //     if (queries?.name) {
+  //       formattedQueries.name = { $regex: queries.name, $options: "i" };
+  //     }
+
+  //     // Lọc thêm theo các trường khác nếu cần (ví dụ tác giả, ...)
+
+  //     // Thêm điều kiện lọc theo danh mục của các sản phẩm trong wishlist (nếu cần)
+  //     formattedQueries.categories = {
+  //       $in: user.wishList.flatMap((product) => product.categories),
+  //     };
+
+  //     // Loại bỏ các sản phẩm đã có trong wishlist
+  //     formattedQueries._id = { $nin: wishListProductIds };
+
+  //     // Tạo câu lệnh truy vấn
+  //     let queryCommand = Product.find(formattedQueries)
+  //       .populate({
+  //         path: "categories",
+  //       })
+  //       .populate({
+  //         path: "author",
+  //         select: "name",
+  //       })
+  //       .populate({
+  //         path: "publisher",
+  //         select: "name",
+  //       })
+  //       .populate({
+  //         path: "discount",
+  //         match: {
+  //           startDate: { $lte: new Date() },
+  //           endDate: { $gte: new Date() },
+  //         },
+  //         select: "discountPercentage startDate endDate",
+  //       });
+
+  //     // Kết hợp kết quả từ Collaborative Filtering và các bộ lọc khác
+  //     queryCommand = queryCommand.or([
+  //       { _id: { $in: recommendedProductIds } },
+  //       formattedQueries,
+  //     ]);
+
+  //     // Sắp xếp nếu có chỉ định
+  //     if (queries.sort) {
+  //       const sortBy = queries.sort.split(",").join(" ");
+  //       queryCommand = queryCommand.sort(sortBy);
+  //     }
+
+  //     // Giới hạn các trường trả về nếu có
+  //     if (queries.fields) {
+  //       const fields = queries.fields.split(",").join(" ");
+  //       queryCommand = queryCommand.select(fields);
+  //     }
+
+  //     // Phân trang
+  //     const page = +queries.page || 1;
+  //     const limit = +queries.limit || process.env.LIMIT_PRODUCTS;
+  //     const skip = (page - 1) * limit;
+  //     queryCommand.skip(skip).limit(limit);
+
+  //     // Thực thi truy vấn
+  //     const suggestedProducts = await queryCommand.exec();
+  //     const counts = await Product.find(formattedQueries).countDocuments();
+
+  //     // Tính finalPrice cho từng sản phẩm
+  //     const productsWithFinalPrice = await Promise.all(
+  //       suggestedProducts.map(async (product) => {
+  //         const finalPrice = await product.getFinalPrice();
+  //         let timeRemaining = null;
+
+  //         // Kiểm tra nếu product có discount hợp lệ
+  //         if (product.discount && product.discount.endDate) {
+  //           timeRemaining =
+  //             product.discount.endDate.getTime() - new Date().getTime();
+  //           if (timeRemaining <= 0) timeRemaining = 0;
+  //         }
+  //         return {
+  //           ...product.toObject(),
+  //           finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm finalPrice vào kết quả trả về
+  //           timeRemaining,
+  //         };
+  //       })
+  //     );
+  //     return {
+  //       success: productsWithFinalPrice.length > 0,
+  //       counts,
+  //       suggestedProducts:
+  //         suggestedProducts.length > 0 ? productsWithFinalPrice : [],
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
+  // -------------------
   async suggestProducts(userId, queries) {
     try {
+      // 🔹 Lấy thông tin người dùng và wishlist
       const user = await User.findById(userId).populate("wishList");
       if (!user) throw new Error("User not found");
-
       const wishListProductIds =
-        user.wishList?.map((product) => product._id.toString()) || [];
+        user.wishList?.map((product) => product._id) || [];
 
-      const orders = await Order.find({ user: userId }).populate("details");
+      // 🔹 Lấy danh sách sản phẩm user đã mua từ Order
+      const orders =
+        (await Order.find({ user: userId }).populate("details").exec()) || [];
+      if (!orders.length) return [];
       const purchasedProductIds = new Set();
-      orders.forEach((order) => {
-        order.details.forEach((detail) => {
-          if (detail.productId) {
-            purchasedProductIds.add(detail.productId.toString());
-          }
-        });
-      });
 
+      if (orders.length > 0) {
+        orders.forEach((order) => {
+          order.details.forEach((detail) => {
+            if (detail.productId) {
+              purchasedProductIds.add(detail.productId.toString());
+            }
+          });
+        });
+      }
+
+      // 🔹 Kết hợp danh sách sản phẩm user đã tương tác
       const userProductIds = Array.from(
         new Set([...wishListProductIds, ...purchasedProductIds])
       );
 
-      let recommendedProductIds = await collaborativeFiltering(
-        userId,
-        userProductIds
-      );
-      recommendedProductIds = recommendedProductIds.filter(
-        (id) => !userProductIds.includes(id.toString())
-      );
-
+      // 🔹 Lấy danh sách đề xuất từ Collaborative Filtering
+      const recommendedProductIds =
+        (await collaborativeFiltering(userId, userProductIds)) || [];
+      console.log(recommendedProductIds);
+      // Xây dựng bộ lọc theo query
       const queryCopy = { ...queries };
       const excludeFields = ["limit", "sort", "page", "fields"];
       excludeFields.forEach((el) => delete queryCopy[el]);
 
-      let queryString = JSON.stringify(queryCopy).replace(
+      let queryString = JSON.stringify(queryCopy);
+      // Định dạng các operator: gte, gt, lt, lte
+      queryString = queryString.replace(
         /\b(gte|gt|lt|lte)\b/g,
         (matched) => `$${matched}`
       );
       const formattedQueries = JSON.parse(queryString);
 
+      // Filtering theo tên sản phẩm nếu có
       if (queries?.name) {
         formattedQueries.name = { $regex: queries.name, $options: "i" };
       }
 
+      // Thêm điều kiện lọc theo danh mục của các sản phẩm trong wishlist (nếu cần)
       if (user.wishList.length > 0) {
         formattedQueries.categories = {
           $in: user.wishList.flatMap((product) => product.categories),
         };
       }
 
-      formattedQueries._id = { $nin: userProductIds }; // Loại bỏ wishlist & đã mua
+      // Loại bỏ các sản phẩm đã có trong wishlist
+      formattedQueries._id = { $nin: recommendedProductIds };
 
+      // Tạo câu lệnh truy vấn
       let queryCommand = Product.find(formattedQueries)
-        .populate("categories")
-        .populate("author", "name")
-        .populate("publisher", "name")
+        .populate({
+          path: "categories",
+        })
+        .populate({
+          path: "author",
+          select: "name",
+        })
+        .populate({
+          path: "publisher",
+          select: "name",
+        })
         .populate({
           path: "discount",
           match: {
@@ -454,39 +592,58 @@ class ProductService {
           select: "discountPercentage startDate endDate",
         });
 
+      // Kết hợp kết quả từ Collaborative Filtering và các bộ lọc khác
+      queryCommand = queryCommand.or([
+        { _id: { $in: recommendedProductIds } },
+        formattedQueries,
+      ]);
+
+      // Sắp xếp nếu có chỉ định
       if (queries.sort) {
-        queryCommand = queryCommand.sort(queries.sort.split(",").join(" "));
+        const sortBy = queries.sort.split(",").join(" ");
+        queryCommand = queryCommand.sort(sortBy);
       }
 
+      // Giới hạn các trường trả về nếu có
       if (queries.fields) {
-        queryCommand = queryCommand.select(queries.fields.split(",").join(" "));
+        const fields = queries.fields.split(",").join(" ");
+        queryCommand = queryCommand.select(fields);
       }
 
+      // Phân trang
       const page = +queries.page || 1;
       const limit = +queries.limit || process.env.LIMIT_PRODUCTS;
       const skip = (page - 1) * limit;
       queryCommand.skip(skip).limit(limit);
 
+      // Thực thi truy vấn
       const suggestedProducts = await queryCommand.exec();
+      // const counts = await Product.find(formattedQueries).countDocuments();
 
+      // Tính finalPrice cho từng sản phẩm
       const productsWithFinalPrice = await Promise.all(
         suggestedProducts.map(async (product) => {
           const finalPrice = await product.getFinalPrice();
-          let timeRemaining = product.discount?.endDate
-            ? product.discount.endDate.getTime() - Date.now()
-            : null;
-          if (timeRemaining <= 0) timeRemaining = 0;
+          let timeRemaining = null;
+
+          // Kiểm tra nếu product có discount hợp lệ
+          if (product.discount && product.discount.endDate) {
+            timeRemaining =
+              product.discount.endDate.getTime() - new Date().getTime();
+            if (timeRemaining <= 0) timeRemaining = 0;
+          }
           return {
             ...product.toObject(),
-            finalPrice: parseFloat(finalPrice.toFixed(2)),
+            finalPrice: parseFloat(finalPrice.toFixed(2)), // Thêm finalPrice vào kết quả trả về
             timeRemaining,
           };
         })
       );
-
       return {
         success: productsWithFinalPrice.length > 0,
-        suggestedProducts: productsWithFinalPrice,
+        // counts,
+        suggestedProducts:
+          suggestedProducts.length > 0 ? productsWithFinalPrice : [],
       };
     } catch (error) {
       throw error;
