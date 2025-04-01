@@ -49,7 +49,7 @@ const Wishlist = () => {
 
     useEffect(() => {
         fetchWishlist();
-    }, [wishList]); 
+    }, []); 
 
     return (
         <div className='w-full relative px-4'>
@@ -61,6 +61,7 @@ const Wishlist = () => {
                     <div key={ele._id}>
                         <Product
                             productData={ele}
+                            onWishlistChange= {fetchWishlist}
                         />
                     </div>
                 ))}
