@@ -71,7 +71,7 @@ import { getCurrent } from '../store/user/asyncActions';
 
 const { Countdown } = Statistic;
 
-const Product = ({ productData }) => {
+const Product = ({ productData ,  onWishlistChange}) => {
     const dispatch = useDispatch();
     const { current } = useSelector(state => state.user);
     const isInWishList = current?.wishList?.some(item => item === productData?._id);
@@ -90,6 +90,7 @@ const Product = ({ productData }) => {
         if (response.success) {
             dispatch(getCurrent());
             toast.success(response.mess);
+            onWishlistChange();
         } else {
             toast.error(response.mess);
         }
