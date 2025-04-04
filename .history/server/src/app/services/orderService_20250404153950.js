@@ -723,12 +723,13 @@ class OrderService {
     return order;
   }
 
-  async confirmOrder(orderId, email) {
+  async confirmOrder(orderId) {
     // Tìm đơn hàng
     const order = await Order.findById(orderId).populate({
       path: "details",
       model: "OrderDetail",
     });
+
     if (!order) {
       throw new Error("Order not found");
     }
@@ -743,56 +744,73 @@ class OrderService {
     // Cập nhật trạng thái thành "Successed"
     order.status = "Successed";
     await order.save();
+
+    // Tính tổng số lượng sản phẩm trong đơn hàng
+    const orderDetails = await OrderDetail.find({
+      _id: { $in: order.details },
+    });
+    const totalQuantity = orderDetails.reduce(
+      (acc, detail) => acc + detail.quantity,
+      0
+    );
+
+    // Cộng điểm cho người dùng
+    const user = await User.findById(order.user).populate("member");
+    if (user && user.member) {
+      user.member.score += 2 * totalQuantity; // 2 điểm cho mỗi sản phẩm
+      await user.member.save();
+    }
+
     // Gửi email xác nhận
     const html = `<!DOCTYPE html>
-      <html lang="vi">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Thư cảm ơn</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              font-size: 14px;
-              color: #333333;
-              margin: 0;
-              padding: 0;
-            }
-            .container {
-              max-width: 600px;
-              margin: 0 auto;
-              border: 5px solid #39c6b9;
-              border-radius: 10px;
-            }
-            .content {
-              padding: 20px;
-            }
-            h1 {
-              color: #39c6b9;
-            }
-            p {
-              line-height: 1.5;
-            }
-            a {
-              color: #0099ff;
-              text-decoration: none;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="content">
-              <h1>Book Store</h1>
-              <p>Xin chào!</p>
-              <p>Cảm ơn bạn rất nhiều vì đã đặt hàng tại <strong>Book Store</strong>! 📚</p>
-              <p>Chúng tôi rất trân trọng sự ủng hộ của bạn và hy vọng bạn sẽ hài lòng với sản phẩm vừa mua.</p>
-              <p>Mong được gặp lại bạn trong những lần mua sắm tiếp theo!</p>
-              <p>Trân trọng,</p>
-              <p><strong>Book Store</strong></p>
-            </div>
-          </div>
-        </body>
-      </html>`;
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thư cảm ơn</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #333333;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        border: 5px solid #39c6b9;
+        border-radius: 10px;
+      }
+      .content {
+        padding: 20px;
+      }
+      h1 {
+        color: #39c6b9;
+      }
+      p {
+        line-height: 1.5;
+      }
+      a {
+        color: #0099ff;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="content">
+        <h1>Book Store</h1>
+        <p>Xin chào!</p>
+        <p>Cảm ơn bạn rất nhiều vì đã đặt hàng tại <strong>Book Store</strong>! 📚</p>
+        <p>Chúng tôi rất trân trọng sự ủng hộ của bạn và hy vọng bạn sẽ hài lòng với sản phẩm vừa mua.</p>
+        <p>Mong được gặp lại bạn trong những lần mua sắm tiếp theo!</p>
+        <p>Trân trọng,</p>
+        <p><strong>Book Store</strong></p>
+      </div>
+    </div>
+  </body>
+</html>`;
 
     const data = { email, html };
     await sendMail("You're Awesome - Thanks for Shopping with Us!", data);
@@ -909,7 +927,7 @@ async function createMoMoOrder(user, totalPrice, orderId) {
   const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
   const partnerCode = "MOMO";
   const redirectUrl = "http://localhost:3001/momo";
-  const ipnUrl = `${process.env.BASE_URL_DEV}/order/callbackMomo/${orderId}`;
+  const ipnUrl = `http://localhost:3000/momo/order/callbackMomo/${orderId}`;
   const requestType = "payWithMethod";
   const amount = totalPrice.toString();
   const orderInfo = "Payment for Order #" + orderId;
@@ -951,6 +969,7 @@ async function createMoMoOrder(user, totalPrice, orderId) {
         },
       }
     );
+    console.log(`${process.env.BASE_URL_DEV}/order/callbackMomo/${orderId}`);
 
     return {
       success: true,

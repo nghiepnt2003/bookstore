@@ -13,7 +13,6 @@ const CryptoJS = require("crypto-js");
 const axios = require("axios");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
-const sendMail = require("../../util/sendMail");
 
 class OrderService {
   async getOrderById(orderId, userId) {

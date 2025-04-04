@@ -13,7 +13,6 @@ const CryptoJS = require("crypto-js");
 const axios = require("axios");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
-const sendMail = require("../../util/sendMail");
 
 class OrderService {
   async getOrderById(orderId, userId) {
@@ -723,7 +722,7 @@ class OrderService {
     return order;
   }
 
-  async confirmOrder(orderId, email) {
+  async confirmOrder(orderId) {
     // Tìm đơn hàng
     const order = await Order.findById(orderId).populate({
       path: "details",
@@ -743,60 +742,6 @@ class OrderService {
     // Cập nhật trạng thái thành "Successed"
     order.status = "Successed";
     await order.save();
-    // Gửi email xác nhận
-    const html = `<!DOCTYPE html>
-      <html lang="vi">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Thư cảm ơn</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              font-size: 14px;
-              color: #333333;
-              margin: 0;
-              padding: 0;
-            }
-            .container {
-              max-width: 600px;
-              margin: 0 auto;
-              border: 5px solid #39c6b9;
-              border-radius: 10px;
-            }
-            .content {
-              padding: 20px;
-            }
-            h1 {
-              color: #39c6b9;
-            }
-            p {
-              line-height: 1.5;
-            }
-            a {
-              color: #0099ff;
-              text-decoration: none;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="content">
-              <h1>Book Store</h1>
-              <p>Xin chào!</p>
-              <p>Cảm ơn bạn rất nhiều vì đã đặt hàng tại <strong>Book Store</strong>! 📚</p>
-              <p>Chúng tôi rất trân trọng sự ủng hộ của bạn và hy vọng bạn sẽ hài lòng với sản phẩm vừa mua.</p>
-              <p>Mong được gặp lại bạn trong những lần mua sắm tiếp theo!</p>
-              <p>Trân trọng,</p>
-              <p><strong>Book Store</strong></p>
-            </div>
-          </div>
-        </body>
-      </html>`;
-
-    const data = { email, html };
-    await sendMail("You're Awesome - Thanks for Shopping with Us!", data);
-
     return order;
   }
 

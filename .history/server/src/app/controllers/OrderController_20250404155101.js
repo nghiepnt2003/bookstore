@@ -411,9 +411,7 @@ class OrderController {
   async confirmOrder(req, res) {
     try {
       const { id } = req.params;
-      const { _id } = req.user;
-      const user = await User.findById(_id);
-      const email = user?.email;
+      const { email } = req.user;
       const order = await orderService.confirmOrder(id, email);
 
       res.status(200).json({
