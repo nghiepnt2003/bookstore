@@ -1,8 +1,6 @@
 const cosineSimilarity = require("cosine-similarity"); // Thư viện tính toán Cosine Similarity
 const Product = require("../models/Product");
 const Author = require("../models/Author");
-const Rating = require("../models/Rating");
-
 const Category = require("../models/Category");
 const Publisher = require("../models/Publisher");
 const LineItem = require("../models/LineItem");
