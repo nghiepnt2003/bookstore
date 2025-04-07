@@ -386,6 +386,33 @@ class ProductController {
       });
     }
   }
+
+  async getRecommendedProducts(req, res) {
+    try {
+      const { uid } = req.params;
+      console.log(`DEDE     ${process.env.RECOMMENDATION_SERVER}/${uid}`)
+      const rs = await fetch(`${process.env.RECOMMENDATION_SERVER}/${uid}`);
+      const productIds = await rs.json();
+      console.log("KQ AI " + productIds);
+
+      const products = await Product.find({ _id: { $in: productIds } })
+        // .populate('brand', 'brandName -_id')
+        // .populate('category', 'categoryName');
+
+      console.log("KQ NE PRODUCT " + JSON.stringify(products))
+
+      return res.status(200).json({
+        success: true,
+        products,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(400).json({
+        success: false,
+        message: "Error when getting recommendations: " + error.message,
+      });
+    }
+  }
 }
 
 module.exports = new ProductController();

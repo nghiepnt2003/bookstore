@@ -44,3 +44,8 @@ export const apiCreateInventory = (data) => axios({
     method: 'post',
     data
 })
+export const apiGetRecommendedProducts = (uid) => axios({
+    url: '/product/recommendation/' + uid,
+    method: 'get',
+    withCredentials: true,
+})

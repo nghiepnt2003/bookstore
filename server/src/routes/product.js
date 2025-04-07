@@ -43,5 +43,5 @@ router.patch(
   [verifyAccessToken, isAdmin],
   productController.restore
 );
-
+router.get('/recommendation/:uid', productController.getRecommendedProducts) 
 module.exports = router;

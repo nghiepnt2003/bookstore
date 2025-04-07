@@ -89,10 +89,10 @@ const Product = ({ productData ,  onWishlistChange}) => {
         }
         if (response.success) {
             dispatch(getCurrent());
-            toast.success(response.mess);
+            toast.success(response.message);
             onWishlistChange();
         } else {
-            toast.error(response.mess);
+            toast.error(response.message);
         }
     };
 
