@@ -150,7 +150,7 @@ class ProductService {
             ...product.toObject(),
             finalPrice: parseFloat(finalPrice.toFixed(2)),
             timeRemaining,
-            ratings: ratingStars,
+            ratings: ratingStars.map((r) => r.star),
           };
         })
       );
