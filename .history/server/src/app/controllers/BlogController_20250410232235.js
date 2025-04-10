@@ -42,11 +42,7 @@ class BlogController {
       };
 
       const userId = req.user._id;
-      if (!userId)
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-
+      if (!userId) throw new Error("User Not found");
       const { blogs, counts } = await BlogService.getBlogsByUser(
         userId,
         options
@@ -113,13 +109,6 @@ class BlogController {
           return res
             .status(404)
             .json({ success: false, message: "Blog not found" });
-        }
-        // ✅ Kiểm tra nếu user hiện tại không phải là author
-        if (currentBlog.author.toString() !== req.user._id) {
-          return res.status(403).json({
-            success: false,
-            message: "You are not allowed to update this blog",
-          });
         }
         const updatedBlog = await BlogService.updateBlog(
           req.params.id,

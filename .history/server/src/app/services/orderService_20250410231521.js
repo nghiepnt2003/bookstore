@@ -931,8 +931,8 @@ class OrderService {
               <p class="message">
                 Sự hài lòng và góp ý của Quý khách là nguồn động lực to lớn để chúng tôi ngày càng hoàn thiện và phát triển.
               </p>
-              <p class="signature">Trân trọng,</p>
-              <p class="signature"><strong>Book Store</strong></p>
+              <p>Trân trọng,</p>
+              <p><strong>Book Store</strong></p>
             </div>
           </div>
         </body>

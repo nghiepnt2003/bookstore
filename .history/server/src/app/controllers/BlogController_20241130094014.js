@@ -32,35 +32,6 @@ class BlogController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
-  async getByUser(req, res) {
-    try {
-      const options = {
-        sort: req.query.sort,
-        fields: req.query.fields,
-        page: +req.query.page || 1,
-        limit: +req.query.limit || process.env.LIMIT_BLOGS || 10,
-      };
-
-      const userId = req.user._id;
-      if (!userId)
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-
-      const { blogs, counts } = await BlogService.getBlogsByUser(
-        userId,
-        options
-      );
-
-      res.status(200).json({
-        success: blogs.length > 0,
-        counts,
-        blogs: blogs.length > 0 ? blogs : "No blogs found for this user",
-      });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  }
 
   async getRelatedBlogs(req, res) {
     try {
@@ -113,13 +84,6 @@ class BlogController {
           return res
             .status(404)
             .json({ success: false, message: "Blog not found" });
-        }
-        // ✅ Kiểm tra nếu user hiện tại không phải là author
-        if (currentBlog.author.toString() !== req.user._id) {
-          return res.status(403).json({
-            success: false,
-            message: "You are not allowed to update this blog",
-          });
         }
         const updatedBlog = await BlogService.updateBlog(
           req.params.id,

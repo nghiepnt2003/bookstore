@@ -4,9 +4,9 @@ const { verifyAccessToken, isAdmin } = require("../app/middlewares/jwt");
 const router = express.Router();
 
 router.get("/related/:id", blogController.getRelatedBlogs);
-router.get("/my-blogs", verifyAccessToken, blogController.getByUser);
 router.get("/:id", blogController.getById);
 router.get("/", blogController.getAll);
+
 router.post("/store", [verifyAccessToken], blogController.store);
 router.put("/:id", [verifyAccessToken], blogController.update);
 router.delete("/:id/force", [verifyAccessToken], blogController.forceDelete);

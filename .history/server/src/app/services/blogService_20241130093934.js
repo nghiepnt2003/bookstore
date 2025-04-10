@@ -6,29 +6,6 @@ class BlogService {
   async getBlogById(id) {
     return await Blog.findOne({ _id: id });
   }
-  async getBlogsByUser(userId, options) {
-    const query = { author: userId };
-
-    let queryCommand = Blog.find(query);
-
-    if (options.sort) {
-      const sortBy = options.sort.split(",").join(" ");
-      queryCommand = queryCommand.sort(sortBy);
-    }
-
-    if (options.fields) {
-      const fields = options.fields.split(",").join(" ");
-      queryCommand = queryCommand.select(fields);
-    }
-
-    const skip = (options.page - 1) * options.limit;
-    queryCommand = queryCommand.skip(skip).limit(options.limit);
-
-    const blogs = await queryCommand.exec();
-    const counts = await Blog.countDocuments(query);
-
-    return { blogs, counts };
-  }
 
   async getAllBlogs(queries, options) {
     const excludeFields = ["limit", "sort", "page", "fields"];

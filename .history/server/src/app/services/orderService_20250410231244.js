@@ -919,20 +919,19 @@ class OrderService {
                 </tbody>
               </table>
               <p class="total">Tổng tiền: ${totalPrice} VND</p>
-              <p class="highlight">
-                Quý khách đã nhận được đơn hàng thành công. Nếu có bất kỳ sai sót nào về sản phẩm hoặc quá trình giao hàng, xin vui lòng liên hệ với chúng tôi qua tin nhắn hoặc số điện thoại hỗ trợ để được giải quyết trong thời gian sớm nhất.
+              <p>
+              Quý khách đã nhận được đơn hàng thành công. Nếu có bất kỳ sai sót nào về sản phẩm hoặc quá trình giao hàng, xin vui lòng liên hệ với chúng tôi qua tin nhắn hoặc số điện thoại hỗ trợ để được giải quyết trong thời gian sớm nhất.
               </p>
 
-              <p class="message">
-                Chúng tôi luôn mong muốn mang lại trải nghiệm mua sắm tốt nhất cho Quý khách.
-                Vì vậy, nếu hài lòng với sản phẩm và dịch vụ, rất mong Quý khách dành chút thời gian để đánh giá 5★ cho <strong>Book Store</strong> trên hệ thống.
+              <p>
+              Chúng tôi luôn mong muốn mang lại trải nghiệm mua sắm tốt nhất cho Quý khách. Vì vậy, nếu hài lòng với sản phẩm và dịch vụ, rất mong Quý khách dành chút thời gian để đánh giá 5★ cho <strong>Book Store</strong> trên hệ thống.
               </p>
 
-              <p class="message">
-                Sự hài lòng và góp ý của Quý khách là nguồn động lực to lớn để chúng tôi ngày càng hoàn thiện và phát triển.
+              <p>
+              Sự hài lòng và góp ý của Quý khách là nguồn động lực to lớn để chúng tôi ngày càng hoàn thiện và phát triển.
               </p>
-              <p class="signature">Trân trọng,</p>
-              <p class="signature"><strong>Book Store</strong></p>
+              <p>Trân trọng,</p>
+              <p><strong>Book Store</strong></p>
             </div>
           </div>
         </body>
