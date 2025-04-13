@@ -416,11 +416,6 @@ class ProductController {
   async getRecommendedProducts(req, res) {
     try {
       const uid = req.user._id;
-      if (!uid)
-        return res.status(404).json({
-          success: false,
-          message: "User not found: " + error.message,
-        });
       console.log(`DEDE     ${process.env.RECOMMENDATION_SERVER}/${uid}`);
       const rs = await fetch(`${process.env.RECOMMENDATION_SERVER}/${uid}`);
       const productIds = await rs.json();

@@ -12,11 +12,6 @@ router.get(
   verifyAccessToken,
   productController.suggestPopularProducts
 );
-router.get(
-  "/recommendation",
-  verifyAccessToken,
-  productController.getRecommendedProducts
-);
 router.get("/discount", productController.getProductsWithDiscount);
 router.get(
   "/discount/:discountId",
@@ -48,5 +43,9 @@ router.patch(
   [verifyAccessToken, isAdmin],
   productController.restore
 );
-
+router.get(
+  "/recommendation",
+  verifyAccessToken,
+  productController.getRecommendedProducts
+);
 module.exports = router;
