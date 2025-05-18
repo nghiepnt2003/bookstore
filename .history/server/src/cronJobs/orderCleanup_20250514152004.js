@@ -33,8 +33,6 @@ const Order = require("../app/models/Order");
 
 // Chạy công việc mỗi phút (hoặc thay đổi lại theo lịch bạn mong muốn, ví dụ: "0 * * * *" để chạy mỗi giờ)
 cron.schedule("* * * * *", async () => {
-  console.log("Cron job running...");
-
   const now = new Date();
 
   // 1. Đơn chưa thanh toán sau 100 phút thì huỷ
