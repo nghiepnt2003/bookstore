@@ -12,11 +12,11 @@ export const navigation = [
         value: 'PRODUCTS',
         path: `/${path.PRODUCTS}`
     },
-    // {
-    //     id: 3,
-    //     value: 'BLOG',
-    //     path: `/${path.BLOG}`
-    // },
+    {
+        id: 3,
+        value: 'BLOG',
+        path: `/${path.BLOG}`
+    },
     // {
     //     id: 4,
     //     value: 'CONTACT',

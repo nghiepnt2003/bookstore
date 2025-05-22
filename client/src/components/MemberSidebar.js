@@ -22,7 +22,7 @@ const MemberSidebar = () => {
     return (
         <div className=' bg-white h-full py-4 w-[250px] flex-none'>
             <div className='flex flex-col w-full py-4 justify-center items-center'>
-                <img src={current?.image || 'https://api.multiavatar.com/default.png'}
+                <img src={current?.image || 'https://antimatter.vn/wp-content/uploads/2022/11/anh-avatar-trang-tron.jpg'}
                     alt='logo' className='w-16 h-16 object-cover rounded-full'></img>
                 <small className='font-semibold text-sm'>{`${current?.username}`}</small>
             </div>

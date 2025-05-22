@@ -115,7 +115,7 @@ class BlogController {
             .json({ success: false, message: "Blog not found" });
         }
         // ✅ Kiểm tra nếu user hiện tại không phải là author
-        if (currentBlog.author.toString() !== req.user._id) {
+        if (currentBlog.author.toString() !== req.user._id.toString()) {
           return res.status(403).json({
             success: false,
             message: "You are not allowed to update this blog",

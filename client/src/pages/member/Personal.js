@@ -394,7 +394,7 @@ const Personal = () => {
             if (response) {
                 console.log("REPON " + JSON.stringify(response))
                 toast[response.success ? 'success' : 'error'](
-                    response.success ? 'Cập nhật thông tin thành công' : 'Cập nhật thất bại'
+                    response.success ? 'Cập nhật thông tin thành công' : response.message
                 );
                 setLoading(false); // Kết thúc loading
                 if (response.success) {
@@ -511,7 +511,7 @@ const Personal = () => {
                     <form className='flex flex-col gap-4 mt-4' onSubmit={e => { e.preventDefault(); handleUpdateInfo(); }}>
                         <div className='flex gap-4 mb-4'>
                             <div className='relative h-[150px] w-[150px] rounded-full mr-14'>
-                                <img className='h-[150px] w-[150px] rounded-full' src={avatar ? avatar.preview : current.image || 'https://api.multiavatar.com/default.png'} alt="Avatar preview" />
+                                <img className='h-[150px] w-[150px] rounded-full' src={avatar ? avatar.preview : current.image || 'https://antimatter.vn/wp-content/uploads/2022/11/anh-avatar-trang-tron.jpg'} alt="Avatar preview" />
                                 <input
                                     type='file'
                                     id='images'

@@ -12,7 +12,7 @@ import { TiCameraOutline, TiDeleteOutline } from "react-icons/ti";
 import { BiCategoryAlt } from "react-icons/bi";
 import { GrContactInfo } from "react-icons/gr";
 import { CiSearch } from "react-icons/ci";
-import { FaMoneyBillWave, FaFacebookMessenger } from "react-icons/fa";
+import { FaMoneyBillWave, FaFacebookMessenger, FaUser } from "react-icons/fa";
 
 
 const icons = {
@@ -61,7 +61,8 @@ const icons = {
     FaStarHalfAlt,
     FaRegClock,
     IoFlashSharp,
-    FaFacebookMessenger
+    FaFacebookMessenger,
+    FaUser
 }
 
 export default icons

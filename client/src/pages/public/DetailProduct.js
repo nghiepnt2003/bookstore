@@ -92,14 +92,21 @@ const DetailProduct = () => {
                     alert('Vui lòng thêm nhận xét của bạn');
                     return;
                 }
-                await apiPostRating({
+                const rs = await apiPostRating({
                     star: value.star,
                     product: productData?._id
                 });
-                await apiPostComments({
-                    product: productData?._id,
-                    comment: value.comment
-                });
+                if(rs.success)
+                {
+                    await apiPostComments({
+                        product: productData?._id,
+                        comment: value.comment
+                    });
+                }
+                else
+                {
+                    toast.error(rs.message)
+                }
                 // fetchRatingCommentData()
                 fetchProductData();
                 // Đóng modal sau khi đánh giá thành công
