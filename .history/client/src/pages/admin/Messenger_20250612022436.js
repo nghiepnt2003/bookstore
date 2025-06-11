@@ -11,6 +11,7 @@ import {
 } from "../../apis/message";
 import { toast } from "react-toastify";
 
+require("dotenv").config();
 const URL_SERVER = process.env.REACT_APP_API_URI;
 const socket = io(URL_SERVER);
 
