@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { FileImageTwoTone } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
-require("dotenv").config();
+
 const URL_SERVER = process.env.REACT_APP_API_URI;
 const socket = io(URL_SERVER);
 
