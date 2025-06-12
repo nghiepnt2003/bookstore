@@ -696,7 +696,7 @@ class UserService {
       // Kiểm tra nếu email đã tồn tại trong hệ thống
       let user = await User.findOne({ email });
       if (user) {
-        throw new Error("User with this email already exists ");
+        throw new Error("User with this email already exists !!!");
       }
 
       // Tạo mã OTP ngẫu nhiên
