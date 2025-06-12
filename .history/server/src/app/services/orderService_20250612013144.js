@@ -460,9 +460,9 @@ class OrderService {
     // const userInfo = await User.findById(user._id).select("address member");
     const userInfo = await User.findById(user._id).select("address");
 
-    // if (!userInfo.address || userInfo.address.length === 0) {
-    //   throw new Error("User address is required for checkout");
-    // }
+    if (!userInfo.address || userInfo.address.length === 0) {
+      throw new Error("User address is required for checkout");
+    }
 
     const cart = await Cart.findOne({ user: user._id }).populate({
       path: "items",
