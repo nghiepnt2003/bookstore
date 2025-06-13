@@ -69,8 +69,9 @@
 // };
 
 // src/socket/socket.js
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const socket = io('http://localhost:3000'); // Thay đổi URL này nếu cần
+const URL_SERVER = process.env.REACT_APP_API_URI;
+const socket = io(URL_SERVER); // Thay đổi URL này nếu cần
 
 export default socket;

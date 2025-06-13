@@ -11,7 +11,8 @@ import {
 } from "../../apis/message";
 import { toast } from "react-toastify";
 
-const socket = io("http://localhost:3000");
+const URL_SERVER = process.env.REACT_APP_API_URI;
+const socket = io(URL_SERVER);
 
 const Messenger = () => {
   const { current } = useSelector((state) => state.user);
@@ -29,7 +30,7 @@ const Messenger = () => {
   const getSessions = async () => {
     const rs = await apiGetAllChatSessions();
     if (rs?.success) {
-      const formattedSessions = rs.data.map((session) => ({
+      const formattedSessions = rs.data?.map((session) => ({
         _id: session._id,
         customerUserID: {
           _id:
@@ -54,7 +55,7 @@ const Messenger = () => {
         _id: rs.data._id, // Giả sử rs.data có trường _id
         customerUserID: {
           _id:
-            rs.data.sender === current._id ? rs.data.receiver : rs.data.sender,
+            rs.data.sender === current?._id ? rs.data.receiver : rs.data.sender,
           name: rs.data?.userInfo?.username,
           email: rs.data?.userInfo?.email,
           avatar: rs.data?.userInfo?.image,
@@ -92,7 +93,7 @@ const Messenger = () => {
     if ((!textMessage && selectedFiles.length < 1) || !activeSession) return;
 
     const messageData = {
-      sender: current._id,
+      sender: current?._id,
       receiver: activeSession?.customerUserID?._id,
       content: textMessage,
       images: selectedFiles,
@@ -150,7 +151,7 @@ const Messenger = () => {
   const fetchRecentMessages = async () => {
     try {
       const response = await apiGetRecentMessages(
-        activeSession.customerUserID._id
+        activeSession?.customerUserID?._id
       );
       if (response.success) {
         setMessages(response.data.reverse());
@@ -201,8 +202,8 @@ const Messenger = () => {
                             <SessionItem key={index} session={session} isActive={activeSession === session._id} setActive={setActiveSession} />
                         ))} */}
             {sessions
-              .filter((session) =>
-                session.customerUserID?.email.includes(searchEmail)
+              ?.filter((session) =>
+                session.customerUserID?.email?.includes(searchEmail)
               )
               .map((session, index) => {
                 // Log giá trị activeSession và session._id
@@ -236,8 +237,8 @@ const Messenger = () => {
             {messages?.map((message, index) => (
               <MessageItem
                 key={index}
-                content={message.content}
-                images={message.images}
+                content={message?.content}
+                images={message?.images}
                 avatar={activeSession?.customerUserID?.avatar}
                 isMe={message.sender === current._id}
               />

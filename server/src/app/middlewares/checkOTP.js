@@ -18,7 +18,7 @@ const checkOTP = async (req, res, next) => {
     // Nếu OTP hợp lệ, tiếp tục với request
     next();
   } catch (error) {
-    console.error("Error in checkOTP middleware:", error);
+    console.error("Error in checkOTP ", error);
     return res
       .status(500)
       .json({ success: false, message: "Lỗi trong quá trình xác thực OTP." });
