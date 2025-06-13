@@ -7,7 +7,8 @@ import { FileImageTwoTone } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000");
+const URL_SERVER = process.env.REACT_APP_API_URI;
+const socket = io(URL_SERVER);
 
 const ModalChat = ({ props }) => {
   const { open, setOpen, messages, setMessages, fetchRecentMessages } = props;

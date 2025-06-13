@@ -9,7 +9,8 @@ import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 import { apiGetRecentMessages } from "../apis/message";
 
-const socket = io("http://localhost:3000");
+const URL_SERVER = process.env.REACT_APP_API_URI;
+const socket = io(URL_SERVER);
 
 const ChatWithAdmin = () => {
   const { current: currentUser } = useSelector((state) => state.user);

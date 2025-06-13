@@ -11,7 +11,8 @@ import {
 } from "../../apis/message";
 import { toast } from "react-toastify";
 
-const socket = io("http://localhost:3000");
+const URL_SERVER = process.env.REACT_APP_API_URI;
+const socket = io(URL_SERVER);
 
 const Messenger = () => {
   const { current } = useSelector((state) => state.user);
