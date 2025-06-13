@@ -3,7 +3,8 @@ import axios from "axios";
 export const apiLoginWithGoogle = async ({ idToken, accessToken }) => {
   console.log("ID: " + idToken);
   console.log("Access Token: " + accessToken);
-  const URL_CLIENT = process.env.URL_SERVER || "http://localhost:3000";
+  const URL_CLIENT =
+    process.env.REACT_APP_URL_CLIENT || "http://localhost:3000";
   try {
     const response = await axios.post(
       `${URL_CLIENT}/user/loginWithGoogle`,

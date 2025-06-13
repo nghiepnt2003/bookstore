@@ -7,7 +7,7 @@ const GoogleLoginButton = () => {
   const clientId =
     "181816093508-2m603lnb2qie0oj3gvc6q4u9lujqlgb3.apps.googleusercontent.com"; // Thay thế bằng Client ID của bạn
   const redirectUri =
-    process.env.URL_CLIENT || "http://localhost:3001/callback"; // URL callback của bạn
+    process.env.REACT_APP_URL_CLIENT || "http://localhost:3001/callback"; // URL callback của bạn
   const scope = "profile email";
   const responseType = "token id_token";
 
