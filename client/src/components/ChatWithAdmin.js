@@ -121,7 +121,7 @@ const ChatWithAdmin = () => {
       <div
         className={`${
           open ? "opacity-100 bottom-[40px]" : "opacity-0 bottom-[-100%]"
-        } fixed flex flex-col w-[320px] h-[450px] bg-red-100 text-black rounded-lg right-[30px] z-[101] shadow-lg transition-all duration-300`}
+        } fixed flex flex-col w-[320px] h-[450px] bg-red-100 text-black rounded-lg right-[110px] z-[101] shadow-lg transition-all duration-300`}
       >
         <div className="flex justify-between bg-[#ff007f] rounded-t-lg text-white font-medium text-md min-h-[60px] px-4 py-2">
           {"Chat với nhân viên tư vấn"}
@@ -179,7 +179,7 @@ const ChatWithAdmin = () => {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-4 p-4 pt-2 bg-red-100 rounded-b-lg">
+        <div className="flex items-center gap-1 p-4 pt-2 bg-red-100 rounded-b-lg">
           <Badge count={selectedFiles.length}>
             <Input
               className="w-[20px] p-0 bg-transparent pr-1 cursor-pointer border-0"
