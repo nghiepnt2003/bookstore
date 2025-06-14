@@ -1,0 +1,14 @@
+<svg width="64" height="64" viewBox="0 0 612 612" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g>
+<ellipse cx="306" cy="306" rx="306" ry="306" fill="white"/>
+<rect x="156" y="156" width="300" height="200" rx="100" fill="black"/>
+<ellipse cx="256" cy="256" rx="40" ry="40" fill="white"/>
+<ellipse cx="356" cy="256" rx="40" ry="40" fill="white"/>
+<ellipse cx="256" cy="256" rx="16" ry="16" fill="black"/>
+<ellipse cx="356" cy="256" rx="16" ry="16" fill="black"/>
+<rect x="206" y="356" width="200" height="120" rx="60" fill="black"/>
+<text x="250" y="430" font-size="64" fill="white" font-family="Arial" font-weight="bold">AI</text>
+<rect x="286" y="106" width="40" height="40" rx="20" fill="black"/>
+<rect x="296" y="86" width="20" height="40" rx="10" fill="black"/>
+</g>
+</svg>
