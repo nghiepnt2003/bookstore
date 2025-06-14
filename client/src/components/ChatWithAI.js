@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { apiSendMessageToAI } from "../apis/ai";
 
 const ChatWithAI = () => {
+  const productList = null;
   const { current } = useSelector((state) => state.user);
   const isLoggedIn = current !== null;
   const [open, setOpen] = useState(false);
