@@ -101,7 +101,7 @@ const ChatWithAI = () => {
         type="primary"
         className={`${
           open ? "invisible opacity-0" : "visible opacity-100"
-        } right-[120px] cursor-pointer transition-all duration-1000`}
+        } right-[60px] bottom-[110px] cursor-pointer transition-all duration-1000`}
         tooltip="Chat với AI"
         onClick={handleOpenChatModal}
         icon={
@@ -115,7 +115,7 @@ const ChatWithAI = () => {
       <div
         className={`${
           open ? "opacity-100 bottom-[40px]" : "opacity-0 bottom-[-100%]"
-        } fixed flex flex-col w-[320px] h-[450px] bg-blue-100 text-black rounded-lg right-[90px] z-[101] shadow-lg transition-all duration-300`}
+        } fixed flex flex-col w-[320px] h-[450px] bg-blue-100 text-black rounded-lg right-[110px] z-[101] shadow-lg transition-all duration-300`}
       >
         <div className="flex justify-between bg-blue-600 rounded-t-lg text-white font-medium text-md min-h-[60px] px-4 py-2">
           {"Chat với AI"}
@@ -177,7 +177,7 @@ const ChatWithAI = () => {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-4 p-4 pt-2 bg-blue-100 rounded-b-lg">
+        <div className="flex items-center gap-1 p-4 pt-2 bg-blue-100 rounded-b-lg">
           <Badge count={selectedFiles.length}>
             <Input
               className="w-[20px] p-0 bg-transparent pr-1 cursor-pointer border-0"
