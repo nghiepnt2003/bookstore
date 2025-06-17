@@ -1,5 +1,11 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Product = require("../models/Product");
 require("dotenv").config();
+
+// Initialize cache
+let booksDataCache = null;
+let lastFetchTime = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 phút
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -26,6 +32,8 @@ STRICT RULES:
 6. Always response with vietnamese language.
 7. Always response briefly and concisely, focusing on book recommendations.
 8. Do not use markdown or any formatting in responses.
+9. Each book information is a bullet point, and a line break.
+10. If the user asks about a book not in the database, suggest similar books from the database.
 When receiving a non-book-related question, respond with:
 "I apologize, but I can only provide advice about books and book-related matters. Instead of answering your question directly, would you like me to recommend some excellent books on this topic?"
 ;`;
@@ -95,6 +103,71 @@ class AIChatController {
     return context;
   }
 
+  // Fetch books data từ database với cache
+  async getBookData() {
+    const now = Date.now();
+
+    // Kiểm tra cache
+    if (
+      booksDataCache &&
+      lastFetchTime &&
+      now - lastFetchTime < CACHE_DURATION
+    ) {
+      console.log("Sử dụng cached book data");
+      return booksDataCache;
+    }
+
+    try {
+      console.log("Fetching fresh book data from database");
+      const books = await Product.find()
+        .populate("author", "name")
+        .populate("publisher", "name")
+        .populate("categories", "name")
+        .select(
+          "name author publisher categories description pageNumber price"
+        );
+      // Format data thành string cho AI
+      let booksInfo = "THÔNG TIN SÁCH TRONG CỬA HÀNG:\n\n";
+      books.forEach((book, index) => {
+        booksInfo += `${index + 1}. Sách: ${book.name}\n`;
+        booksInfo += `   - Tác giả: ${
+          book.author?.map((c) => c.name).join(", ") || "Không có thông tin"
+        }\n`;
+        booksInfo += `   - Nhà xuất bản: ${
+          book.publisher?.name || "Không có thông tin"
+        }\n`;
+        booksInfo += `   - Thể loại: ${
+          book.categories?.map((c) => c.name).join(", ") || "Không có thông tin"
+        }\n`;
+        booksInfo += `   - Số trang: ${
+          book.pageNumber || "Không có thông tin"
+        }\n`;
+        booksInfo += `   - Giá: ${book.price?.toLocaleString("vi-VN")}đ\n`;
+        booksInfo += `   - Mô tả: ${book.description || "Không có mô tả"}\n\n`;
+      });
+
+      // Cập nhật cache
+      booksDataCache = booksInfo;
+      lastFetchTime = now;
+
+      return booksInfo;
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu sách:", error);
+      // Nếu có lỗi nhưng có cache cũ, sử dụng cache
+      if (booksDataCache) {
+        console.log("Sử dụng cached data do lỗi fetch");
+        return booksDataCache;
+      }
+      return "";
+    }
+  }
+
+  // Khởi tạo cache khi start server
+  async initCache() {
+    await this.getBookData();
+    console.log("Đã khởi tạo book data cache");
+  }
+
   // Xử lý yêu cầu chat từ người dùng
   async handleChat(req, res) {
     const { message } = req.body;
@@ -108,15 +181,19 @@ class AIChatController {
     }
 
     try {
+      // Fetch dữ liệu sách từ database
+      const booksData = await this.getBookData();
+
       const history = this.getChatHistory(userId);
       const contextString = this.buildContextString(history);
 
-      // Tạo chat mới với context đầy đủ
+      // Thêm thông tin sách vào system prompt
+      const enhancedSystemPrompt = `${SYSTEM_PROMPT}\n\n${booksData}\n\nLưu ý: Hãy sử dụng thông tin sách ở trên để trả lời câu hỏi của người dùng. Nếu được hỏi về sách không có trong danh sách, hãy giới thiệu các sách tương tự từ danh sách trên.`; // Tạo chat mới với context đầy đủ
       const chat = model.startChat({
         history: [
           {
             role: "user",
-            parts: [{ text: `${SYSTEM_PROMPT}\n${contextString}` }],
+            parts: [{ text: `${enhancedSystemPrompt}\n${contextString}` }],
           },
           {
             role: "model",
@@ -165,4 +242,8 @@ class AIChatController {
   }
 }
 
-module.exports = new AIChatController();
+// Khởi tạo cache khi start server
+const aiChatController = new AIChatController();
+aiChatController.initCache();
+
+module.exports = aiChatController;

@@ -9,6 +9,9 @@ const sendMail = async (action, { email, html }) => {
         user: process.env.EMAIL_NAME,
         pass: process.env.EMAIL_APP_PASSWORD,
       },
+      tls: {
+        rejectUnauthorized: false, // Allow self-signed certificates
+      },
     });
     const info = await transporter.sendMail({
       from: '"Book store" <no-reply@bookstore.gmail.com>', // sender address
